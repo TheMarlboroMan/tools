@@ -3,7 +3,7 @@
 
 #include <random>
 
-namespace Herramientas_proyecto
+namespace HerramientasProyecto
 {
 
 class Generador_int

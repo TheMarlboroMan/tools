@@ -9,12 +9,24 @@ DIR_HERRAMIENTAS_PROYECTO=./class/
 $(DIR_O)generador_numeros.o :\
 $(DIR_HERRAMIENTAS_PROYECTO)generador_numeros.h \
 $(DIR_HERRAMIENTAS_PROYECTO)generador_numeros.cpp
-	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)generador_numeros.cpp -o $(DIR_O)generador_numeros.o 
+	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)generador_numeros.cpp -o $(DIR_O)generador_numeros.o
+
+$(DIR_O)selector_aleatorio.o :\
+$(DIR_O)generador_numeros.o\
+$(DIR_HERRAMIENTAS_PROYECTO)selector_aleatorio.h \
+$(DIR_HERRAMIENTAS_PROYECTO)selector_aleatorio.cpp
+	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)selector_aleatorio.cpp -o $(DIR_O)selector_aleatorio.o  
 
 $(DIR_O)tabla_sprites.o :\
 $(DIR_HERRAMIENTAS_PROYECTO)tabla_sprites.h \
 $(DIR_HERRAMIENTAS_PROYECTO)tabla_sprites.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)tabla_sprites.cpp -o $(DIR_O)tabla_sprites.o
+
+$(DIR_O)tabla_animaciones.o :\
+$(DIR_O)tabla_sprites.o\
+$(DIR_HERRAMIENTAS_PROYECTO)tabla_animaciones.h \
+$(DIR_HERRAMIENTAS_PROYECTO)tabla_animaciones.cpp
+	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)tabla_animaciones.cpp -o $(DIR_O)tabla_animaciones.o
 
 $(DIR_O)listado_rejilla.o :\
 $(DIR_O)estructura_paginacion.o\

@@ -1,5 +1,5 @@
-#ifndef HERRAMIENTAS_PROYECTO_TABLA_SPRITES_H
-#define HERRAMIENTAS_PROYECTO_TABLA_SPRITES_H
+#ifndef TABLA_SPRITES_H
+#define TABLA_SPRITES_H
 
 /*La tabla frames nos permitiría abrir un archivo con un cierto formato y usarlo
 para obtener los valores que nos permiten recortar una hoja de sprites en 
@@ -31,12 +31,18 @@ recurso que se va a usar. Se pueden tener, por ejemplo, dos recursos que
 comparten la misma hoja de sprites aunque representan cosas distintas.
 */
 
-#include <libDan2.h>
 #include <fstream>
+#include <map>
+#include <vector>
+
+#include <herramientas/herramientas/herramientas.h>
+#include <herramientas/lector_txt/lector_txt.h>
+#include <herramientas/log_base/log_base.h>
 
 extern DLibH::Log_base LOG;
 
-namespace Herramientas_proyecto
+
+namespace HerramientasProyecto
 {
 
 struct Frame_sprites
@@ -46,32 +52,28 @@ struct Frame_sprites
 	int x, y;
 	unsigned int w, h;
 	int desp_x, desp_y;
-
 	explicit operator bool() const {return x || y || w || h || desp_x || desp_y;}
 
 	Frame_sprites()
 		:x(0), y(0), w(0), h(0), desp_x(0), desp_y(0)
 	{}
-
-
 };
 
 class Tabla_sprites
 {
+	public:
+							Tabla_sprites(const std::string&);
+							Tabla_sprites();
+	void 						cargar(const std::string&);
+	const Frame_sprites& 				obtener(size_t) const;
+	Frame_sprites 					obtener(size_t);
+
 	private:
 
-	std::map<unsigned int, Frame_sprites> mapa;
+	std::map<size_t, Frame_sprites> 		mapa;
 
-	public:
-
-	Tabla_sprites(const std::string&);
-	Tabla_sprites();
-
-	void cargar(const std::string&);
-	
-	const Frame_sprites& obtener(unsigned int) const;
-	Frame_sprites obtener(unsigned int);
 };
 
 }
+
 #endif

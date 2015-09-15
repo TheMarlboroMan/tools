@@ -4,7 +4,9 @@ include _makefile_herramientas
 
 all:\
 $(DIR_O)generador_numeros.o\
+$(DIR_O)selector_aleatorio.o\
 $(DIR_O)tabla_sprites.o\
+$(DIR_O)tabla_animaciones.o\
 $(DIR_O)listado_rejilla.o\
 $(DIR_O)listado_vertical.o\
 $(DIR_O)estructura_paginacion.o\

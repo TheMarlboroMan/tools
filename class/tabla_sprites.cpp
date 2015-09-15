@@ -1,6 +1,6 @@
 #include "tabla_sprites.h"
 
-using namespace Herramientas_proyecto;
+using namespace HerramientasProyecto;
 
 Tabla_sprites::Tabla_sprites(const std::string& ruta)
 {
@@ -12,12 +12,12 @@ Tabla_sprites::Tabla_sprites()
 
 }
 
-const Frame_sprites& Tabla_sprites::obtener(unsigned int indice) const
+const Frame_sprites& Tabla_sprites::obtener(size_t indice) const
 {
 	return mapa.at(indice);
 }
 
-Frame_sprites Tabla_sprites::obtener(unsigned int indice)
+Frame_sprites Tabla_sprites::obtener(size_t indice)
 {
 	if(mapa.count(indice)) return mapa[indice];
 	else return Frame_sprites();
@@ -30,6 +30,7 @@ void Tabla_sprites::cargar(const std::string& ruta)
 	if(!L)	
 	{
 		LOG<<"ERROR: Para Tabla_sprites no se ha podido abrir el archivo "<<ruta<<std::endl;
+		throw std::runtime_error("No se puede localizar archivo de frames");
 	}
 	else
 	{
@@ -45,7 +46,7 @@ void Tabla_sprites::cargar(const std::string& ruta)
 			if(valores.size()==7)
 			{
 				Frame_sprites f;
-				unsigned int indice=std::atoi(valores[0].c_str());
+				size_t indice=std::atoi(valores[0].c_str());
 				f.x=std::atoi(valores[1].c_str());
 				f.y=std::atoi(valores[2].c_str());
 				f.w=std::atoi(valores[3].c_str());
@@ -56,7 +57,8 @@ void Tabla_sprites::cargar(const std::string& ruta)
 			}
 			else
 			{
-				LOG<<"ERROR: En tabla sprites, la línea "<<L.obtener_numero_linea()<<" no está bien formada. Ignorando"<<std::endl;
+				LOG<<"ERROR: En tabla sprites, la línea "<<L.obtener_numero_linea()<<" no está bien formada."<<std::endl;
+				throw std::runtime_error("Linea de frame mal formada");
 			}
 		}
 	}
