@@ -30,12 +30,14 @@ $(DIR_HERRAMIENTAS_PROYECTO)tabla_animaciones.cpp
 
 $(DIR_O)listado_rejilla.o :\
 $(DIR_O)estructura_paginacion.o\
+$(DIR_HERRAMIENTAS_PROYECTO)listado_base.h \
 $(DIR_HERRAMIENTAS_PROYECTO)listado_rejilla.h \
 $(DIR_HERRAMIENTAS_PROYECTO)listado_rejilla.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)listado_rejilla.cpp -o $(DIR_O)listado_rejilla.o
 
 $(DIR_O)listado_vertical.o :\
 $(DIR_O)estructura_paginacion.o\
+$(DIR_HERRAMIENTAS_PROYECTO)listado_base.h \
 $(DIR_HERRAMIENTAS_PROYECTO)listado_vertical.h \
 $(DIR_HERRAMIENTAS_PROYECTO)listado_vertical.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)listado_vertical.cpp -o $(DIR_O)listado_vertical.o
