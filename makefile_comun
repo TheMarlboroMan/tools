@@ -1,0 +1,12 @@
+DIR_O=./objects/
+
+include _makefile_herramientas
+
+all:\
+$(DIR_O)generador_numeros.o\
+$(DIR_O)tabla_sprites.o\
+$(DIR_O)listado_rejilla.o\
+$(DIR_O)listado_vertical.o\
+$(DIR_O)estructura_paginacion.o\
+$(DIR_O)matriz2d.o\
+	
