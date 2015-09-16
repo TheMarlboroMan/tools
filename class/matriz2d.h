@@ -2,67 +2,54 @@
 #define TEMPLATE_MATRIZ2D
 
 #include <map>
+#include <stdexcept>
 
 /*Una matriz 2D implementada en términos de un std::map. Se crea a partir de
 unas dimensiones que le damos y contiene sólo los elementos que le damos.
 En caso de intentar acceder a un elemento inexistente se lanzará una
 excepción.
-
 Sólo sirve para rangos positivos. Una implementación extendida (con cuatro mapas
 internos) serviría para representar una matriz que se extiende tanto en
 positivo como en negativo.
-
 Requisitos:
 - Sólo sirve para rangos positivos en x e y.
 - Es obligatorio especificar ancho y alto.
 - El elemento debe ser copiable.
-
 Viene acompañado de una estructura Item_coordenadas, que la podemos usar para
 guardar elementos y conservar la información de la posición X e Y de las mismas.
-
 Los métodos:
-
 - Para insertar un item.
 	void insert(unsigned int x, unsigned int y, T& val)
 	void insert(unsigned int x, unsigned int y, T&& val)
-
 - Para recuperar un item...
 	const T& operator()(unsigned int x, unsigned int y) const
 	T& operator()(unsigned int x, unsigned int y)
-
 - Para insertar un item y recuperarlo...
 	T& operator()(unsigned int x, unsigned int y, T& val)
 	T& operator()(unsigned int x, unsigned int y, T&& val)
-
 - Para comprobar rápidamente si hay algo en unas coordenadas... Ojo, puede lanzar una excepción si nos vamos fuera de los límites.
 	bool count(unsigned int x, unsigned int y)
-
 - Comprobar, con seguridad de excepciones...
 	bool comprobar(unsigned int x, unsigned int y)
-
 -Una forma de acceder a los mapas subyacentes.
 	const std::map<unsigned int, T>& acc_matriz() const;
 	std::map<unsigned int, T>& acc_matriz();
-
 -Obtener el total de elementos existentes.
 	size_t size() const;
-
-
 Los tipos de excepción en uso:
-
 	Matriz_2d_excepcion : cualquier cosa que falle.
 	Matriz_2d_excepcion_fuera_limites : se indican x o y que quedan fuera del rango.
 	Matriz_2d_excepcion_item_invalido : se intenta obtener un valor en coordenadas donde no hay nada.
 	Matriz_2d_excepcion_item_existe	 : se intenta insertar un valor en coordenadas donde ya hay algo.
 */
 
-namespace Herramientas_proyecto
+namespace HerramientasProyecto
 {
 
-struct Matriz_2d_excepcion 
+struct Matriz_2d_excepcion:public std::logic_error
 {
 	int x, y;
-	Matriz_2d_excepcion(int px, int py): x(px), y(py) {}
+	Matriz_2d_excepcion(int px, int py):logic_error("Error en matriz2d"), x(px), y(py) {}
 };
 
 struct Matriz_2d_excepcion_fuera_limites:public Matriz_2d_excepcion 
