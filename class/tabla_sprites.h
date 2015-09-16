@@ -42,7 +42,7 @@ comparten la misma hoja de sprites aunque representan cosas distintas.
 extern DLibH::Log_base LOG;
 
 
-namespace HerramientasProyecto
+namespace Herramientas_proyecto
 {
 
 struct Frame_sprites

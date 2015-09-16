@@ -10,7 +10,7 @@
 #include <herramientas/lector_txt/lector_txt.h>
 #include "tabla_sprites.h"
 
-namespace HerramientasProyecto
+namespace Herramientas_proyecto
 {
 
 struct Linea_animacion

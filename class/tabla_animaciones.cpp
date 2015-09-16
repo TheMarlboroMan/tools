@@ -1,6 +1,6 @@
 #include "tabla_animaciones.h"
 
-using namespace HerramientasProyecto;
+using namespace Herramientas_proyecto;
 
 Animacion::Animacion()
 	:nombre(), duracion_total(0.0f)

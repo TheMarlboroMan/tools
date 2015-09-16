@@ -1,6 +1,6 @@
 #include "tabla_sprites.h"
 
-using namespace HerramientasProyecto;
+using namespace Herramientas_proyecto;
 
 Tabla_sprites::Tabla_sprites(const std::string& ruta)
 {

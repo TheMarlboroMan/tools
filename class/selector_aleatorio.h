@@ -22,7 +22,7 @@
 //TODO: Quitar
 #include <iostream>
 
-namespace HerramientasProyecto
+namespace Herramientas_proyecto
 {
 
 class SelectorAleatorioException:public std::logic_error
