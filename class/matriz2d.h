@@ -234,6 +234,11 @@ class Matriz_2d
 		}
 		return resultado;
 	}
+
+	template <typename TipoFunc> void aplicar(TipoFunc& f) const
+	{
+		for(auto& p : matriz) f(p.second);
+	}
 };
 
 }

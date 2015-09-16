@@ -13,12 +13,6 @@ class Listado_base
 {
 	public:
 
-						Listado_base(size_t hd, size_t hi)
-		:h_disponible(hd), h_item(hi)
-	{
-
-	}
-
 	void					clear()
 	{
 		lineas.clear();
@@ -56,15 +50,12 @@ class Listado_base
 	size_t					acc_indice_actual() const {return estructura_paginacion.acc_indice_actual();}
 	size_t					acc_total_paginas() const {return estructura_paginacion.acc_total_paginas();}
 	size_t					acc_registros_por_pagina() const {return estructura_paginacion.acc_registros_por_pagina();}
-	size_t					acc_h_item() const	{return h_item;}
 
 	protected:
 
 	std::vector<T>				lineas;
 	Estructura_paginacion			estructura_paginacion;
 
-	size_t					h_disponible;
-	size_t					h_item;
 };
 }
 

@@ -21,8 +21,9 @@ class Listado_rejilla:public Listado_base<T>
 
 						//Propios...
 						Listado_rejilla(size_t w_disponible, size_t h_disponible, size_t w_item, size_t h_item)
-		:Listado_base<T>(h_disponible, h_item),
-		w_disponible(w_disponible), w_item(w_item), 
+		:w_disponible(w_disponible), h_disponible(h_disponible),
+		w_item(w_item), h_item(h_item),  
+		margen_w(0), margen_h(0),
 		reg_fila(floor(w_disponible / w_item)),
 		reg_columna(floor(h_disponible / h_item))
 	{
@@ -39,7 +40,7 @@ class Listado_rejilla:public Listado_base<T>
 		size_t y=floor(rel / reg_fila);
 		size_t x=floor(rel % reg_fila);
 
-		return Item{x * w_item, y * this->h_item, indice, this->item_actual()};
+		return Item{ (x * w_item) + (x * margen_w), (y * h_item) + (y * margen_h), indice, this->item_actual()};
 	}
 
 
@@ -64,12 +65,12 @@ class Listado_rejilla:public Listado_base<T>
 			{
 				x=0;
 				reg=1;
-				y+=this->h_item;
+				y+=h_item+margen_h;
 			}
 			else
 			{
 				++reg;
-				x+=w_item;
+				x+=w_item+margen_w;
 			}
 		}
 
@@ -85,7 +86,7 @@ class Listado_rejilla:public Listado_base<T>
 			if(	rx >= itemp.x
 				&& ry >= itemp.y
 				&& rx <= itemp.x + w_item
-				&& ry <= itemp.y + this->h_item)
+				&& ry <= itemp.y + h_item)
 			{
 				f(itemp);
 				return true;
@@ -101,12 +102,20 @@ class Listado_rejilla:public Listado_base<T>
 		for(size_t i=0; i < reg_fila ; ++i) resultado=this->estructura_paginacion.cambiar_item(v) || resultado;
 		return resultado;
 	}
+
 	size_t					acc_w_item() const {return w_item;}
+	size_t					acc_h_item() const {return h_item;}
+	size_t					acc_margen_w() const {return margen_w;}
+	size_t					acc_margen_h() const {return margen_h;}
+	void					mut_margen_w(size_t v) {margen_w=v;}
+	void					mut_margen_h(size_t v) {margen_h=v;}
+
 
 	private:
 
-	size_t					w_disponible;
-	size_t					w_item;
+	size_t					w_disponible, h_disponible;
+	size_t					w_item, h_item;
+	size_t					margen_w, margen_h;
 	size_t					reg_fila, reg_columna;
 };
 

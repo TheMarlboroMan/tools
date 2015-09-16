@@ -21,22 +21,28 @@ class Listado_vertical:public Listado_base<T>
 
 						//Propios...
 						Listado_vertical(size_t h_disponible, size_t h_item)
-		:Listado_base<T>(h_disponible, h_item)
+		:h_disponible(h_disponible), h_item(h_item), margen_h(0)
 	{
 		this->estructura_paginacion.establecer_registros_por_pagina(floor(h_disponible / h_item));
 	}
 
 	const Item				linea_actual() const 
 	{
-		return Item{ this->h_item * ( this->estructura_paginacion.acc_indice_actual() % this->estructura_paginacion.acc_registros_por_pagina()),  
-			this->estructura_paginacion.acc_indice_actual(),
+		size_t i_actual=this->estructura_paginacion.acc_indice_actual();
+		size_t indice=i_actual % this->estructura_paginacion.acc_registros_por_pagina();
+
+		return Item{ 
+			(h_item * indice) + (margen_h * indice),  
+			i_actual,
 			this->item_actual()
 		};
 	}
 
 	const Item				linea(size_t i) const 
 	{
-		return Item{this->h_item * i, this->estructura_paginacion.acc_indice_actual(), this->lineas[i]};
+		return Item{(h_item * i) + (margen_h * i), 
+				this->estructura_paginacion.acc_indice_actual(), 
+				this->lineas[i]};
 	}
 
 	std::vector<Item>			obtener_pagina() const
@@ -55,7 +61,7 @@ class Listado_vertical:public Listado_base<T>
 		{
 			res.push_back(Item{y, indice++, *ini});
 			++ini;
-			y+=this->h_item;
+			y+=this->h_item+margen_h;
 		}
 
 		return res;
@@ -75,6 +81,16 @@ class Listado_vertical:public Listado_base<T>
 		}
 		return false;
 	}
+
+	size_t					acc_h_item() const	{return h_item;}
+	size_t					acc_margen_h() const	{return margen_h;}
+	void					mut_margen_h(size_t v) const	{margen_h=v;}
+
+	private:
+
+	size_t					h_disponible;
+	size_t					h_item;
+	size_t					margen_h;
 };
 
 }
