@@ -43,7 +43,7 @@ Los tipos de excepción en uso:
 	Matriz_2d_excepcion_item_existe	 : se intenta insertar un valor en coordenadas donde ya hay algo.
 */
 
-namespace HerramientasProyecto
+namespace Herramientas_proyecto
 {
 
 struct Matriz_2d_excepcion:public std::logic_error
