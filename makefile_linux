@@ -10,7 +10,7 @@ CC=g++
 EJECUTABLE=a.out
 LIMPIAR=rm objects/*; rm $(EJECUTABLE);
 
-DIR_HOME=/home/dani/programacion/c++/
+DIR_HOME=/home/daniel/Escritorio/stuff/
 DIR_LIBDAN2=$(DIR_HOME)libdansdl2/
 
 LINKER=-L$(DIR_LIBDAN2) -lDanSDL2 -L. -lSDL2 -lSDL2_mixer -lSDL2_image
