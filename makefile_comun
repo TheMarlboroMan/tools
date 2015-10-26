@@ -2,6 +2,7 @@ DIR_HERRAMIENTAS_PROYECTO=./class/
 DIR_O=./objects/
 
 all:\
+$(DIR_O)dummy\
 $(DIR_O)generador_numeros.o\
 $(DIR_O)selector_aleatorio.o\
 $(DIR_O)tabla_sprites.o\
@@ -15,6 +16,9 @@ $(DIR_O)valor_limitado.o
 
 ################################################################################
 #Herramientas...
+
+$(DIR_O)dummy :
+	$(MKDIR) objects
 
 $(DIR_O)generador_numeros.o :\
 $(DIR_HERRAMIENTAS_PROYECTO)generador_numeros.h \
