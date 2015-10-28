@@ -1,23 +1,16 @@
-
-#Definiciones.
 OPTIMIZACION=-O3
 #SIMBOLOS_DEBUG=-g
-
-LINKARQUITECTURA=-lmingw32
-UNIDAD_DISCO=K
-MINGW32_INCLUDE=/mingw_dev/include
-MINGW32_LIB=/mingw_dev/lib
-FLAGS_BASE=-DWINCOMPIL=1 -D__NO_INLINE__ -Wno-deprecated -Wall -ansi -pedantic -std=c++11 -I$(UNIDAD_DISCO):$(MINGW32_INCLUDE) -L$(UNIDAD_DISCO):$(MINGW32_LIB)
-
+FLAGS_BASE=-Wno-deprecated -Wall -ansi -pedantic -std=c++11
+ 
 CFLAGS=-c $(SIMBOLOS_DEBUG) $(OPTIMIZACION) $(FLAGS_BASE)
 CFLAGS_TARGET_FINAL=$(SIMBOLOS_DEBUG) $(OPTIMIZACION) $(FLAGS_BASE)
 CC=g++
-
-DIR_HOME=$(UNIDAD_DISCO):/winter_build/
+DIR_HOME=/home/daniel/Escritorio/winter_build/
 DIR_LIBDAN2=$(DIR_HOME)libdansdl2/
-
-LINKER=-L. -lDanSDL2 $(LINKARQUITECTURA) -lSDL2main -lSDL2 -lSDL2_mixer -lSDL2_image -static-libgcc -static-libstdc++
+ 
+LINKER=-L$(DIR_LIBDAN2) -lDanSDL2 -L. -lSDL2 -lSDL2_mixer -lSDL2_image
 INCLUDES=-I $(DIR_LIBDAN2)
 LIBRERIAS=
-MKDIR=mkdir 
+MKDIR=mkdir -p
+
 include makefile_comun
