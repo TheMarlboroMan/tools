@@ -8,7 +8,7 @@ sencillo:{
 complejo:{
 	parametro_complejo_uno:13,
 	parametro_complejo_dos:{
-		cosa_uno:1,
+		cosa_uno: "Hola dos puntos : hola",
 		cosa_dos:2
 	},
 	parametro_complejo_tres:3,
@@ -17,7 +17,7 @@ complejo:{
 			uno:1,
 			dos:2},
 		p_b:beee
-	} 
-},
-
-fin:finini
+	},
+	lista:[1,2,3, {uno:1, dos:2}, 4, 5, [uno, dos, tres]],
+	obj:{a:b, c:d}
+}
