@@ -1,0 +1,23 @@
+inicio:14,
+
+sencillo:{
+	parametro_sencillo_uno:12,
+	parametro_sencillo_dos:14
+},
+
+complejo:{
+	parametro_complejo_uno:13,
+	parametro_complejo_dos:{
+		cosa_uno:1,
+		cosa_dos:2
+	},
+	parametro_complejo_tres:3,
+	parametro_complejo_cuatro:{
+		p_a:{
+			uno:1,
+			dos:2},
+		p_b:beee
+	} 
+},
+
+fin:finini
