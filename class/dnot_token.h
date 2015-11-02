@@ -1,6 +1,7 @@
 #ifndef DNOT_TOKEN_H
 #define DNOT_TOKEN_H
 
+#include <iostream>
 #include <vector>
 #include <map>
 #include <string>
@@ -52,6 +53,7 @@ class Dnot_token
 	int 					acc_int() const;
 	float 					acc_float() const;
 	bool 					acc_bool() const;
+
 	const Dnot_token&			operator[](const std::string&) const;
 	Dnot_token&				operator[](const std::string&);
 	const Dnot_token&			operator[](const char *) const;
@@ -60,6 +62,24 @@ class Dnot_token
 	Dnot_token&				operator[](size_t);
 	const Dnot_token&			operator[](int) const;
 	Dnot_token&				operator[](int);
+
+	//TODO...
+/*
+	bool 					operator==(const std::string&) const;
+	bool 					operator==(const char *) const;
+	bool 					operator==(int) const;
+	bool 					operator==(float) const;
+	bool 					operator==(bool) const;
+	bool 					operator!=(const std::string&) const;
+	bool 					operator!=(const char *) const;
+	bool 					operator!=(int) const;
+	bool 					operator!=(float) const;
+	bool 					operator!=(bool) const;
+*/
+
+
+	operator!=
+*/
 
 
 //	operator				t_mapa& () const {return tokens;}
@@ -86,7 +106,6 @@ class Dnot_token
 		lista};		//El token es una lista de otros tokens anónimos.
 
 	tipos					tipo;
-
 	t_mapa					tokens;
 	t_vector				lista;
 	std::string				valor_string;
@@ -95,7 +114,11 @@ class Dnot_token
 	bool					valor_bool;
 
 	friend class Dnot_parser;
+	friend std::ostream& operator<<(std::ostream& os, const Herramientas_proyecto::Dnot_token& t);
 };
+
+std::ostream& operator<<(std::ostream& os, const Herramientas_proyecto::Dnot_token& t);
+
 }
 
 #endif

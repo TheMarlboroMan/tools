@@ -123,5 +123,5 @@ Ignorará todo whitespace que no esté en una cadena y tolerará valores enteros
 de cadena, float a bool.
 
 Un ejemplo de uso está en "base_proyecto", en github.
-
+*/
 #endif

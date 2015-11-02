@@ -177,4 +177,19 @@ Dnot_token& Dnot_token::operator[](int l)
 	return this->operator[]((size_t)l);
 }
 
+std::ostream& Herramientas_proyecto::operator<<(std::ostream& os, const Herramientas_proyecto::Dnot_token& t)
+{
+	using namespace Herramientas_proyecto;
 
+	switch(t.tipo)
+	{
+		case Dnot_token::tipos::compuesto: os<<"{compuesto}"; break;
+		case Dnot_token::tipos::lista: os<<"[lista]"; break;
+		case Dnot_token::tipos::valor_string: os<<t.valor_string; break;
+		case Dnot_token::tipos::valor_int: os<<t.valor_int; break;
+		case Dnot_token::tipos::valor_float: os<<t.valor_float; break;
+		case Dnot_token::tipos::valor_bool: t.valor_bool ? os<<"true" : os<<"false"; break;
+	}
+
+	return os;
+}
