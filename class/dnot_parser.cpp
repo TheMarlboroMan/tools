@@ -1,13 +1,15 @@
 #include "dnot_parser.h"
+
 using namespace Herramientas_proyecto;
 
 Dnot_parser::Dnot_parser(std::ifstream& fichero, tipos t)
 	:estado(estados::leyendo), 
-	leer_comillas(false),
+	leer_comillas(false), finalizado(false),
 	tipo(t),
 	fichero(fichero)
 {
 	buffer.reserve(1024);
+	token.tipo=Dnot_token::tipos::compuesto;
 }
 
 void Dnot_parser::operator()()
@@ -29,6 +31,8 @@ void Dnot_parser::operator()()
 			//TODO: Es posible que esté malformado si estamos leyendo comillas;
 			if(estado==estados::leyendo) asignar_valor_objeto();
 			estado=estados::salir;				
+			finalizado=true;
+			break;
 		}
 
 		buffer+=cb;
@@ -145,7 +149,7 @@ void Dnot_parser::abre_llave()
 		{
 			Dnot_parser p(fichero);
 			p();
-			asignar_subparser_objeto(p.tokens);
+			asignar_subparser_objeto(p.token.tokens);
 			estado=estados::fin_subparser;
 		}
 		break;
@@ -192,7 +196,7 @@ void Dnot_parser::abre_corchete()
 		{
 			Dnot_parser p(fichero, tipos::lista);
 			p();
-			asignar_subparser_lista(p.lista);
+			asignar_subparser_lista(p.token.lista);
 			estado=estados::fin_subparser;
 		}
 		break;
@@ -244,12 +248,13 @@ void Dnot_parser::asignar_valor_objeto()
 		std::string clave=buffer.substr(0, pos);
 		std::string valor=buffer.substr(pos+1, buffer.size()-clave.size()-2);
 
-		if(tokens.count(clave))
+		if(token.tokens.count(clave))
 		{
 			error("La clave "+clave+" ya existe para token");
 		}
 
-		tokens[clave]=generar_token_valor(valor);
+		token.tipo=Dnot_token::tipos::compuesto;
+		token.tokens[clave]=generar_token_valor(valor);
 		buffer.clear();
 	}
 }
@@ -308,7 +313,8 @@ void Dnot_parser::asignar_valor_lista()
 	}
 
 	std::string valor=buffer.substr(0, buffer.size()-1);
-	lista.push_back(generar_token_valor(valor));
+	token.tipo=Dnot_token::tipos::lista;
+	token.lista.push_back(generar_token_valor(valor));
 	buffer.clear();
 }
 
@@ -325,11 +331,11 @@ void Dnot_parser::asignar_subparser_objeto(const std::map<std::string, Dnot_toke
 	size_t pos=buffer.find(":");
 	if(pos==std::string::npos)
 	{
-		lista.push_back(T);
+		token.lista.push_back(T);
 	}
 	else
 	{
-		tokens[buffer.substr(0, pos)]=T;
+		token.tokens[buffer.substr(0, pos)]=T;
 	}
 }
 
@@ -341,9 +347,24 @@ void Dnot_parser::asignar_subparser_objeto(const std::map<std::string, Dnot_toke
 
 void Dnot_parser::asignar_subparser_lista(const std::vector<Dnot_token>& aux)
 {
+	//TODO: Esto falla: no podemos asignar listas. El buffer sigue lleno
+	//cuando llegamos a este punto. se asigna la lista del token pero
+	//el token no tiene nombre!!!. No tenemos una estructura capaz de 
+	//representar eso.
+
 	Dnot_token T;
 	T.asignar(aux);
-	lista.push_back(T);
+
+	size_t pos=buffer.find(":");
+	//Si el token es anónimo simplemente insertamos algo en la lista...
+	if(pos==std::string::npos)
+	{
+		token.lista.push_back(T);
+	}
+	else
+	{
+		token.tokens[buffer.substr(0, pos)]=T;
+	}
 }
 
 void Dnot_parser::error(const std::string& msj)
@@ -360,4 +381,16 @@ std::string Dnot_parser::traducir_estado()
 		case estados::salir: return "SALIR"; break;
 		default: return "DESCONOCIDO"; break;
 	}
+}
+
+Dnot_token Herramientas_proyecto::parsear_dnot(const std::string& c)
+{
+	std::ifstream f(c.c_str());
+	if(!f.is_open()) 
+	{
+		throw std::runtime_error("Imposible abrir fichero "+c);
+	}
+	Dnot_parser p(f);
+	p();
+	return p.acc_token();
 }

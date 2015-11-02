@@ -34,13 +34,13 @@ void Dnot_token::asignar(bool c)
 	tipo=tipos::valor_bool;
 }
 
-void Dnot_token::asignar(const std::map<std::string, Dnot_token>& t)
+void Dnot_token::asignar(const t_mapa& t)
 {
 	tokens=t;
 	tipo=tipos::compuesto;
 }
 
-void Dnot_token::asignar(const std::vector<Dnot_token>& t)
+void Dnot_token::asignar(const t_vector& t)
 {
 	lista=t;
 	tipo=tipos::lista;
@@ -80,3 +80,101 @@ Dnot_token::Dnot_token(bool v)
 {
 
 }
+
+const Dnot_token::t_mapa& Dnot_token::acc_tokens() const 
+{
+	if(tipo!=tipos::compuesto) throw std::runtime_error("El tipo no es compuesto");
+	return tokens;
+}
+
+Dnot_token::t_mapa& Dnot_token::acc_tokens()
+{
+	if(tipo!=tipos::compuesto) throw std::runtime_error("El tipo no es compuesto");
+	return tokens;
+}
+
+const Dnot_token::t_vector& Dnot_token::acc_lista() const 
+{
+	if(tipo!=tipos::lista) throw std::runtime_error("El tipo no es lista");
+	return lista;
+}
+
+Dnot_token::t_vector& Dnot_token::acc_lista()
+{
+	if(tipo!=tipos::lista) throw std::runtime_error("El tipo no es lista");
+	return lista;
+}
+
+const std::string& Dnot_token::acc_string() const 
+{
+	if(tipo!=tipos::valor_string) throw std::runtime_error("El tipo no es string");
+	return valor_string;
+}
+
+int Dnot_token::acc_int() const 
+{
+	if(tipo!=tipos::valor_int) throw std::runtime_error("El tipo no es int");
+	return valor_int;
+}
+
+float Dnot_token::acc_float() const 
+{
+	if(tipo!=tipos::valor_float) throw std::runtime_error("El tipo no es float");
+	return valor_float;
+}
+
+bool Dnot_token::acc_bool() const 
+{
+	if(tipo!=tipos::valor_bool) throw std::runtime_error("El tipo no es bool");
+	return valor_bool;
+}
+
+const Dnot_token& Dnot_token::operator[](const std::string& k) const
+{
+	if(tipo!=tipos::compuesto) throw std::runtime_error("El tipo no es compuesto");
+	else if(!tokens.count(k)) throw std::runtime_error("La clave "+k+" no existe");
+	else return tokens.at(k);
+}
+
+Dnot_token& Dnot_token::operator[](const std::string& k)
+{
+	if(tipo!=tipos::compuesto) throw std::runtime_error("El tipo no es compuesto");
+	else if(!tokens.count(k)) throw std::runtime_error("La clave "+k+" no existe");
+	else return tokens[k];
+}
+
+const Dnot_token& Dnot_token::operator[](const char * k) const
+{
+	return this->operator[](std::string(k));
+}
+
+Dnot_token& Dnot_token::operator[](const char * k)
+{
+	return this->operator[](std::string(k));
+}
+
+const Dnot_token& Dnot_token::operator[](size_t l) const
+{
+	if(tipo!=tipos::lista) throw std::runtime_error("El tipo no es lista");
+	else if(l >= lista.size()) throw std::runtime_error("El indice de lista es inválido");
+	else return lista.at(l);
+}
+
+Dnot_token& Dnot_token::operator[](size_t l)
+{
+	if(tipo!=tipos::lista) throw std::runtime_error("El tipo no es lista");
+	else if(l >= lista.size()) throw std::runtime_error("El indice de lista es inválido");
+	else return lista[l];
+}
+
+const Dnot_token& Dnot_token::operator[](int l) const
+{
+	return this->operator[]((size_t)l);
+}
+
+Dnot_token& Dnot_token::operator[](int l)
+{
+	return this->operator[]((size_t)l);
+}
+
+

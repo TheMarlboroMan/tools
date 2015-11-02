@@ -8,6 +8,13 @@
 
 /**
 * Tokens para el parser de Dnot.
+*
+* El token puede ser (simultáneamente, el código no lo impide) una cadena,
+* un entero, booleano, float, array o mapa. Lógicamente, sólo vamos a usar uno 
+* de ellos a la vez pero no se lanza ninguna excepción (de momento) si 
+* intentamos coger un float cuando es cadena (devolvería 0.0f).
+*
+*
 */
 
 namespace Herramientas_proyecto
@@ -19,27 +26,49 @@ class Dnot_token
 {
 	public:
 
+	typedef 				std::map<std::string, Dnot_token> t_mapa;
+	typedef					std::vector<Dnot_token> t_vector;
+
 	bool 					es_valor() const;
 	bool 					es_valor_string() const {return tipo==tipos::valor_string;}
 	bool 					es_valor_int() const {return tipo==tipos::valor_int;}
 	bool 					es_valor_float() const {return tipo==tipos::valor_float;}
 	bool 					es_valor_bool() const {return tipo==tipos::valor_bool;}
-	bool 					es_objeto() const {return tipo==tipos::compuesto;}
+	bool 					es_compuesto() const {return tipo==tipos::compuesto;}
 	bool 					es_lista() const {return tipo==tipos::lista;}
 
 	void 					asignar(const std::string c);
 	void		 			asignar(int c);
 	void 					asignar(float c);
 	void 					asignar(bool c);
-	void 					asignar(const std::map<std::string, Dnot_token>& t);
-	void 					asignar(const std::vector<Dnot_token>& t);
+	void 					asignar(const t_mapa& t);
+	void 					asignar(const t_vector& t);
 
-	const std::map<std::string, Dnot_token>& acc_tokens() const {return tokens;}
-	const std::vector<Dnot_token>& 		acc_lista() const {return lista;}
-	const std::string& 			acc_string() const {return valor_string;}
-	int 					acc_int() const {return valor_int;}
-	float 					acc_float() const {return valor_float;}
-	bool 					acc_bool() const {return valor_bool;}
+	const t_mapa& 				acc_tokens() const;
+	t_mapa&					acc_tokens();
+	const t_vector& 			acc_lista() const;
+	t_vector& 				acc_lista();
+	const std::string& 			acc_string() const;
+	int 					acc_int() const;
+	float 					acc_float() const;
+	bool 					acc_bool() const;
+	const Dnot_token&			operator[](const std::string&) const;
+	Dnot_token&				operator[](const std::string&);
+	const Dnot_token&			operator[](const char *) const;
+	Dnot_token&				operator[](const char *);
+	const Dnot_token&			operator[](size_t) const;
+	Dnot_token&				operator[](size_t);
+	const Dnot_token&			operator[](int) const;
+	Dnot_token&				operator[](int);
+
+
+//	operator				t_mapa& () const {return tokens;}
+//	operator				t_vector& () const {return lista;}
+
+	operator 				std::string() const {return acc_string();}
+	operator				int() const {return acc_int();}
+	operator				bool() const {return acc_bool();}
+	operator				float() const {return acc_float();}
 
 						Dnot_token();
 						explicit Dnot_token(const std::string& v);
@@ -58,14 +87,14 @@ class Dnot_token
 
 	tipos					tipo;
 
-	std::map<std::string, Dnot_token>	tokens;
-	std::vector<Dnot_token>			lista;
+	t_mapa					tokens;
+	t_vector				lista;
 	std::string				valor_string;
 	int					valor_int;
 	float					valor_float;
 	bool					valor_bool;
 
-	friend class Dnot_Parser;
+	friend class Dnot_parser;
 };
 }
 

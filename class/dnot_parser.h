@@ -11,6 +11,9 @@
 
 #include <cctype>
 #include <fstream>
+
+#include <iostream>
+
 #include <stdexcept>
 #include <algorithm>
 #include "dnot_token.h"
@@ -29,11 +32,23 @@ class Dnot_parser
 						Dnot_parser(std::ifstream& fichero, tipos t=tipos::objeto);
 	void 					operator()();
 
-	//TODO: Un problema con el parser es queS los ficheros no tienen un nodo
+	//TODO: Un problema con el parser es que los ficheros no tienen un nodo
 	//"raiz". Asumiremos siempre que la base es un objeto mientras no pensemos
 	//en una solución.
 
-	std::map<std::string, Dnot_token>& 	acc_tokens() {return tokens;}
+	const Dnot_token&			acc_token() const 
+	{
+		if(!finalizado) throw std::runtime_error("El parser no se ha ejecutado");
+		return token;
+	}
+
+	Dnot_token&				acc_token() 
+	{
+		if(!finalizado) throw std::runtime_error("El parser no se ha ejecutado");
+		return token;
+	}
+
+//	std::map<std::string, Dnot_token>& 	acc_tokens() {return tokens;}
 	
 	private:
  
@@ -58,17 +73,22 @@ class Dnot_parser
 	enum class estados {leyendo, salir, fin_subparser};
 
 	estados			estado;
-	bool			leer_comillas;
+	bool			leer_comillas, finalizado;
 	tipos			tipo;
-	std::ifstream&		fichero;
+	std::ifstream&		fichero; //El fichero es una referencia para poder pasarlo a los parsers recursivos.
 	std::string 		buffer;
 
 	//TODO: std::map no conserva el orden de inserción: Tal vez necesitemos
 	//un vector de pares std::string - token, para poder hacer esto.
 
-	std::map<std::string, Dnot_token>	tokens;
-	std::vector<Dnot_token>	lista;
+	Dnot_token				token; //El token base.
+
+
+	//std::map<std::string, Dnot_token>	tokens;
+	//std::vector<Dnot_token>	lista;
 };
+
+Dnot_token	parsear_dnot(const std::string&);
 
 }
 
@@ -102,68 +122,6 @@ complejo:{
 Ignorará todo whitespace que no esté en una cadena y tolerará valores enteros,
 de cadena, float a bool.
 
-Este programilla leería el fichero.
-
-void dime_token(const Dnot_token& t, int tabs=0)
-{
-	std::string ver_tabs;
-	for(int i=0; i<tabs; ++i) ver_tabs+="\t";
-
-	std::cout<<ver_tabs;
-
-	if(t.es_valor())
-	{
-		if(t.es_valor_string()) std::cout<<"\""<<t.acc_string()<<"\""<<std::endl;
-		else if(t.es_valor_int()) std::cout<<t.acc_int()<<std::endl;
-		else if(t.es_valor_float()) std::cout<<t.acc_float()<<"f"<<std::endl;
-		else if(t.es_valor_bool()) std::cout<<(t.acc_bool() ? "true" : "false")<<std::endl;	
-	}
-	else if(t.es_objeto())
-	{
-		std::cout<<ver_tabs<<"{"<<std::endl;
-		const auto& tokens=t.acc_tokens();
-		for(const auto& tok : tokens) 
-		{
-			std::cout<<tok.first<<":";
-			dime_token(tok.second, tabs+1);
-		}
-		std::cout<<ver_tabs<<"}"<<std::endl;
-	}
-	else if(t.es_lista())
-	{
-		std::cout<<ver_tabs<<"["<<std::endl;
-		const auto& lista=t.acc_lista();
-		for(const auto& tok : lista) dime_token(tok, tabs+1);	
-		std::cout<<ver_tabs<<"]"<<std::endl;
-	}
-	else std::cout<<"TIPO DESCONOCIDO"<<std::endl;
-}
-
-int main(int argc, char ** argv)
-{
-	try
-	{
-		std::ifstream fichero("ejemplo.dat");
-		if(!fichero.is_open()) throw std::runtime_error("Imposible abrir fichero");
-
-		Dnot_parser p(fichero);
-		p();
-
-		const auto& tokens=p.acc_tokens();	
-		for(const auto& t : tokens)
-		{
-			std::cout<<t.first<<":";
-			dime_token(t.second);
-		}
-
-		return 0;
-	}
-	catch(std::exception& e)
-	{
-		std::cout<<"ERROR : "<<e.what();
-		return 1;
-	}
-}
-*/
+Un ejemplo de uso está en "base_proyecto", en github.
 
 #endif
