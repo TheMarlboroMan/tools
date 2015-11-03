@@ -54,6 +54,8 @@ class Dnot_token
 	float 					acc_float() const;
 	bool 					acc_bool() const;
 
+	bool 					existe_clave(const std::string&) const;
+
 	const Dnot_token&			operator[](const std::string&) const;
 	Dnot_token&				operator[](const std::string&);
 	const Dnot_token&			operator[](const char *) const;

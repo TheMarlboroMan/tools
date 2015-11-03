@@ -13,7 +13,8 @@ $(DIR_O)estructura_paginacion.o\
 $(DIR_O)matriz2d.o\
 $(DIR_O)valor_limitado.o\
 $(DIR_O)dnot_token.o\
-$(DIR_O)dnot_parser.o
+$(DIR_O)dnot_parser.o\
+$(DIR_O)compositor_vista.o
 	@echo Objetos generados.
 
 ################################################################################
@@ -72,6 +73,12 @@ $(DIR_O)valor_limitado.o :\
 $(DIR_HERRAMIENTAS_PROYECTO)valor_limitado.h \
 $(DIR_HERRAMIENTAS_PROYECTO)valor_limitado.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)valor_limitado.cpp -o $(DIR_O)valor_limitado.o
+
+$(DIR_O)compositor_vista.o :\
+$(DIR_O)dnot_parser.o \
+$(DIR_HERRAMIENTAS_PROYECTO)compositor_vista.h \
+$(DIR_HERRAMIENTAS_PROYECTO)compositor_vista.cpp
+	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)compositor_vista.cpp -o $(DIR_O)compositor_vista.o
 
 $(DIR_O)dnot_parser.o :\
 $(DIR_O)dnot_token.o \

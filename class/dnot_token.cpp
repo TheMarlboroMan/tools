@@ -193,3 +193,9 @@ std::ostream& Herramientas_proyecto::operator<<(std::ostream& os, const Herramie
 
 	return os;
 }
+
+bool Dnot_token::existe_clave(const std::string& k) const
+{
+	if(tipo!=tipos::compuesto) throw std::runtime_error("El tipo no es compuesto");
+	else return tokens.count(k);
+}
