@@ -77,11 +77,6 @@ class Dnot_token
 	bool 					operator!=(bool) const;
 */
 
-
-	operator!=
-*/
-
-
 //	operator				t_mapa& () const {return tokens;}
 //	operator				t_vector& () const {return lista;}
 
