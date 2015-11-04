@@ -5,7 +5,7 @@ FLAGS_BASE=-Wno-deprecated -Wall -ansi -pedantic -std=c++11
 CFLAGS=-c $(SIMBOLOS_DEBUG) $(OPTIMIZACION) $(FLAGS_BASE)
 CFLAGS_TARGET_FINAL=$(SIMBOLOS_DEBUG) $(OPTIMIZACION) $(FLAGS_BASE)
 CC=g++
-DIR_HOME=/home/dani/programacion/c++/
+DIR_HOME=/home/daniel/Escritorio/stuff/
 DIR_LIBDAN2=$(DIR_HOME)libdansdl2/
  
 LINKER=-L$(DIR_LIBDAN2) -lDanSDL2 -L. -lSDL2 -lSDL2_mixer -lSDL2_image
