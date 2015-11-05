@@ -9,6 +9,7 @@
 #include <video/representacion/representacion.h>
 #include <video/representacion/representacion_primitiva/representacion_primitiva_caja/representacion_primitiva_caja.h>
 #include <video/representacion/representacion_grafica/representacion_bitmap/representacion_bitmap.h>
+#include <video/representacion/representacion_grafica/representacion_bitmap/representacion_bitmap_patron.h>
 #include <video/representacion/representacion_grafica/representacion_texto/representacion_texto_auto.h>
 #include <video/representacion/representacion_grafica/representacion_ttf/representacion_ttf.h>
 
@@ -58,6 +59,7 @@ class Compositor_vista
 	static const std::string		clave_caja;
 	static const std::string		clave_bitmap;
 	static const std::string		clave_texto;
+	static const std::string		clave_patron;
 	static const std::string		clave_ttf;
 	static const std::string		clave_pantalla;
 	static const std::string		clave_orden;
@@ -71,6 +73,7 @@ class Compositor_vista
 	static const std::string		clave_superficie;
 	static const std::string		clave_fuente;
 	static const std::string		clave_estatica;
+	static const std::string		clave_pincel;
 
 	struct color
 	{
@@ -105,6 +108,7 @@ class Compositor_vista
 
 	uptr_representacion	crear_caja(const Dnot_token&);
 	uptr_representacion	crear_bitmap(const Dnot_token&);
+	uptr_representacion	crear_patron(const Dnot_token&);
 	uptr_representacion	crear_texto(const Dnot_token&);
 	uptr_representacion	crear_ttf(const Dnot_token&);
 	void			procesar_tipo_pantalla(const Dnot_token&);

@@ -5,6 +5,7 @@ const std::string Compositor_vista::clave_tipo="tipo";
 const std::string Compositor_vista::clave_caja="caja";
 const std::string Compositor_vista::clave_bitmap="bitmap";
 const std::string Compositor_vista::clave_ttf="ttf";
+const std::string Compositor_vista::clave_patron="patron";
 const std::string Compositor_vista::clave_pantalla="pantalla";
 const std::string Compositor_vista::clave_alpha="alpha";
 const std::string Compositor_vista::clave_orden="orden";
@@ -18,6 +19,7 @@ const std::string Compositor_vista::clave_superficie="superficie";
 const std::string Compositor_vista::clave_fuente="fuente";
 const std::string Compositor_vista::clave_textura="textura";
 const std::string Compositor_vista::clave_estatica="estatica";
+const std::string Compositor_vista::clave_pincel="pincel";
 
 Compositor_vista::Compositor_vista()
 	:con_pantalla(false), color_pantalla{0,0,0, 255}
@@ -121,6 +123,7 @@ void Compositor_vista::parsear(const std::string& ruta, const std::string& nodo)
 		else if(tipo==clave_bitmap) ptr=std::move(crear_bitmap(token));
 		else if(tipo==clave_texto) ptr=std::move(crear_texto(token));
 		else if(tipo==clave_ttf) ptr=std::move(crear_ttf(token));
+		else if(tipo==clave_patron) ptr=std::move(crear_patron(token));
 		else if(tipo==clave_pantalla) 
 		{
 			procesar_tipo_pantalla(token);
@@ -214,6 +217,22 @@ Compositor_vista::uptr_representacion Compositor_vista::crear_ttf(const Dnot_tok
 	auto posicion=posicion_desde_lista(token[clave_pos]);
 	res->establecer_posicion(posicion.x, posicion.y);
 	return res;
+}
+
+Compositor_vista::uptr_representacion Compositor_vista::crear_patron(const Dnot_token& token)
+{
+
+	if(!mapa_texturas.count(token[clave_textura]))
+	{
+		throw std::runtime_error("No se localiza la textura "+token[clave_textura].acc_string()+" para patrón");
+	}
+	
+	auto res=new DLibV::Representacion_bitmap_patron(mapa_texturas[token[clave_textura]]);
+	res->establecer_posicion(caja_desde_lista(token[clave_pos]));
+	res->establecer_recorte(caja_desde_lista(token[clave_rec]));
+	res->establecer_pincel(caja_desde_lista(token[clave_pincel]));
+
+	return uptr_representacion(res);
 }
 
 void Compositor_vista::procesar_tipo_pantalla(const Dnot_token& token)
