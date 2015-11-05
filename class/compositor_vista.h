@@ -146,7 +146,12 @@ class Compositor_vista
 * - bitmap:
 *	pos[x, y, w, h] : posición de la caja
 *	rec[x, y, w, h] : recorte de la textura
-*	textura["cadena"] : cadena de mapeo de la textura.
+*	textura["cadena"] : cadena de mapeo de la textura
+* - patron:
+*	pos[x, y, w, h] : posición de la caja
+*	rec[x, y, w, h] : recorte de la textura
+*	textura["cadena"] : cadena de mapeo de la textura
+*	pincel:[x, y, w, h] : rectángulo de pincel que se usará para dibujar
 * - texto:
 *	pos[x, y] : posición del texto
 *	superficie["cadena"] : cadena de mapeo de la superficie de texto
@@ -179,6 +184,13 @@ escena_prueba:
 		tipo:"bitmap",
 		pos:[200, 200, 14, 30], rec:[0, 0, 14, 30],
 		textura:"sprites", alpha:192
+	},
+	{
+		tipo:"patron",
+		pos:[0, 128, 256, 64], 
+		rec:[0, 0, 64, 32],
+		pincel:[0, 0, 64, 32],
+		textura:"tiles"
 	},
 	{
 		tipo:"texto", 
