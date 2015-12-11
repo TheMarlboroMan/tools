@@ -80,7 +80,7 @@ Tabla_animaciones::Tabla_animaciones(const Tabla_sprites& t, const std::string& 
 
 void Tabla_animaciones::cargar(const std::string& ruta)
 {
-	DLibH::Lector_txt L(ruta, '#');
+	Lector_txt L(ruta, '#');
 
 	if(!L)	
 	{

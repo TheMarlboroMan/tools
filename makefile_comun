@@ -1,4 +1,6 @@
 DIR_HERRAMIENTAS_PROYECTO=./class/
+DIR_BASE=./base/
+DIR_SOURCE=./source/
 DIR_O=./objects/
 
 all:\
@@ -14,8 +16,15 @@ $(DIR_O)matriz2d.o\
 $(DIR_O)valor_limitado.o\
 $(DIR_O)dnot_token.o\
 $(DIR_O)dnot_parser.o\
-$(DIR_O)compositor_vista.o
+$(DIR_O)lector_txt.o\
+$(DIR_O)compositor_vista.o\
+$(DIR_O)controlador_argumentos.o\
+$(DIR_O)localizador_base.o\
+$(DIR_O)string_utilidades.o
 	@echo Objetos generados.
+
+clean:
+	$(LIMPIAR)
 
 ################################################################################
 #Herramientas...
@@ -90,3 +99,23 @@ $(DIR_O)dnot_token.o :\
 $(DIR_HERRAMIENTAS_PROYECTO)dnot_token.h \
 $(DIR_HERRAMIENTAS_PROYECTO)dnot_token.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)dnot_token.cpp -o $(DIR_O)dnot_token.o
+
+$(DIR_O)lector_txt.o :\
+$(DIR_HERRAMIENTAS_PROYECTO)lector_txt.h \
+$(DIR_HERRAMIENTAS_PROYECTO)lector_txt.cpp
+	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)lector_txt.cpp -o $(DIR_O)lector_txt.o
+
+$(DIR_O)controlador_argumentos.o :\
+$(DIR_HERRAMIENTAS_PROYECTO)controlador_argumentos.h \
+$(DIR_HERRAMIENTAS_PROYECTO)controlador_argumentos.cpp
+	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)controlador_argumentos.cpp -o $(DIR_O)controlador_argumentos.o
+
+$(DIR_O)localizador_base.o :\
+$(DIR_BASE)localizador_base.h \
+$(DIR_BASE)localizador_base.cpp
+	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_BASE)localizador_base.cpp -o $(DIR_O)localizador_base.o
+
+$(DIR_O)string_utilidades.o :\
+$(DIR_SOURCE)string_utilidades.h \
+$(DIR_SOURCE)string_utilidades.cpp
+	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_SOURCE)string_utilidades.cpp -o $(DIR_O)string_utilidades.o

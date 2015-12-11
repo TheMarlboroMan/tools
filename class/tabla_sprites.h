@@ -36,7 +36,7 @@ comparten la misma hoja de sprites aunque representan cosas distintas.
 #include <vector>
 
 #include <herramientas/herramientas/herramientas.h>
-#include <herramientas/lector_txt/lector_txt.h>
+#include "lector_txt.h"
 #include <herramientas/log_base/log_base.h>
 
 extern DLibH::Log_base LOG;

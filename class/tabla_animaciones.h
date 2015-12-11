@@ -7,7 +7,6 @@
 #include <sstream>
 #include <iterator>
 
-#include <herramientas/lector_txt/lector_txt.h>
 #include "tabla_sprites.h"
 
 namespace Herramientas_proyecto

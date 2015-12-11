@@ -4,10 +4,11 @@ FLAGS_BASE=-Wno-deprecated -Wall -ansi -pedantic -std=c++11
  
 CFLAGS=-c $(SIMBOLOS_DEBUG) $(OPTIMIZACION) $(FLAGS_BASE)
 CC=g++
-DIR_HOME=/home/dani/programacion/c++/
-DIR_LIBDAN2=$(DIR_HOME)libdansdl2/
+DIR_HOME=/home/dani/programacion/
+DIR_LIBDAN2=$(DIR_HOME)libdansdl2
  
 INCLUDES=-I $(DIR_LIBDAN2)
 MKDIR=mkdir -p
+LIMPIAR=rm objects/*; touch objects/dummy;
 
 include makefile_comun
