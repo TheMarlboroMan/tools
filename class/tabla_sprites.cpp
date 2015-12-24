@@ -40,7 +40,11 @@ void Tabla_sprites::cargar(const std::string& ruta)
 		while(true)
 		{
 			linea=L.leer_linea();
-			if(!L) break;
+			if(L.es_eof()) 
+			{
+				LOG<<"Fin fichero tabla sprites "<<ruta<<std::endl;
+				break;
+			}
 
 			std::vector<std::string> valores=DLibH::Herramientas::explotar(linea, separador);
 			if(valores.size()==7)

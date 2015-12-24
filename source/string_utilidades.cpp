@@ -67,28 +67,23 @@ std::map<std::string, std::string> Herramientas_proyecto::generar_mapa_pares(con
 
 	std::map<std::string, std::string> res;
 	std::string linea;
-	
+
 	while(true)
 	{
 		linea=L.leer_linea();
 
-		std::cout<<linea<<" >> "<<std::endl;
-
-		if(!L) 
-		{
-			std::cout<<"LOCALIZADO FIN DE FICHERO"<<std::endl;
+		if(L.es_eof()) 
+		{	
 			break;
 		}
-		else if(!linea.size()) 
+		//Localizar separador... 
+		else if(linea.find(separador)==linea.npos)
 		{
-			std::cout<<"SALTANDO LINEA"<<std::endl;
-			continue;
+			throw std::runtime_error("Herramientas_proyecto::generar_mapa_pares linea malformada "+std::to_string(L.obtener_numero_linea())+" '"+linea+"' en "+fichero);
 		}
 
 		std::vector<std::string> valores=explotar(linea, separador, 2);
 		res[valores[0]]=valores[1];
-
-		std::cout<<" >> "<<valores[0]<<" = "<<res[valores[0]]<<std::endl;
 	}
 
 	return res;

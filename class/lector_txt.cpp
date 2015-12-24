@@ -1,4 +1,5 @@
 #include "lector_txt.h"
+#include <iostream>
 
 using namespace Herramientas_proyecto;
 
@@ -19,6 +20,13 @@ Lector_txt::~Lector_txt()
 	if(archivo) archivo.close();
 }
 
+/**
+* Lee la siguiente línea del archivo. Si determina que la siguiente
+* línea es un comentario o está vacía intentará automáticamente leer la
+* siguiente. Cuando no puede leer la siguiente devolverá una línea en
+* blanco.
+*/
+
 std::string Lector_txt::leer_linea()
 {
 	if(archivo.eof())
@@ -29,7 +37,10 @@ std::string Lector_txt::leer_linea()
 	{
 		++numero_linea;
 		std::getline(archivo, linea_actual);
-		if(!linea_actual.size() || linea_actual[0]==comentario) return leer_linea();
+		if(!linea_actual.size() || (linea_actual.size() && linea_actual[0]==comentario))
+		{
+			return leer_linea();
+		}
 	}
 
 	return linea_actual;

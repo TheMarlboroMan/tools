@@ -26,6 +26,7 @@ class Lector_txt
 	void abrir_archivo(const std::string&);
 
 	/*explicit*/ operator bool() const {return archivo;}
+	bool es_eof() const {return archivo.eof();}
 	unsigned int obtener_numero_linea() const {return numero_linea;}
 	char obtener_comentario() const {return comentario;}
 	const std::string& obtener_linea_actual() {return linea_actual;}

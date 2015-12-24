@@ -109,10 +109,11 @@ void Tabla_animaciones::cargar(const std::string& ruta)
 			while(true)
 			{
 				linea=L.leer_linea();
-				if(!L) 
+				if(L.es_eof()) 
 				{	
 					//Insertar la última animación...
 					if(animacion) insertar_anim(animacion, id);
+					LOG<<"Fin fichero animaciones "<<ruta<<std::endl;
 					break;
 				}
 
