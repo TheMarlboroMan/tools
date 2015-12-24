@@ -116,6 +116,7 @@ $(DIR_BASE)localizador_base.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_BASE)localizador_base.cpp -o $(DIR_O)localizador_base.o
 
 $(DIR_O)string_utilidades.o :\
+$(DIR_O)lector_txt.o \
 $(DIR_SOURCE)string_utilidades.h \
 $(DIR_SOURCE)string_utilidades.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_SOURCE)string_utilidades.cpp -o $(DIR_O)string_utilidades.o

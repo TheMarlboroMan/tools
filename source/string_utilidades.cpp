@@ -1,8 +1,11 @@
 #include "string_utilidades.h"
+#include "../class/lector_txt.h"
+
+#include <iostream>
 
 using namespace Herramientas_proyecto;
 
-std::vector<std::string> explotar(const std::string & p_cadena, const char p_delimitador, size_t max)
+std::vector<std::string> Herramientas_proyecto::explotar(const std::string & p_cadena, const char p_delimitador, size_t max)
 {
 	size_t cuenta=0;
 
@@ -35,13 +38,63 @@ std::vector<std::string> explotar(const std::string & p_cadena, const char p_del
 	return resultado;
 }
 
-std::map<std::string, std::string> generar_mapa_pares(const std::string& fichero, const char separador)
+/*
+* @param std::string fichero: nombre del fichero a abrir.
+* @param const char separador: cadena de separación entre claves y valores.
+* @return std::map<std::string, std::string>
+* @throw std::runtime error : cuando no se puede abrir el fichero.
+*
+* Abre el archivo y lee todas las líneas, explotándolas por el carácter de
+* separación. De separador a izquierda se considera "clave" y de separador
+* a derecha se considera "valor". Devuelve un mapa de claves y valores.
+* Las líneas sin longitud y las que comienzan por "comentario" se ignoran. 
+* Cuando la línea tiene más de un separador se usa sólo el primero y el 
+* resto pasa a formar parte del "valor".
+* En caso de claves repetidas se usará el último valor presente en el 
+* archivo.
+* En caso de producirse un error a la hora de leer el archivo (por ejemplo,
+* el fichero no existe) se lanzará una excepción del tipo std::runtime_error.
+*/
+
+std::map<std::string, std::string> Herramientas_proyecto::generar_mapa_pares(const std::string& fichero, const char separador, const char comentario)
 {
+	Lector_txt L(fichero.c_str(), comentario);
+
+	if(!L)
+	{
+		throw std::runtime_error("Herramientas_proyecto::generar_mapa_pares no pudo abrir el fichero "+fichero);
+	}
+
 	std::map<std::string, std::string> res;
+	std::string linea;
+	
+	while(true)
+	{
+		linea=L.leer_linea();
+
+		std::cout<<linea<<" >> "<<std::endl;
+
+		if(!L) 
+		{
+			std::cout<<"LOCALIZADO FIN DE FICHERO"<<std::endl;
+			break;
+		}
+		else if(!linea.size()) 
+		{
+			std::cout<<"SALTANDO LINEA"<<std::endl;
+			continue;
+		}
+
+		std::vector<std::string> valores=explotar(linea, separador, 2);
+		res[valores[0]]=valores[1];
+
+		std::cout<<" >> "<<valores[0]<<" = "<<res[valores[0]]<<std::endl;
+	}
+
 	return res;
 }
 
-size_t digitos_en_entero(int p_entero)
+size_t Herramientas_proyecto::digitos_en_entero(int p_entero)
 {
 	if(p_entero==0) return 1;
 
