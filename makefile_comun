@@ -20,6 +20,7 @@ $(DIR_O)lector_txt.o\
 $(DIR_O)compositor_vista.o\
 $(DIR_O)controlador_argumentos.o\
 $(DIR_O)localizador_base.o\
+$(DIR_O)fichero_pares.o\
 $(DIR_O)string_utilidades.o
 	@echo Objetos generados.
 
@@ -114,6 +115,13 @@ $(DIR_O)localizador_base.o :\
 $(DIR_BASE)localizador_base.h \
 $(DIR_BASE)localizador_base.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_BASE)localizador_base.cpp -o $(DIR_O)localizador_base.o
+
+$(DIR_O)fichero_pares.o :\
+$(DIR_O)string_utilidades.o \
+$(DIR_HERRAMIENTAS_PROYECTO)fichero_pares.h \
+$(DIR_HERRAMIENTAS_PROYECTO)fichero_pares.cpp
+	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)fichero_pares.cpp -o $(DIR_O)fichero_pares.o
+
 
 $(DIR_O)string_utilidades.o :\
 $(DIR_O)lector_txt.o \
