@@ -19,21 +19,21 @@ namespace Herramientas_proyecto
 class Fichero_pares
 {
 	public:
-	
-													Fichero_pares(const std::string&, char, char);
+						Fichero_pares(const std::string&, char, char);
 
-	void 											cargar();
-	void											guardar();
-	const std::string&							operator[](const std::string clave) const {return configuracion.at(clave);}
-	std::string&									operator[](const std::string clave) {return configuracion[clave];}
+	void 					cargar();
+	void					guardar();
+	void					sincronizar(const Fichero_pares& f);
+	const std::string&			operator[](const std::string clave) const {return configuracion.at(clave);}
+	std::string&				operator[](const std::string clave) {return configuracion[clave];}
 
 	private:
 
-	std::string										nombre_fichero;
-	char											separador;
-	char											comentario;
+	std::string				nombre_fichero;
+	char					separador;
+	char					comentario;
 
-	std::map<std::string, std::string>			configuracion;
+	std::map<std::string, std::string>	configuracion;
 };
 
 }

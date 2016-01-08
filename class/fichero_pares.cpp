@@ -34,3 +34,12 @@ void Fichero_pares::guardar()
 		fichero<<par.first<<separador<<par.second<<std::endl;
 	}
 }
+
+void Fichero_pares::sincronizar(const Fichero_pares& f)
+{
+	for(const auto& par : f.configuracion)
+	{
+		if(!configuracion.count(par.first)) 
+			configuracion[par.first]=f.configuracion.at(par.first);
+	}
+}
