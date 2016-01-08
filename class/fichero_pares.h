@@ -2,6 +2,7 @@
 #define FICHERO_PARES_H
 
 #include <map>
+#include <exception>
 #include "../source/string_utilidades.h"
 
 /**
@@ -15,6 +16,14 @@
 
 namespace Herramientas_proyecto
 {
+
+class Fichero_pares_exception:public std::runtime_error
+{
+	public: 
+	Fichero_pares_exception(const std::string& ruta)
+		:std::runtime_error("Error al generar mapa de pares : no se ha podido abrir el archivo "+ruta)
+	{}
+};
 
 class Fichero_pares
 {

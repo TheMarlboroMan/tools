@@ -15,7 +15,14 @@ Fichero_pares::Fichero_pares(const std::string& nf, char sep, char com):
 
 void Fichero_pares::cargar()
 {
-	configuracion=generar_mapa_pares(nombre_fichero, separador, comentario);
+	try
+	{
+		configuracion=generar_mapa_pares(nombre_fichero, separador, comentario);
+	}
+	catch(std::exception& e)
+	{
+		throw Fichero_pares_exception(nombre_fichero);
+	}
 }
 
 /**
