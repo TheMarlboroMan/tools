@@ -84,7 +84,7 @@ class Listado_vertical:public Listado_base<T>
 
 	size_t					acc_h_item() const	{return h_item;}
 	size_t					acc_margen_h() const	{return margen_h;}
-	void					mut_margen_h(size_t v) const	{margen_h=v;}
+	void					mut_margen_h(size_t v) {margen_h=v;}
 
 	private:
 
