@@ -171,13 +171,13 @@ class Menu_opciones
 		opciones.at(clave).rotar(dir);
 	}
 
-	size_t	size_opcion(const Tclave& clave) const
+	size_t		size_opcion(const Tclave& clave) const
 	{
 		comprobar_opcion_existe(clave, "La clave no existe para obtener_valor");
 		return opciones.at(clave).selecciones.size();
 	}
 
-	Tvalor	valor_opcion(const Tclave& clave) const
+	Tvalor		valor_opcion(const Tclave& clave) const
 	{
 		comprobar_opcion_existe(clave, "La clave no existe para obtener_valor");
 		const auto& o=opciones.at(clave);
@@ -204,7 +204,7 @@ class Menu_opciones
 		for(const auto& t : v) traducir(t); 
 	}
 
-	void	traducir(const struct_traduccion& t)
+	void		traducir(const struct_traduccion& t)
 	{
 		const auto busca=t.busca, reemplaza=t.reemplaza;
 
