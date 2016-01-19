@@ -1,6 +1,8 @@
 #ifndef MENU_OPCIONES_HERRAMIENTAS_PROYECTO
 #define MENU_OPCIONES_HERRAMIENTAS_PROYECTO
 
+#include <iostream>
+
 #include <string>
 #include <map>
 #include <vector>
@@ -35,6 +37,69 @@ Va acompañado de un método "traducir" que hace una pasada simple por todos los
 en múltiples idiomas.
 
 Al final de este archivo hay un ejemplo de uso.
+
+--== Interface pública ==-------------------------------------------------------
+
+Por lo general todos los métodos lanzan excepción si la clave no existe.
+
+class Menu_opciones_exception:public std::runtime_error;
+
+Estructura de traducción: podemos hacer un vector de estas y pasarlo al método
+"traducir" para que traduzca las opciones y selecciones con la clave "busca"
+con los textos "reemplaza".
+
+struct struct_traduccion
+{
+	Tclave busca;
+	std::string reemplaza;
+};
+
+Los métodos son:
+
+Inserta una opción.
+void		insertar_opcion(const Tclave& clave, const std::string& nombre);
+
+Elimina una opción por su clave.
+void		eliminar_opcion(const Tclave& clave)
+
+Crea una selección en una opción. Lanza excepción si las claves están duplicadas.
+void		insertar_seleccion_en_opcion(const Tclave& clave_opcion, const Tclave& clave_seleccion, const std::string& nombre, const Tvalor& valor)
+
+Elimina una selección de una opción.
+void		eliminar_seleccion(const Tclave& clave_opcion, const Tclave& clave_seleccion)
+
+Cambia la selección de una opción hacia adelante (dir=1) o atrás (dir=-1).
+void		rotar_opcion(const Tclave& clave, int dir)
+
+Indica la cantidad de selecciones de una opción.
+size_t		size_opcion(const Tclave& clave) const
+
+Indica el valor actual de la opción.
+Tvalor		valor_opcion(const Tclave& clave) const
+
+Indica el nombre visible de la opción.
+std::string	nombre_opcion(const Tclave& clave) const
+
+Indica el nombre visible de la selección para la opción.
+std::string	nombre_seleccion(const Tclave& clave) const
+
+Traduce el menú.
+void		traducir(const std::vector<struct_traduccion>& v)
+
+Traduce el menú.
+void		traducir(const struct_traduccion& t)
+
+Indica la cantidad de opciones.
+size_t		size() const
+
+Cambia la selección actual de una opción.
+void		seleccionar_opcion(const Tclave& clave_opcion, const Tclave& clave_seleccion)
+
+Cambia la selección actual de una opción por su valor.
+void		seleccionar_opcion_por_valor(const Tclave& clave_opcion, const Tvalor& valor_seleccion)
+
+Obtiene un vector con las claves de las opciones, sin las claves de las selecciones.
+std::vector<Tclave>		obtener_claves() const 
 */
 
 namespace Herramientas_proyecto
@@ -62,7 +127,7 @@ class Menu_opciones
 	{
 		std::string 			nombre;
 		std::map<Tclave, Seleccion_menu>	selecciones;
-		Tclave				opcion_actual;
+		Tclave				clave_actual;
 
 		void				comprobar_opciones_existen(const std::string& msj) const
 		{
@@ -71,18 +136,18 @@ class Menu_opciones
 
 		void 				rotar(int dir)
 		{
-			auto it=selecciones.find(opcion_actual);
+			auto it=selecciones.find(clave_actual);
 
 			//Descender...
 			if(dir < 0)
 			{
 				if(it==selecciones.begin()) //Dar la vuelta.
 				{
-					opcion_actual=selecciones.rbegin()->first;
+					clave_actual=selecciones.rbegin()->first;
 				}
 				else
 				{
-					opcion_actual=std::prev(it)->first;
+					clave_actual=std::prev(it)->first;
 				}
 			}
 			//Ascender...
@@ -91,11 +156,11 @@ class Menu_opciones
 				auto sigue=std::next(it);
 				if(sigue==std::end(selecciones))
 				{
-					opcion_actual=selecciones.begin()->first;
+					clave_actual=selecciones.begin()->first;
 				}
 				else
 				{
-					opcion_actual=sigue->first;
+					clave_actual=sigue->first;
 				}
 			}
 
@@ -103,12 +168,12 @@ class Menu_opciones
 
 		void				insertar_seleccion(const Tclave& clave, const Tvalor& valor, const std::string& nombre)
 		{
-			if(!selecciones.size()) opcion_actual=clave;
+			if(!selecciones.size()) clave_actual=clave;
 			selecciones[clave]={valor, nombre};
 		}
 
 
-						Opcion_menu(const std::string& n):nombre(n), opcion_actual() {}
+						Opcion_menu(const std::string& n):nombre(n), clave_actual() {}
 	};
 
 	void	comprobar_opcion_existe(const Tclave& clave, const std::string& msj) const
@@ -182,7 +247,7 @@ class Menu_opciones
 		comprobar_opcion_existe(clave, "La clave no existe para obtener_valor");
 		const auto& o=opciones.at(clave);
 		o.comprobar_opciones_existen("La opción no tiene selecciones para obtener valor");
-		return o.selecciones.at(o.opcion_actual).valor;
+		return o.selecciones.at(o.clave_actual).valor;
 	}
 
 	std::string	nombre_opcion(const Tclave& clave) const
@@ -196,7 +261,7 @@ class Menu_opciones
 		comprobar_opcion_existe(clave, "La clave no existe para obtener_valor");
 		const auto& o=opciones.at(clave);
 		o.comprobar_opciones_existen("La opción no tiene selecciones para obtener valor");
-		return o.selecciones.at(o.opcion_actual).nombre;
+		return o.selecciones.at(o.clave_actual).nombre;
 	}
 
 	void		traducir(const std::vector<struct_traduccion>& v)
@@ -230,7 +295,34 @@ class Menu_opciones
 	{
 		return opciones.size();
 	}
+	
+	void		seleccionar_opcion(const Tclave& clave_opcion, const Tclave& clave_seleccion)
+	{
+		comprobar_opcion_existe(clave_opcion, "La clave no existe para seleccionar opción");
+		auto& opcion=opciones.at(clave_opcion);
+		if(!opcion.selecciones.count(clave_seleccion)) 
+		{
+			throw Menu_opciones_exception("La clave no existe al asignar selección");
+		}
+		else opcion.clave_actual=clave_seleccion;		
+	}
 
+	void		seleccionar_opcion_por_valor(const Tclave& clave_opcion, const Tvalor& valor_seleccion)
+	{
+		comprobar_opcion_existe(clave_opcion, "La clave no existe para seleccionar opción");
+		auto& opcion=opciones.at(clave_opcion);
+
+		for(auto& seleccion : opcion.selecciones)
+		{
+			if(seleccion.second.valor==valor_seleccion) 
+			{
+				opcion.clave_actual=seleccion.first;
+				return;
+			}
+		}
+
+		throw Menu_opciones_exception("El valor no existe al asignar selección");
+	}
 
 	std::vector<Tclave>		obtener_claves() const 
 	{
