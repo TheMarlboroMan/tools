@@ -7,7 +7,7 @@ using namespace Herramientas_proyecto;
 
 std::vector<std::string> Herramientas_proyecto::explotar(const std::string & p_cadena, const char p_delimitador, size_t max)
 {
-	size_t cuenta=0;
+	size_t cuenta=1;
 
 	std::vector<std::string> resultado;
 	std::string::const_iterator ini=p_cadena.begin(), fin=p_cadena.end();

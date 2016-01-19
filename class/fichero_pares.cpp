@@ -1,6 +1,10 @@
 #include "fichero_pares.h"
 #include <fstream>
 
+
+//TODO: Delete.
+#include <iostream>
+
 using namespace Herramientas_proyecto;
 
 Fichero_pares::Fichero_pares(const std::string& nf, char sep, char com):
