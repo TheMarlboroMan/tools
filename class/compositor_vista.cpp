@@ -270,3 +270,9 @@ Compositor_vista::posicion Compositor_vista::posicion_desde_lista(const Dnot_tok
 	int x=tok[0], y=tok[1];
 	return posicion{x, y};
 }
+
+void Compositor_vista::vaciar_vista()
+{
+	representaciones.clear();
+	mapa_ids.clear();
+}
