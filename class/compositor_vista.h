@@ -51,6 +51,7 @@ class Compositor_vista
 	void			mapear_textura(const std::string&, DLibV::Textura *);
 	void			mapear_superficie(const std::string&, DLibV::Superficie *);
 	void			mapear_fuente(const std::string&, const DLibV::Fuente_TTF *);
+	void			vaciar_vista() {representaciones.clear();}
 	DLibV::Representacion * obtener_por_id(const std::string&);
 
 	private:
@@ -74,6 +75,7 @@ class Compositor_vista
 	static const std::string		clave_fuente;
 	static const std::string		clave_estatica;
 	static const std::string		clave_pincel;
+	static const std::string		clave_visibilidad;
 
 	struct color
 	{

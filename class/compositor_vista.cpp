@@ -20,6 +20,7 @@ const std::string Compositor_vista::clave_fuente="fuente";
 const std::string Compositor_vista::clave_textura="textura";
 const std::string Compositor_vista::clave_estatica="estatica";
 const std::string Compositor_vista::clave_pincel="pincel";
+const std::string Compositor_vista::clave_visibilidad="visible";
 
 Compositor_vista::Compositor_vista()
 	:con_pantalla(false), color_pantalla{0,0,0, 255}
@@ -149,6 +150,11 @@ void Compositor_vista::parsear(const std::string& ruta, const std::string& nodo)
 		if(token.existe_clave(clave_estatica))
 		{
 			ptr->hacer_estatica();
+		}
+
+		if(token.existe_clave(clave_visibilidad))
+		{
+			ptr->cambiar_visibilidad(token[clave_visibilidad].acc_bool());
 		}
 
 		if(token.existe_clave(clave_id))
