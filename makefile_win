@@ -1,14 +1,17 @@
-#Definiciones.
-LINKARQUITECTURA=-lmingw32
-UNIDAD_DISCO=K
-MINGW32_INCLUDE=/mingw_dev/include
-MINGW32_LIB=/mingw_dev/lib
+#SIMBOLOS_DEBUG=-g
+UNIDAD_DISCO=C
+MINGW32_INCLUDE=/mingw/include
+MINGW32_LIB=/mingw/lib
+DIR_HOME=$(UNIDAD_DISCO):/Devel/
+DIR_LIBDAN2=$(DIR_HOME)libdansdl2-master
+DIR_SDL2=$(UNIDAD_DISCO):/SDLDev/include
 
-BASE_FLAGS_WIN=-DWINCOMPIL=1 -D__NO_INLINE__ -Wno-deprecated -Wall -ansi -pedantic -std=c++11 -I$(UNIDAD_DISCO):$(MINGW32_INCLUDE) -L$(UNIDAD_DISCO):$(MINGW32_LIB)
+FLAGS_BASE=-DWINCOMPIL=1 -D__NO_INLINE__ -Wno-deprecated -Wall -ansi -pedantic -std=c++11 -I$(UNIDAD_DISCO):$(MINGW32_INCLUDE) -I$(DIR_LIBDAN2) -I$(DIR_SDL2) -L$(UNIDAD_DISCO):$(MINGW32_LIB)
 
-CFLAGS= -c $(BASE_FLAGS_WIN)
-CFLAGS_TARGET_FINAL=$(BASE_FLAGS_WIN)
+CFLAGS= -c $(SIMBOLOS_DEBUG) $(OPTIMIZACION)  $(FLAGS_BASE)
+
 CC=g++
-LINKER=-L. -lDanSDL2 $(LINKARQUITECTURA) -lSDL2main -lSDL2 -lSDL2_mixer -lSDL2_image -static-libgcc -static-libstdc++
-
+MKDIR=mkdir
+LIMPIAR=rmdir objects /s /q;
 include makefile_comun
+
