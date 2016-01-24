@@ -11,7 +11,6 @@
 #include <vector>
 #include <stdexcept>
 
-
 namespace Herramientas_proyecto
 {
 

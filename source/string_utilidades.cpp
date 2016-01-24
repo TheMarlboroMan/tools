@@ -1,7 +1,11 @@
 #include "string_utilidades.h"
 #include "../class/lector_txt.h"
-
 #include <iostream>
+
+#ifdef WINCOMPIL
+/* Localización del parche mingw32... Esto debería estar en otro lado, supongo. */
+#include <herramientas/herramientas/herramientas.h>
+#endif
 
 using namespace Herramientas_proyecto;
 
@@ -60,6 +64,12 @@ std::map<std::string, std::string> Herramientas_proyecto::generar_mapa_pares(con
 {
 	Lector_txt L(fichero.c_str(), comentario);
 
+#ifdef WINCOMPIL
+	using namespace parche_mingw;
+#else
+	using namespace std;
+#endif
+
 	if(!L)
 	{
 		throw std::runtime_error("Herramientas_proyecto::generar_mapa_pares no pudo abrir el fichero "+fichero);
@@ -78,8 +88,8 @@ std::map<std::string, std::string> Herramientas_proyecto::generar_mapa_pares(con
 		}
 		//Localizar separador... 
 		else if(linea.find(separador)==linea.npos)
-		{
-			throw std::runtime_error("Herramientas_proyecto::generar_mapa_pares linea malformada "+std::to_string(L.obtener_numero_linea())+" '"+linea+"' en "+fichero);
+		{	
+			throw std::runtime_error("Herramientas_proyecto::generar_mapa_pares linea malformada "+to_string(L.obtener_numero_linea())+" '"+linea+"' en "+fichero);
 		}
 
 		std::vector<std::string> valores=explotar(linea, separador, 2);

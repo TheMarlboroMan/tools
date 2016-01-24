@@ -1,5 +1,10 @@
 #include "localizador_base.h"
 
+#ifdef WINCOMPIL
+/* Localización del parche mingw32... Esto debería estar en otro lado, supongo. */
+#include <herramientas/herramientas/herramientas.h>
+#endif
+
 using namespace Herramientas_proyecto;
 
 Localizador_base::Localizador_base(unsigned short int p_idioma)
