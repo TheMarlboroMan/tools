@@ -223,57 +223,69 @@ std::string Dnot_token::serializar(const Dnot_token_opciones_serializador& opcio
 	using namespace std;
 #endif
 
-	auto nl=[&resultado, opciones]()
-	{
-		resultado+="\n";
-	};
-
-	auto f=[&resultado, &opciones, recursividad](const std::string& c)
+	auto tab=[&resultado, &opciones, recursividad]()
 	{
 		if(opciones.tabular_tras_salto_linea)
 		{
-			for(int i=0; i<recursividad; ++i) resultado+="\t";
+			for(int i=0; i<recursividad; ++i) resultado+='\t';
 		}
+	};	
+
+	auto nl=[&resultado, &opciones, recursividad, &tab]()
+	{
+		tab();
+		resultado+="\n";
+	};
+
+	auto s=[&resultado](const std::string& c)
+	{
 		resultado+=c;
+	};	
+
+	auto f=[&resultado](const std::string& c)
+	{
+		resultado+=c+",";
 	};
 
 	switch(tipo)
 	{
 		case tipos::lista: 
-			f("[");
+			s("[");
 			if(opciones.salto_linea_en_lista) nl();
 			for(const auto& e : lista) 
 			{
-				f(e.serializar(opciones, recursividad+1)+",");
+				f(e.serializar(opciones, recursividad+1));
 			}
 			resultado.pop_back();
-			f("]");
+			s("]");
+			if(opciones.salto_linea_en_lista) nl();
 		break;
 		case tipos::compuesto: 
-			f("{");
+			s("{");
 			if(opciones.salto_linea_en_compuesto) nl();
 			for(const auto& e : tokens) 
 			{
-				f(e.first+":"+e.second.serializar(opciones, recursividad+1)+",");
+				f(e.first+":"+e.second.serializar(opciones, recursividad+1));
 			}
 			resultado.pop_back();
-			f("}");
+			s("}");
+			if(opciones.salto_linea_en_compuesto) nl(); 
 		break;
 		case tipos::valor_string: 	
-			f("\""+valor_string+"\""); 
-			if(opciones.salto_linea_string) nl();
+			s("\""+valor_string+"\"");
+			if(opciones.salto_linea_tras_propiedad) nl();
 		break;
 		case tipos::valor_int: 		
-			f(to_string(valor_int)); 
-			if(opciones.salto_linea_int) nl();
+			s(to_string(valor_int)); 
+			if(opciones.salto_linea_tras_propiedad) nl();
 		break;
 		case tipos::valor_float: 	
-			f(to_string(valor_float)); 
-			if(opciones.salto_linea_float) nl();
+			s(to_string(valor_float)); 
+			if(opciones.salto_linea_tras_propiedad) nl();
 		break;
 		case tipos::valor_bool: 	
-			f(valor_bool ? "true" : "false"); 
-			if(opciones.salto_linea_bool) nl();
+			s(valor_bool ? "true" : "false"); 
+			if(opciones.salto_linea_tras_propiedad) nl();
 		break;
 	}
 

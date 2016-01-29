@@ -28,11 +28,9 @@ struct Dnot_token_opciones_serializador
 	bool 	aplanar_primer_nodo_compuesto=true,
 		salto_linea_en_lista=true,
 		salto_linea_en_compuesto=true,
-		salto_linea_int=true,
-		salto_linea_bool=true,
-		salto_linea_float=true,
-		salto_linea_string=true,
+		salto_linea_tras_propiedad=false,
 		tabular_tras_salto_linea=true;
+	char	tabulador='	';
 };
 
 class Dnot_token
