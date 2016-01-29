@@ -1,5 +1,10 @@
 #include "dnot_token.h"
 
+#ifdef WINCOMPIL
+/* Localización del parche mingw32... Esto debería estar en otro lado, supongo. */
+#include <herramientas/herramientas/herramientas.h>
+#endif
+
 using namespace Herramientas_proyecto;
 
 bool Dnot_token::es_valor() const 
@@ -10,7 +15,15 @@ bool Dnot_token::es_valor() const
 	tipo==tipos::valor_bool;
 }
 
+
+
 void Dnot_token::asignar(const std::string c)
+{
+	valor_string=c;
+	tipo=tipos::valor_string;
+}
+
+void Dnot_token::asignar(const char * c)
 {
 	valor_string=c;
 	tipo=tipos::valor_string;
@@ -198,4 +211,76 @@ bool Dnot_token::existe_clave(const std::string& k) const
 {
 	if(tipo!=tipos::compuesto) throw std::runtime_error("El tipo no es compuesto");
 	else return tokens.count(k);
+}
+
+std::string Dnot_token::serializar(const Dnot_token_opciones_serializador& opciones, int recursividad) const
+{
+	std::string resultado;
+
+#ifdef WINCOMPIL
+	using namespace parche_mingw;
+#else
+	using namespace std;
+#endif
+
+	auto nl=[&resultado, opciones]()
+	{
+		resultado+="\n";
+	};
+
+	auto f=[&resultado, &opciones, recursividad](const std::string& c)
+	{
+		if(opciones.tabular_tras_salto_linea)
+		{
+			for(int i=0; i<recursividad; ++i) resultado+="\t";
+		}
+		resultado+=c;
+	};
+
+	switch(tipo)
+	{
+		case tipos::lista: 
+			f("[");
+			if(opciones.salto_linea_en_lista) nl();
+			for(const auto& e : lista) 
+			{
+				f(e.serializar(opciones, recursividad+1)+",");
+			}
+			resultado.pop_back();
+			f("]");
+		break;
+		case tipos::compuesto: 
+			f("{");
+			if(opciones.salto_linea_en_compuesto) nl();
+			for(const auto& e : tokens) 
+			{
+				f(e.first+":"+e.second.serializar(opciones, recursividad+1)+",");
+			}
+			resultado.pop_back();
+			f("}");
+		break;
+		case tipos::valor_string: 	
+			f("\""+valor_string+"\""); 
+			if(opciones.salto_linea_string) nl();
+		break;
+		case tipos::valor_int: 		
+			f(to_string(valor_int)); 
+			if(opciones.salto_linea_int) nl();
+		break;
+		case tipos::valor_float: 	
+			f(to_string(valor_float)); 
+			if(opciones.salto_linea_float) nl();
+		break;
+		case tipos::valor_bool: 	
+			f(valor_bool ? "true" : "false"); 
+			if(opciones.salto_linea_bool) nl();
+		break;
+	}
+
+	if(!recursividad && opciones.aplanar_primer_nodo_compuesto && resultado.size() > 2)
+	{
+//		resultado=resultado.substr(0, resultado.size() - 2);
+	}
+
+	return resultado;
 }

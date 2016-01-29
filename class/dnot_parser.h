@@ -52,6 +52,7 @@ class Dnot_parser
 	
 	private:
  
+	
 	char 					leer_string();
 	char 					leer_stream();
 	void 					procesar_string(char cb);
@@ -89,7 +90,6 @@ class Dnot_parser
 };
 
 Dnot_token	parsear_dnot(const std::string&);
-
 }
 
 /*

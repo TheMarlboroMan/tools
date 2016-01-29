@@ -23,9 +23,23 @@ namespace Herramientas_proyecto
 
 class Dnot_Parser;
 
+struct Dnot_token_opciones_serializador
+{
+	bool 	aplanar_primer_nodo_compuesto=true,
+		salto_linea_en_lista=true,
+		salto_linea_en_compuesto=true,
+		salto_linea_int=true,
+		salto_linea_bool=true,
+		salto_linea_float=true,
+		salto_linea_string=true,
+		tabular_tras_salto_linea=true;
+};
+
 class Dnot_token
 {
 	public:
+
+	std::string				serializar(const Dnot_token_opciones_serializador& = Dnot_token_opciones_serializador(), int=0) const;
 
 	typedef 				std::map<std::string, Dnot_token> t_mapa;
 	typedef					std::vector<Dnot_token> t_vector;
@@ -39,6 +53,7 @@ class Dnot_token
 	bool 					es_lista() const {return tipo==tipos::lista;}
 
 	void 					asignar(const std::string c);
+	void 					asignar(const char * c);
 	void		 			asignar(int c);
 	void 					asignar(float c);
 	void 					asignar(bool c);
