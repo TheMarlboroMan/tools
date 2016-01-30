@@ -110,62 +110,62 @@ Dnot_token::Dnot_token(bool v)
 
 const Dnot_token::t_mapa& Dnot_token::acc_tokens() const 
 {
-	if(tipo!=tipos::compuesto) throw std::runtime_error("El tipo no es compuesto ["+traducir_tipo(tipo)+"]");
+	if(tipo!=tipos::compuesto) throw std::runtime_error("El tipo no es compuesto ["+traducir_tipo(tipo)+" - "+valor_como_string()+"]");
 	return tokens;
 }
 
 Dnot_token::t_mapa& Dnot_token::acc_tokens()
 {
-	if(tipo!=tipos::compuesto) throw std::runtime_error("El tipo no es compuesto ["+traducir_tipo(tipo)+"]");
+	if(tipo!=tipos::compuesto) throw std::runtime_error("El tipo no es compuesto ["+traducir_tipo(tipo)+" - "+valor_como_string()+"]");
 	return tokens;
 }
 
 const Dnot_token::t_vector& Dnot_token::acc_lista() const 
 {
-	if(tipo!=tipos::lista) throw std::runtime_error("El tipo no es lista ["+traducir_tipo(tipo)+"]");
+	if(tipo!=tipos::lista) throw std::runtime_error("El tipo no es lista ["+traducir_tipo(tipo)+" - "+valor_como_string()+"]");
 	return lista;
 }
 
 Dnot_token::t_vector& Dnot_token::acc_lista()
 {
-	if(tipo!=tipos::lista) throw std::runtime_error("El tipo no es lista ["+traducir_tipo(tipo)+"]");
+	if(tipo!=tipos::lista) throw std::runtime_error("El tipo no es lista ["+traducir_tipo(tipo)+" - "+valor_como_string()+"]");
 	return lista;
 }
 
 const std::string& Dnot_token::acc_string() const 
 {
-	if(tipo!=tipos::valor_string) throw std::runtime_error("El tipo no es string ["+traducir_tipo(tipo)+"]");
+	if(tipo!=tipos::valor_string) throw std::runtime_error("El tipo no es string ["+traducir_tipo(tipo)+" - "+valor_como_string()+"]");
 	return valor_string;
 }
 
 int Dnot_token::acc_int() const 
 {
-	if(tipo!=tipos::valor_int) throw std::runtime_error("El tipo no es int ["+traducir_tipo(tipo)+"]");
+	if(tipo!=tipos::valor_int) throw std::runtime_error("El tipo no es int ["+traducir_tipo(tipo)+" - "+valor_como_string()+"]");
 	return valor_int;
 }
 
 float Dnot_token::acc_float() const 
 {
-	if(tipo!=tipos::valor_float) throw std::runtime_error("El tipo no es float ["+traducir_tipo(tipo)+"]");
+	if(tipo!=tipos::valor_float) throw std::runtime_error("El tipo no es float ["+traducir_tipo(tipo)+" - "+valor_como_string()+"]");
 	return valor_float;
 }
 
 bool Dnot_token::acc_bool() const 
 {
-	if(tipo!=tipos::valor_bool) throw std::runtime_error("El tipo no es bool ["+traducir_tipo(tipo)+"]");
+	if(tipo!=tipos::valor_bool) throw std::runtime_error("El tipo no es bool ["+traducir_tipo(tipo)+" - "+valor_como_string()+"]");
 	return valor_bool;
 }
 
 const Dnot_token& Dnot_token::operator[](const std::string& k) const
 {
-	if(tipo!=tipos::compuesto) throw std::runtime_error("El tipo no es compuesto ["+traducir_tipo(tipo)+"]");
+	if(tipo!=tipos::compuesto) throw std::runtime_error("El tipo no es compuesto ["+traducir_tipo(tipo)+" - "+valor_como_string()+"]");
 	else if(!tokens.count(k)) throw std::runtime_error("La clave "+k+" no existe");
 	else return tokens.at(k);
 }
 
 Dnot_token& Dnot_token::operator[](const std::string& k)
 {
-	if(tipo!=tipos::compuesto) throw std::runtime_error("El tipo no es compuesto ["+traducir_tipo(tipo)+"]");
+	if(tipo!=tipos::compuesto) throw std::runtime_error("El tipo no es compuesto ["+traducir_tipo(tipo)+" - "+valor_como_string()+"]");
 	else if(!tokens.count(k)) throw std::runtime_error("La clave "+k+" no existe");
 	else return tokens[k];
 }
@@ -182,14 +182,14 @@ Dnot_token& Dnot_token::operator[](const char * k)
 
 const Dnot_token& Dnot_token::operator[](size_t l) const
 {
-	if(tipo!=tipos::lista) throw std::runtime_error("El tipo no es lista ["+traducir_tipo(tipo)+"]");
+	if(tipo!=tipos::lista) throw std::runtime_error("El tipo no es lista ["+traducir_tipo(tipo)+" - "+valor_como_string()+"]");
 	else if(l >= lista.size()) throw std::runtime_error("El indice de lista es inválido");
 	else return lista.at(l);
 }
 
 Dnot_token& Dnot_token::operator[](size_t l)
 {
-	if(tipo!=tipos::lista) throw std::runtime_error("El tipo no es lista ["+traducir_tipo(tipo)+"]");
+	if(tipo!=tipos::lista) throw std::runtime_error("El tipo no es lista ["+traducir_tipo(tipo)+" - "+valor_como_string()+"]");
 	else if(l >= lista.size()) throw std::runtime_error("El indice de lista es inválido");
 	else return lista[l];
 }
@@ -223,7 +223,7 @@ std::ostream& Herramientas_proyecto::operator<<(std::ostream& os, const Herramie
 
 bool Dnot_token::existe_clave(const std::string& k) const
 {
-	if(tipo!=tipos::compuesto) throw std::runtime_error("El tipo no es compuesto ["+traducir_tipo(tipo)+"]");
+	if(tipo!=tipos::compuesto) throw std::runtime_error("El tipo no es compuesto ["+traducir_tipo(tipo)+" - "+valor_como_string()+"]");
 	else return tokens.count(k);
 }
 
@@ -321,4 +321,24 @@ std::string Dnot_token::traducir_tipo(Dnot_token::tipos t)const
 		default: return "desconocido"; break;
 	}
 	
+}
+
+std::string Dnot_token::valor_como_string()const
+{
+#ifdef WINCOMPIL
+	using namespace parche_mingw;
+#else
+	using namespace std;
+#endif
+
+	switch(tipo)
+	{
+		case tipos::compuesto: return "compuesto ("+to_string(tokens.size())+")"; break;
+		case tipos::valor_string: return valor_string; break;
+		case tipos::valor_int: return to_string(valor_int); break;
+		case tipos::valor_float: return to_string(valor_float); break;
+		case tipos::valor_bool: return valor_bool ? "true" : "false"; break;
+		case tipos::lista:	return "lista ("+to_string(lista.size())+")"; break;
+		default: return "** desconocido **"; break;
+	}
 }

@@ -119,6 +119,7 @@ class Dnot_token
 		lista};		//El token es una lista de otros tokens anónimos.
 
 	std::string				traducir_tipo(tipos)const;
+	std::string				valor_como_string()const;
 
 	tipos					tipo;
 	t_mapa					tokens;
