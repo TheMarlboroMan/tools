@@ -314,7 +314,7 @@ void Dnot_parser::asignar_valor_lista()
 
 	std::string valor=buffer.substr(0, buffer.size()-1);
 	token.tipo=Dnot_token::tipos::lista;
-	token.lista.push_back(generar_token_valor(valor));
+	if(valor.size()) token.lista.push_back(generar_token_valor(valor));
 	buffer.clear();
 }
 
