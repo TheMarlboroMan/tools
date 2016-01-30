@@ -110,62 +110,62 @@ Dnot_token::Dnot_token(bool v)
 
 const Dnot_token::t_mapa& Dnot_token::acc_tokens() const 
 {
-	if(tipo!=tipos::compuesto) throw std::runtime_error("El tipo no es compuesto");
+	if(tipo!=tipos::compuesto) throw std::runtime_error("El tipo no es compuesto ["+traducir_tipo(tipo)+"]");
 	return tokens;
 }
 
 Dnot_token::t_mapa& Dnot_token::acc_tokens()
 {
-	if(tipo!=tipos::compuesto) throw std::runtime_error("El tipo no es compuesto");
+	if(tipo!=tipos::compuesto) throw std::runtime_error("El tipo no es compuesto ["+traducir_tipo(tipo)+"]");
 	return tokens;
 }
 
 const Dnot_token::t_vector& Dnot_token::acc_lista() const 
 {
-	if(tipo!=tipos::lista) throw std::runtime_error("El tipo no es lista");
+	if(tipo!=tipos::lista) throw std::runtime_error("El tipo no es lista ["+traducir_tipo(tipo)+"]");
 	return lista;
 }
 
 Dnot_token::t_vector& Dnot_token::acc_lista()
 {
-	if(tipo!=tipos::lista) throw std::runtime_error("El tipo no es lista");
+	if(tipo!=tipos::lista) throw std::runtime_error("El tipo no es lista ["+traducir_tipo(tipo)+"]");
 	return lista;
 }
 
 const std::string& Dnot_token::acc_string() const 
 {
-	if(tipo!=tipos::valor_string) throw std::runtime_error("El tipo no es string");
+	if(tipo!=tipos::valor_string) throw std::runtime_error("El tipo no es string ["+traducir_tipo(tipo)+"]");
 	return valor_string;
 }
 
 int Dnot_token::acc_int() const 
 {
-	if(tipo!=tipos::valor_int) throw std::runtime_error("El tipo no es int");
+	if(tipo!=tipos::valor_int) throw std::runtime_error("El tipo no es int ["+traducir_tipo(tipo)+"]");
 	return valor_int;
 }
 
 float Dnot_token::acc_float() const 
 {
-	if(tipo!=tipos::valor_float) throw std::runtime_error("El tipo no es float");
+	if(tipo!=tipos::valor_float) throw std::runtime_error("El tipo no es float ["+traducir_tipo(tipo)+"]");
 	return valor_float;
 }
 
 bool Dnot_token::acc_bool() const 
 {
-	if(tipo!=tipos::valor_bool) throw std::runtime_error("El tipo no es bool");
+	if(tipo!=tipos::valor_bool) throw std::runtime_error("El tipo no es bool ["+traducir_tipo(tipo)+"]");
 	return valor_bool;
 }
 
 const Dnot_token& Dnot_token::operator[](const std::string& k) const
 {
-	if(tipo!=tipos::compuesto) throw std::runtime_error("El tipo no es compuesto");
+	if(tipo!=tipos::compuesto) throw std::runtime_error("El tipo no es compuesto ["+traducir_tipo(tipo)+"]");
 	else if(!tokens.count(k)) throw std::runtime_error("La clave "+k+" no existe");
 	else return tokens.at(k);
 }
 
 Dnot_token& Dnot_token::operator[](const std::string& k)
 {
-	if(tipo!=tipos::compuesto) throw std::runtime_error("El tipo no es compuesto");
+	if(tipo!=tipos::compuesto) throw std::runtime_error("El tipo no es compuesto ["+traducir_tipo(tipo)+"]");
 	else if(!tokens.count(k)) throw std::runtime_error("La clave "+k+" no existe");
 	else return tokens[k];
 }
@@ -182,14 +182,14 @@ Dnot_token& Dnot_token::operator[](const char * k)
 
 const Dnot_token& Dnot_token::operator[](size_t l) const
 {
-	if(tipo!=tipos::lista) throw std::runtime_error("El tipo no es lista");
+	if(tipo!=tipos::lista) throw std::runtime_error("El tipo no es lista ["+traducir_tipo(tipo)+"]");
 	else if(l >= lista.size()) throw std::runtime_error("El indice de lista es inválido");
 	else return lista.at(l);
 }
 
 Dnot_token& Dnot_token::operator[](size_t l)
 {
-	if(tipo!=tipos::lista) throw std::runtime_error("El tipo no es lista");
+	if(tipo!=tipos::lista) throw std::runtime_error("El tipo no es lista ["+traducir_tipo(tipo)+"]");
 	else if(l >= lista.size()) throw std::runtime_error("El indice de lista es inválido");
 	else return lista[l];
 }
@@ -223,7 +223,7 @@ std::ostream& Herramientas_proyecto::operator<<(std::ostream& os, const Herramie
 
 bool Dnot_token::existe_clave(const std::string& k) const
 {
-	if(tipo!=tipos::compuesto) throw std::runtime_error("El tipo no es compuesto");
+	if(tipo!=tipos::compuesto) throw std::runtime_error("El tipo no es compuesto ["+traducir_tipo(tipo)+"]");
 	else return tokens.count(k);
 }
 
@@ -306,4 +306,19 @@ std::string Dnot_token::serializar(const Dnot_token_opciones_serializador& opcio
 	}
 
 	return resultado;
+}
+
+std::string Dnot_token::traducir_tipo(Dnot_token::tipos t)const
+{
+	switch(t)
+	{
+		case tipos::compuesto: return "compuesto"; break;
+		case tipos::valor_string: return "string"; break;
+		case tipos::valor_int: return "int"; break;
+		case tipos::valor_float: return "float"; break;
+		case tipos::valor_bool: return "bool"; break;
+		case tipos::lista:	return "lista"; break;
+		default: return "desconocido"; break;
+	}
+	
 }

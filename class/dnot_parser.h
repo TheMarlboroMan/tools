@@ -10,8 +10,9 @@
 */
 
 #include <cctype>
-#include <fstream>
+#include <istream>
 
+#include <fstream>
 #include <iostream>
 
 #include <stdexcept>
@@ -29,7 +30,7 @@ class Dnot_parser
 
 	public:
 
-						Dnot_parser(std::ifstream& fichero, tipos t=tipos::objeto);
+						Dnot_parser(std::istream&, tipos t=tipos::objeto);
 	void 					operator()();
 
 	//TODO: Un problema con el parser es que los ficheros no tienen un nodo
@@ -76,7 +77,7 @@ class Dnot_parser
 	estados			estado;
 	bool			leer_comillas, finalizado;
 	tipos			tipo;
-	std::ifstream&		fichero; //El fichero es una referencia para poder pasarlo a los parsers recursivos.
+	std::istream&		stream; //El stream es una referencia para poder pasarlo a los parsers recursivos.
 	std::string 		buffer;
 
 	//TODO: std::map no conserva el orden de inserción: Tal vez necesitemos

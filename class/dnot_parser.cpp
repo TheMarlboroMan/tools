@@ -2,11 +2,11 @@
 
 using namespace Herramientas_proyecto;
 
-Dnot_parser::Dnot_parser(std::ifstream& fichero, tipos t)
+Dnot_parser::Dnot_parser(std::istream& stream, tipos t)
 	:estado(estados::leyendo), 
 	leer_comillas(false), finalizado(false),
 	tipo(t),
-	fichero(fichero)
+	stream(stream)
 {
 	buffer.reserve(1024);
 	token.tipo=Dnot_token::tipos::compuesto;
@@ -26,7 +26,7 @@ void Dnot_parser::operator()()
 
 		char cb=leer_comillas ? leer_string() : leer_stream();
 
-		if(fichero.eof())
+		if(stream.eof())
 		{
 			//TODO: Es posible que esté malformado si estamos leyendo comillas;
 			if(estado==estados::leyendo) asignar_valor_objeto();
@@ -47,7 +47,7 @@ void Dnot_parser::operator()()
 char Dnot_parser::leer_string()
 {
 	char cb;
-	fichero.get(cb);
+	stream.get(cb);
 	return cb;
 }
 
@@ -58,7 +58,7 @@ char Dnot_parser::leer_string()
 char Dnot_parser::leer_stream()
 {
 	char cb;
-	fichero>>cb;
+	stream>>cb;
 	return cb;
 }
 
@@ -147,7 +147,7 @@ void Dnot_parser::abre_llave()
 	{
 		case estados::leyendo:
 		{
-			Dnot_parser p(fichero);
+			Dnot_parser p(stream);
 			p();
 			asignar_subparser_objeto(p.token.tokens);
 			estado=estados::fin_subparser;
@@ -194,7 +194,7 @@ void Dnot_parser::abre_corchete()
 	{
 		case estados::leyendo:
 		{
-			Dnot_parser p(fichero, tipos::lista);
+			Dnot_parser p(stream, tipos::lista);
 			p();
 			asignar_subparser_lista(p.token.lista);
 			estado=estados::fin_subparser;

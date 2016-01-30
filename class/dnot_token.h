@@ -118,6 +118,8 @@ class Dnot_token
 		valor_bool,	//El token tiene un valor bool
 		lista};		//El token es una lista de otros tokens anónimos.
 
+	std::string				traducir_tipo(tipos)const;
+
 	tipos					tipo;
 	t_mapa					tokens;
 	t_vector				lista;
