@@ -25,12 +25,20 @@ class Dnot_Parser;
 
 struct Dnot_token_opciones_serializador
 {
-	bool 	aplanar_primer_nodo_compuesto=true,
-		salto_linea_en_lista=true,
-		salto_linea_en_compuesto=true,
-		salto_linea_tras_propiedad=false,
-		tabular_tras_salto_linea=true;
-	char	tabulador='	';
+	bool 		aplanar_primer_nodo_compuesto,
+			salto_linea_en_lista,
+			salto_linea_en_compuesto,
+			salto_linea_tras_propiedad,
+			tabular_tras_salto_linea;
+	std::string	tabulador;
+	Dnot_token_opciones_serializador()
+		:aplanar_primer_nodo_compuesto(true),
+		salto_linea_en_lista(true),
+		salto_linea_en_compuesto(true),
+		salto_linea_tras_propiedad(false),
+		tabular_tras_salto_linea(true),
+		tabulador("\t")
+	{}
 };
 
 class Dnot_token

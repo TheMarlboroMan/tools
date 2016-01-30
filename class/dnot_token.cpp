@@ -225,15 +225,15 @@ std::string Dnot_token::serializar(const Dnot_token_opciones_serializador& opcio
 
 	auto tab=[&resultado, &opciones, recursividad]()
 	{
-		if(opciones.tabular_tras_salto_linea)
-		{
-			for(int i=0; i<recursividad; ++i) resultado+='\t';
-		}
+//		if(opciones.tabular_tras_salto_linea)
+//		{
+			for(int i=0; i<recursividad; ++i) resultado+="\t";
+//opciones.tabulador;
+//		}
 	};	
 
 	auto nl=[&resultado, &opciones, recursividad, &tab]()
 	{
-		tab();
 		resultado+="\n";
 	};
 
@@ -242,56 +242,62 @@ std::string Dnot_token::serializar(const Dnot_token_opciones_serializador& opcio
 		resultado+=c;
 	};	
 
-	auto f=[&resultado](const std::string& c)
+	auto coma=[&resultado](const std::string& c)
 	{
 		resultado+=c+",";
 	};
+
 
 	switch(tipo)
 	{
 		case tipos::lista: 
 			s("[");
-			if(opciones.salto_linea_en_lista) nl();
+			nl();
+			++recursividad;
+			tab();
 			for(const auto& e : lista) 
 			{
-				f(e.serializar(opciones, recursividad+1));
+				s(e.serializar(opciones, recursividad));
 			}
 			resultado.pop_back();
-			s("]");
-			if(opciones.salto_linea_en_lista) nl();
+			coma("]");
+			--recursividad;
+			nl();
+			tab();
 		break;
 		case tipos::compuesto: 
 			s("{");
-			if(opciones.salto_linea_en_compuesto) nl();
+			nl();
+			++recursividad;
+			tab();
 			for(const auto& e : tokens) 
 			{
-				f(e.first+":"+e.second.serializar(opciones, recursividad+1));
+				s(e.first+":"+e.second.serializar(opciones, recursividad));
 			}
 			resultado.pop_back();
-			s("}");
-			if(opciones.salto_linea_en_compuesto) nl(); 
+			coma("}");
+			--recursividad;
+			nl();
+			tab();
 		break;
 		case tipos::valor_string: 	
-			s("\""+valor_string+"\"");
-			if(opciones.salto_linea_tras_propiedad) nl();
+			coma("\""+valor_string+"\"");
 		break;
 		case tipos::valor_int: 		
-			s(to_string(valor_int)); 
-			if(opciones.salto_linea_tras_propiedad) nl();
+			coma(to_string(valor_int)); 
 		break;
 		case tipos::valor_float: 	
-			s(to_string(valor_float)); 
-			if(opciones.salto_linea_tras_propiedad) nl();
+			coma(to_string(valor_float)); 
 		break;
 		case tipos::valor_bool: 	
-			s(valor_bool ? "true" : "false"); 
-			if(opciones.salto_linea_tras_propiedad) nl();
+			coma(valor_bool ? "true" : "false"); 
 		break;
 	}
 
 	if(!recursividad && opciones.aplanar_primer_nodo_compuesto && resultado.size() > 2)
 	{
-//		resultado=resultado.substr(0, resultado.size() - 2);
+		//Quitar última coma y primera llave.
+		resultado=resultado.substr(0, resultado.size() - 1);
 	}
 
 	return resultado;
