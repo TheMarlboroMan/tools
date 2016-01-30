@@ -1,0 +1,8 @@
+nodo:[
+	{
+		valor_string:"Esto es una cadena", lista:[1, "Borrar", 2,3,4,5.5]
+	},
+	{
+		bool_cambiar:true, cosa:33
+	}
+]

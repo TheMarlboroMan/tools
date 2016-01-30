@@ -73,6 +73,20 @@ Dnot_token::Dnot_token(const std::string& v)
 
 }
 
+Dnot_token::Dnot_token(const char * v)
+	:tipo(tipos::valor_string), 
+	valor_string(v), valor_int(0), valor_float(0.f), valor_bool(false)
+{
+
+}
+
+Dnot_token::Dnot_token(const char v)
+	:tipo(tipos::valor_string), 
+	valor_string(), valor_int(0), valor_float(0.f), valor_bool(false)
+{
+	valor_string+=v;
+}
+
 Dnot_token::Dnot_token(int v)
 	:tipo(tipos::valor_int),
 	valor_string(""), valor_int(v), valor_float(0.f), valor_bool(false)
@@ -223,81 +237,73 @@ std::string Dnot_token::serializar(const Dnot_token_opciones_serializador& opcio
 	using namespace std;
 #endif
 
-	auto tab=[&resultado, &opciones, recursividad]()
-	{
-//		if(opciones.tabular_tras_salto_linea)
-//		{
-			for(int i=0; i<recursividad; ++i) resultado+="\t";
-//opciones.tabulador;
-//		}
-	};	
+	size_t tot=0, cur=0;
 
-	auto nl=[&resultado, &opciones, recursividad, &tab]()
+	auto nl=[&resultado, &opciones](int rec)
 	{
 		resultado+="\n";
+		for(int i=0; i<rec; ++i) 
+		{
+			resultado+=opciones.tabulador;
+		}
 	};
 
-	auto s=[&resultado](const std::string& c)
-	{
-		resultado+=c;
-	};	
 
-	auto coma=[&resultado](const std::string& c)
+	auto abre=[&resultado, &nl, &opciones](tipos tipo, int rec)
 	{
-		resultado+=c+",";
+		if(rec < 1) return;
+		resultado+=tipo==tipos::lista ? "[" : "{";
+		if(opciones.tabular_profundidad) nl(rec);
 	};
 
+	auto cierra=[&resultado, &nl, &opciones](tipos tipo, int rec)
+	{
+		if(rec < 1) return;
+		if(opciones.tabular_profundidad) nl(rec-1);
+		resultado+=tipo==tipos::lista ? "]" : "}";
+	};
 
 	switch(tipo)
 	{
 		case tipos::lista: 
-			s("[");
-			nl();
-			++recursividad;
-			tab();
-			for(const auto& e : lista) 
-			{
-				s(e.serializar(opciones, recursividad));
-			}
-			resultado.pop_back();
-			coma("]");
-			--recursividad;
-			nl();
-			tab();
-		break;
-		case tipos::compuesto: 
-			s("{");
-			nl();
-			++recursividad;
-			tab();
-			for(const auto& e : tokens) 
-			{
-				s(e.first+":"+e.second.serializar(opciones, recursividad));
-			}
-			resultado.pop_back();
-			coma("}");
-			--recursividad;
-			nl();
-			tab();
-		break;
-		case tipos::valor_string: 	
-			coma("\""+valor_string+"\"");
-		break;
-		case tipos::valor_int: 		
-			coma(to_string(valor_int)); 
-		break;
-		case tipos::valor_float: 	
-			coma(to_string(valor_float)); 
-		break;
-		case tipos::valor_bool: 	
-			coma(valor_bool ? "true" : "false"); 
-		break;
-	}
+		case tipos::compuesto:
 
-	if(!recursividad && opciones.aplanar_primer_nodo_compuesto && resultado.size() > 2)
-	{
-		//Quitar última coma y primera llave.
-		resultado=resultado.substr(0, resultado.size() - 1);
+			cur=0;
+			tot=tipo==tipos::lista ? lista.size()-1 : tokens.size()-1;
+
+			abre(tipo, recursividad);
+			switch(tipo)
+			{ 
+				case tipos::lista:
+					for(const auto& e : lista) 
+					{
+						resultado+=e.serializar(opciones, recursividad+1);
+						if(cur++!=tot) resultado+=", ";
+					}
+				break;
+				case tipos::compuesto:
+					for(const auto& e : tokens) 
+					{
+						resultado+=e.first+":"+e.second.serializar(opciones, recursividad+1);
+						if(cur++!=tot) resultado+=", ";
+					}
+				break;
+			}
+			cierra(tipo, recursividad);
+
+		break;
+		case tipos::valor_string: 
+			resultado+="\""+valor_string+"\"";
+		break;
+		case tipos::valor_int: 
+			resultado+=to_string(valor_int);
+		break;
+		case tipos::valor_float:
+			resultado+=to_string(valor_float);
+		break;
+		case tipos::valor_bool:
+			resultado+=valor_bool ? "true" : "false";
+		break;
 	}
 
 	return resultado;

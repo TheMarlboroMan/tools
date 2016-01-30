@@ -25,18 +25,10 @@ class Dnot_Parser;
 
 struct Dnot_token_opciones_serializador
 {
-	bool 		aplanar_primer_nodo_compuesto,
-			salto_linea_en_lista,
-			salto_linea_en_compuesto,
-			salto_linea_tras_propiedad,
-			tabular_tras_salto_linea;
+	bool 		tabular_profundidad;
 	std::string	tabulador;
 	Dnot_token_opciones_serializador()
-		:aplanar_primer_nodo_compuesto(true),
-		salto_linea_en_lista(true),
-		salto_linea_en_compuesto(true),
-		salto_linea_tras_propiedad(false),
-		tabular_tras_salto_linea(true),
+		:tabular_profundidad(false),
 		tabulador("\t")
 	{}
 };
@@ -47,6 +39,7 @@ class Dnot_token
 
 	std::string				serializar(const Dnot_token_opciones_serializador& = Dnot_token_opciones_serializador(), int=0) const;
 
+	typedef					std::pair<std::string, Dnot_token> par_mapa;
 	typedef 				std::map<std::string, Dnot_token> t_mapa;
 	typedef					std::vector<Dnot_token> t_vector;
 
@@ -110,6 +103,8 @@ class Dnot_token
 
 						Dnot_token();
 						explicit Dnot_token(const std::string& v);
+						explicit Dnot_token(const char *);
+						explicit Dnot_token(const char);
 						explicit Dnot_token(int v);
 						explicit Dnot_token(float v);
 						explicit Dnot_token(bool v);
