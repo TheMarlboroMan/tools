@@ -272,22 +272,21 @@ std::string Dnot_token::serializar(const Dnot_token_opciones_serializador& opcio
 			tot=tipo==tipos::lista ? lista.size()-1 : tokens.size()-1;
 
 			abre(tipo, recursividad);
-			switch(tipo)
-			{ 
-				case tipos::lista:
-					for(const auto& e : lista) 
-					{
-						resultado+=e.serializar(opciones, recursividad+1);
-						if(cur++!=tot) resultado+=", ";
-					}
-				break;
-				case tipos::compuesto:
-					for(const auto& e : tokens) 
-					{
-						resultado+=e.first+":"+e.second.serializar(opciones, recursividad+1);
-						if(cur++!=tot) resultado+=", ";
-					}
-				break;
+			if(tipo==tipos::lista)
+			{
+				for(const auto& e : lista) 
+				{
+					resultado+=e.serializar(opciones, recursividad+1);
+					if(cur++!=tot) resultado+=", ";
+				}
+			}
+			else if(tipo==tipos::compuesto)
+			{
+				for(const auto& e : tokens) 
+				{
+					resultado+=e.first+":"+e.second.serializar(opciones, recursividad+1);
+					if(cur++!=tot) resultado+=", ";
+				}
 			}
 			cierra(tipo, recursividad);
 

@@ -1,3 +1,4 @@
+#include <fstream>
 #include "../class/dnot_parser.cpp"
 #include "../class/dnot_token.cpp"
 
@@ -32,6 +33,16 @@ int main(int argc, char ** argv)
 	std::cout<<std::endl<<std::endl;
 	std::cout<<"===== DOCUMENTO MODIFICADO ====="<<std::endl;
 	std::cout<<tok.serializar();
+
+	std::ofstream salida("dnot_cambiado.dnot");
+	salida<<tok.serializar();
+	salida.close();
+
+	auto tok2=parsear_dnot("dnot_cambiado.dnot");
+	std::cout<<std::endl<<std::endl;
+	std::cout<<"===== DOCUMENTO GUARDADO Y LEIDO ====="<<std::endl;
+	std::cout<<tok2.serializar();
+	std::cout<<std::endl<<std::endl;
 
 	return 1;
 
