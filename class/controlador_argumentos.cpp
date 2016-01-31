@@ -37,8 +37,9 @@ const Controlador_argumentos::t_argumento Controlador_argumentos::acc_argumento(
 	}
 	catch (...)
 	{
-		std::cout<<"Controlador_argumentos::se intentó acceder a un argumento no existente"<<std::endl;
-		return t_argumento("ERROR");
+		throw Controlador_argumentos_exception("se intentó acceder a un argumento inexistente");
+//		std::cout<<"Controlador_argumentos::se intentó acceder a un argumento no existente"<<std::endl;
+//		return t_argumento("ERROR");
 	}
 }
 
