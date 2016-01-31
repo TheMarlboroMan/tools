@@ -21,6 +21,7 @@ $(DIR_O)compositor_vista.o\
 $(DIR_O)controlador_argumentos.o\
 $(DIR_O)localizador_base.o\
 $(DIR_O)fichero_pares.o\
+$(DIR_O)ficheros_utilidades.o\
 $(DIR_O)string_utilidades.o\
 $(DIR_O)menu_opciones.o
 	@echo Objetos generados.
@@ -122,6 +123,11 @@ $(DIR_O)string_utilidades.o \
 $(DIR_HERRAMIENTAS_PROYECTO)fichero_pares.h \
 $(DIR_HERRAMIENTAS_PROYECTO)fichero_pares.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)fichero_pares.cpp -o $(DIR_O)fichero_pares.o
+
+$(DIR_O)ficheros_utilidades.o :\
+$(DIR_SOURCE)ficheros_utilidades.h \
+$(DIR_SOURCE)ficheros_utilidades.cpp
+	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_SOURCE)ficheros_utilidades.cpp -o $(DIR_O)ficheros_utilidades.o
 
 $(DIR_O)string_utilidades.o :\
 $(DIR_O)lector_txt.o \
