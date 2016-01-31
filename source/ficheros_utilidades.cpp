@@ -17,7 +17,7 @@ std::string Herramientas_proyecto::volcar_fichero(const std::string& c)
 	{
 		if(f.eof()) break;
 		std::getline(f, lin);
-		res+=lin;
+		res+=lin+"\n";
 	}
 
 	return res;
