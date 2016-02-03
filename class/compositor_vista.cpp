@@ -70,6 +70,11 @@ void Compositor_vista::mapear_textura(const std::string& clave, DLibV::Textura *
 	mapa_texturas[clave]=tex;
 }
 
+void Compositor_vista::mapear_textura(const std::string& clave, DLibV::Textura& tex)
+{
+	mapear_textura(clave, &tex);
+}
+
 /**
 * Recibe una superficie y la mapea a una clave para poder usarla en diversas 
 * representaciones. No hace copia de la superficie: en su lugar se requiere que 
@@ -86,6 +91,11 @@ void Compositor_vista::mapear_superficie(const std::string& clave, DLibV::Superf
 	mapa_superficies[clave]=sup;
 }
 
+void Compositor_vista::mapear_superficie(const std::string& clave, DLibV::Superficie& sup)
+{
+	mapear_superficie(clave, &sup);
+}
+
 void Compositor_vista::mapear_fuente(const std::string& clave, const DLibV::Fuente_TTF * fuente)
 {
 	if(mapa_fuentes.count(clave))
@@ -94,6 +104,11 @@ void Compositor_vista::mapear_fuente(const std::string& clave, const DLibV::Fuen
 	}
 	
 	mapa_fuentes[clave]=fuente;
+}
+
+void Compositor_vista::mapear_fuente(const std::string& clave, const DLibV::Fuente_TTF& fuente)
+{
+	mapear_fuente(clave, &fuente);
 }
 
 DLibV::Representacion * Compositor_vista::obtener_por_id(const std::string& id)

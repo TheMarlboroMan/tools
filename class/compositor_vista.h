@@ -49,8 +49,11 @@ class Compositor_vista
 	void			volcar(DLibV::Pantalla&);
 	void			volcar(DLibV::Pantalla&, const DLibV::Camara&);
 	void			mapear_textura(const std::string&, DLibV::Textura *);
+	void			mapear_textura(const std::string&, DLibV::Textura&);
 	void			mapear_superficie(const std::string&, DLibV::Superficie *);
+	void			mapear_superficie(const std::string&, DLibV::Superficie&);
 	void			mapear_fuente(const std::string&, const DLibV::Fuente_TTF *);
+	void			mapear_fuente(const std::string&, const DLibV::Fuente_TTF&);
 	void			vaciar_vista();
 	DLibV::Representacion * obtener_por_id(const std::string&);
 
