@@ -115,7 +115,7 @@ DLibV::Representacion * Compositor_vista::obtener_por_id(const std::string& id)
 {
 	try
 	{
-		return mapa_ids[id];
+		return mapa_ids.at(id);
 	}
 	catch(std::exception& e)
 	{
