@@ -113,8 +113,19 @@ void Compositor_vista::mapear_fuente(const std::string& clave, const DLibV::Fuen
 
 DLibV::Representacion * Compositor_vista::obtener_por_id(const std::string& id)
 {
-	if(mapa_ids[id]) return mapa_ids[id];
-	else return nullptr;
+	try
+	{
+		return mapa_ids[id];
+	}
+	catch(std::exception& e)
+	{
+		throw std::runtime_error("La clave "+id+" no existe en la vista. ¿Está la vista montada?");
+	}
+}
+
+bool Compositor_vista::existe_id(const std::string& id) const
+{
+	return mapa_ids.count(id);
 }
 
 /**

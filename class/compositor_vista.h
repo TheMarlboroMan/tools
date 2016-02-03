@@ -56,6 +56,7 @@ class Compositor_vista
 	void			mapear_fuente(const std::string&, const DLibV::Fuente_TTF&);
 	void			vaciar_vista();
 	DLibV::Representacion * obtener_por_id(const std::string&);
+	bool			existe_id(const std::string&) const;
 
 	private:
 
