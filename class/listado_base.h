@@ -25,7 +25,7 @@ class Listado_base
 		estructura_paginacion.establecer_total_elementos(estructura_paginacion.acc_total_elementos()+1);
 	}
 
-	void					size() const 
+	size_t					size() const 
 	{
 		return lineas.size();
 	}
