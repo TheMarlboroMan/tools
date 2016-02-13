@@ -196,7 +196,7 @@ class Menu_opciones
 			if(!selecciones.size()) throw Menu_opciones_exception(msj);
 		}
 
-		void				insertar_seleccion(const Tclave& clave, const std::string& valor, const std::string& nombre)
+		void				insertar_seleccion(const Tclave& clave, const Tvalor& valor, const std::string& nombre)
 		{
 			if(!selecciones.size()) clave_actual=clave;
 			selecciones[clave]={valor, nombre};
@@ -279,7 +279,7 @@ class Menu_opciones
 
 	//Para rotatorias representadas como string.
 	template<typename Tvalor>
-	void		insertar_opcion_templated(const Tclave& clave, const Tvalor& nombre)
+	void		insertar_opcion_templated(const Tclave& clave, const std::string& nombre)
 	{
 		comprobar_clave_unica(clave);
 		opciones.insert(std::pair<Tclave, uptr_base>(clave, uptr_base(new Opcion_menu_templated<Tvalor>(nombre))));
@@ -414,8 +414,7 @@ void menu_opciones_desde_dnot(
 	const std::string& filename, 
 	const std::string& root, 
 	Menu_opciones<Tclave>& opciones_menu, 
-	std::map<Tclave, int>& mapa_traducciones, 
-	Tclave defecto)
+	std::map<Tclave, int>& mapa_traducciones)
 {
 	const auto parser=parsear_dnot(filename);
 	const auto opciones=parser[root].acc_lista();
@@ -424,16 +423,34 @@ void menu_opciones_desde_dnot(
 	{
 		const std::string k_opcion=opcion["c"];
 		mapa_traducciones[k_opcion]=opcion["t"];
-		//Bufff... Ese "template" está para que el compilador no se grille: es el "template disambiguator", 
-		//que ayuda a saber que es un método templatizado y no una propiedad seguida de "menor que".
-		opciones_menu.template insertar_opcion_templated<Tclave>(k_opcion, defecto);
 
-		const auto& selecciones=opcion["o"].acc_lista();
-		for(const auto& seleccion : selecciones)
+		const std::string tipo_menu=opcion["m"];
+
+		if(tipo_menu=="templated")
 		{
-			const std::string k_seleccion=seleccion["c"];
-			mapa_traducciones[k_seleccion]=seleccion["t"];
-			opciones_menu.template insertar_seleccion_templated<std::string>(k_opcion, k_seleccion, defecto, seleccion["v"]);
+			//Bufff... Ese "template" está para que el compilador no se grille: es el "template disambiguator", 
+			//que ayuda a saber que es un método templatizado y no una propiedad seguida de "menor que".
+
+			const std::string mt=opcion["mt"];
+			if(mt=="string") opciones_menu.template insertar_opcion_templated<std::string>(k_opcion, "-");
+			else if(mt=="int") opciones_menu.template insertar_opcion_templated<int>(k_opcion, "-");
+			else if(mt=="bool") opciones_menu.template insertar_opcion_templated<bool>(k_opcion, "-");
+			else throw std::runtime_error("Modo template desconocido "+mt+" al montar menú");
+
+			const auto& selecciones=opcion["o"].acc_lista();
+			for(const auto& seleccion : selecciones)
+			{
+				const std::string k_seleccion=seleccion["c"];
+				mapa_traducciones[k_seleccion]=seleccion["t"];
+
+				if(mt=="string") opciones_menu.template insertar_seleccion_templated<std::string>(k_opcion, k_seleccion, "-", seleccion["v"]);
+				else if(mt=="int") opciones_menu.template insertar_seleccion_templated<int>(k_opcion, k_seleccion, "-", seleccion["v"]); 
+				else if(mt=="bool") opciones_menu.template insertar_seleccion_templated<bool>(k_opcion, k_seleccion, "-", seleccion["v"]);
+			}
+		}
+		else if(tipo_menu=="int")
+		{
+
 		}
 	}
 }
