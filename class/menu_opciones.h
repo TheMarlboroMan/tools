@@ -3,6 +3,7 @@
 
 #include <iostream>
 
+#include <type_traits>
 #include <string>
 #include <map>
 #include <vector>
@@ -87,15 +88,13 @@ class Menu_opciones
 
 	private:
 
-	enum class tipos			{tstring, tint};
+	enum class tipos			{ttemplated, tint};
 
 	struct Base_seleccion
 	{
 		std::string 				nombre;
 
 		virtual	std::string		valor_visible() const=0;
-		virtual std::string		valor_string() const {return "";}
-		virtual int			valor_int() const {return 0;}
 		virtual tipos			tipo() const=0;
 		virtual void			rotar(int)=0;
 		virtual void			traducir(const struct_traduccion& t)=0;
@@ -104,20 +103,22 @@ class Menu_opciones
 
 	typedef std::unique_ptr<Base_seleccion>				uptr_base;
 
-	//Opción del menú de tipo string, rotatoria.
-	struct Opcion_menu_string:public Base_seleccion
+	//Estructura para un valor del tipo Tvalor, representado como string.
+	//Es un template.
+	template<typename Tvalor>
+	struct Opcion_menu_templated:public Base_seleccion
 	{
 		//El tipo de una selección de menú de tipo string.
-		struct Seleccion_menu_string
+		struct Seleccion_menu_templated
 		{		
-			std::string			valor, 
-							nombre;
+			Tvalor				valor;
+			std::string			nombre; 
 		};
 
-		std::map<Tclave, Seleccion_menu_string>	selecciones;
+		std::map<Tclave, Seleccion_menu_templated>	selecciones;
 		Tclave					clave_actual;
 
-		virtual std::string			valor_string() const 
+		Tvalor					obtener_valor() const 
 		{
 			comprobar_opciones_existen("La opción no tiene selecciones para valor_string");
 			return selecciones.at(clave_actual).valor;
@@ -127,7 +128,8 @@ class Menu_opciones
 			comprobar_opciones_existen("La opción no tiene selecciones para valor_visible");
 			return selecciones.at(clave_actual).nombre;
 		}
-		virtual tipos				tipo() const {return tipos::tstring;}
+
+		virtual tipos				tipo() const {return tipos::ttemplated;}
 
 		virtual void 				rotar(int dir)
 		{
@@ -212,7 +214,8 @@ class Menu_opciones
 				t.reemplazar(seleccion.first, seleccion.second.nombre);
 			}
 		}
-						Opcion_menu_string(const std::string& n):Base_seleccion(n), clave_actual() {}
+
+		Opcion_menu_templated(const std::string& n):Base_seleccion(n), clave_actual() {}
 	};
 
 	//Estructura para la selección de un valor de enteros.
@@ -230,7 +233,7 @@ class Menu_opciones
 
 			return to_string(val.actual());
 		}
-		virtual int			valor_int() const {return val.actual();}
+		virtual int			obtener_valor() const {return val.actual();}
 		virtual tipos			tipo() const {return tipos::tint;}
 		virtual void			rotar(int d){val+=d;}
 		virtual void			traducir(const struct_traduccion& t){}
@@ -261,12 +264,6 @@ class Menu_opciones
 
 	public:
 
-	void		insertar_opcion_string(const Tclave& clave, const std::string& nombre)
-	{
-		comprobar_clave_unica(clave);
-		opciones.insert(std::pair<Tclave, uptr_base>(clave, uptr_base(new Opcion_menu_string(nombre))));
-	}
-
 	void		insertar_opcion_int(const Tclave& clave, const std::string& nombre, int min, int max, int act)
 	{
 		comprobar_clave_unica(clave);
@@ -279,21 +276,67 @@ class Menu_opciones
 		opciones.erase(clave);
 	}
 
-	void		insertar_seleccion_string(const Tclave& clave_opcion, const Tclave& clave_seleccion, const std::string& nombre, const std::string& valor)
+	//Para rotatorias representadas como string.
+	template<typename Tvalor>
+	void		insertar_opcion_templated(const Tclave& clave, const Tvalor& nombre)
+	{
+		comprobar_clave_unica(clave);
+		opciones.insert(std::pair<Tclave, uptr_base>(clave, uptr_base(new Opcion_menu_templated<Tvalor>(nombre))));
+	}
+
+	template<typename Tvalor>
+	void		insertar_seleccion_templated(const Tclave& clave_opcion, const Tclave& clave_seleccion, const std::string& nombre, const Tvalor& valor)
 	{
 		comprobar_clave_unica(clave_seleccion);
 		comprobar_opcion_existe(clave_opcion, "La clave no existe para insertar seleccion "+nombre+" en selecciones");
 		auto& o=opciones.at(clave_opcion);
-		validar_tipo(o->tipo(), tipos::tstring, "Insertar_seleccion_string : opción no es tipo string");
-		static_cast<Opcion_menu_string *>(o.get())->insertar_seleccion(clave_seleccion, valor, nombre);
+		validar_tipo(o->tipo(), tipos::ttemplated, "Insertar_seleccion_string : opción no es tipo templated");
+		static_cast<Opcion_menu_templated<Tvalor> *>(o.get())->insertar_seleccion(clave_seleccion, valor, nombre);
 	}
 
-	void		eliminar_seleccion_string(const Tclave& clave_opcion, const Tclave& clave_seleccion)
+	template<typename Tvalor>
+	void		eliminar_seleccion_templated(const Tclave& clave_opcion, const Tclave& clave_seleccion)
 	{
 		comprobar_opcion_existe(clave_opcion, "La clave no existe para eliminar seleccion en selecciones");
 		auto& o=opciones.at(clave_opcion);
-		validar_tipo(o->tipo(), tipos::tstring, "Eliminar_seleccion_string : opción no es de tipo string");
-		static_cast<Opcion_menu_string *>(o.get())->eliminar_seleccion(clave_seleccion);
+		validar_tipo(o->tipo(), tipos::ttemplated, "Eliminar_seleccion_string : opción no es tipo templated");
+		static_cast<Opcion_menu_templated<Tvalor> *>(o.get())->eliminar_seleccion(clave_seleccion);
+	}
+
+	template<typename Tvalor>
+	void		asignar_por_clave_templated(const Tclave& clave_opcion, const Tclave& clave_seleccion)
+	{
+		comprobar_opcion_existe(clave_opcion, "La clave no existe para seleccionar opción");
+		auto& o=opciones.at(clave_opcion);
+		validar_tipo(o->tipo(), tipos::ttemplated, "seleccionar_opcion_string : opción no es tipo templated");
+		static_cast<Opcion_menu_templated<Tvalor> *>(o.get())->seleccionar_opcion(clave_seleccion);
+	}
+
+	template<typename Tvalor>
+	void		asignar_por_valor_templated(const Tclave& clave_opcion, const Tvalor& valor_seleccion)
+	{
+		comprobar_opcion_existe(clave_opcion, "La clave no existe para seleccionar opción");
+		auto& o=opciones.at(clave_opcion);
+		validar_tipo(o->tipo(), tipos::ttemplated, "asignar_por_valor : opción no es tipo templated");
+		static_cast<Opcion_menu_templated<Tvalor> *>(o.get())->asignar_por_valor(valor_seleccion);
+	}
+
+	template<typename Tvalor>
+	Tvalor		valor_templated(const Tclave& clave) const
+	{
+		comprobar_opcion_existe(clave, "La clave no existe para obtener_valor");
+		const auto& o=opciones.at(clave);
+		validar_tipo(o->tipo(), tipos::ttemplated, "valor_opcion : opción no es tipo templated");
+		return static_cast<Opcion_menu_templated<Tvalor> *>(o.get())->obtener_valor();
+	}
+
+	template<typename Tvalor>
+	size_t		size_opcion_templated(const Tclave& clave) const
+	{
+		comprobar_opcion_existe(clave, "La clave no existe para size_opcion");
+		auto& o=opciones.at(clave);
+		validar_tipo(o->tipo(), tipos::ttemplated, "size_opcion_string : opción no es tipo templated");
+		return static_cast<Opcion_menu_templated<Tvalor> *>(o.get())->size();
 	}
 
 	void		rotar_opcion(const Tclave& clave, int dir)
@@ -302,29 +345,23 @@ class Menu_opciones
 		opciones.at(clave)->rotar(dir);
 	}
 
-	size_t		size_opcion_string(const Tclave& clave) const
-	{
-		comprobar_opcion_existe(clave, "La clave no existe para size_opcion");
-		auto& o=opciones.at(clave);
-		validar_tipo(o->tipo(), tipos::tstring, "size_opcion_string : opción no es de tipo string");
-		return static_cast<Opcion_menu_string *>(o.get())->size();
-	}
-
-	std::string	valor_string(const Tclave& clave) const
-	{
-		comprobar_opcion_existe(clave, "La clave no existe para obtener_valor");
-		const auto& o=opciones.at(clave);
-		validar_tipo(o->tipo(), tipos::tstring, "valor_opcion : opción no es de tipo string");
-		return o->valor_string();
-	}
-
+	//Para el tipo int.
 	int	valor_int(const Tclave& clave) const
 	{
 		comprobar_opcion_existe(clave, "La clave no existe para obtener_valor");
 		const auto& o=opciones.at(clave);
 		validar_tipo(o->tipo(), tipos::tint, "valor_opcion : opción no es de tipo int");
-		return o->valor_int();
+		return static_cast<Opcion_menu_int *>(o.get())->obtener_valor();
 	}
+
+	void	asignar_por_valor_int(const Tclave& clave_opcion, int valor_seleccion)
+	{
+		comprobar_opcion_existe(clave_opcion, "La clave no existe para seleccionar opción");
+		auto& o=opciones.at(clave_opcion);
+		validar_tipo(o->tipo(), tipos::tint, "asignar_por_valor : opción no es tipo int");
+		static_cast<Opcion_menu_int *>(o.get())->val=valor_seleccion;
+	}
+
 
 	std::string	nombre_opcion(const Tclave& clave) const
 	{
@@ -355,33 +392,7 @@ class Menu_opciones
 	size_t		size() const
 	{
 		return opciones.size();
-	}
-	
-	//Sólo para tipo string.
-	void		asignar_por_clave_string(const Tclave& clave_opcion, const Tclave& clave_seleccion)
-	{
-		comprobar_opcion_existe(clave_opcion, "La clave no existe para seleccionar opción");
-		auto& o=opciones.at(clave_opcion);
-		validar_tipo(o->tipo(), tipos::tstring, "seleccionar_opcion_string : opción no es de tipo string");
-		static_cast<Opcion_menu_string *>(o.get())->seleccionar_opcion(clave_seleccion);
-	}
-
-
-	void		asignar_por_valor(const Tclave& clave_opcion, const std::string& valor_seleccion)
-	{
-		comprobar_opcion_existe(clave_opcion, "La clave no existe para seleccionar opción");
-		auto& o=opciones.at(clave_opcion);
-		validar_tipo(o->tipo(), tipos::tstring, "asignar_por_valor : opción no es de tipo string");
-		static_cast<Opcion_menu_string *>(o.get())->asignar_por_valor(valor_seleccion);
-	}
-
-	void		asignar_por_valor(const Tclave& clave_opcion, int valor_seleccion)
-	{
-		comprobar_opcion_existe(clave_opcion, "La clave no existe para seleccionar opción");
-		auto& o=opciones.at(clave_opcion);
-		validar_tipo(o->tipo(), tipos::tint, "asignar_por_valor : opción no es de tipo string");
-		static_cast<Opcion_menu_int *>(o.get())->val=valor_seleccion;
-	}
+	}	
 
 	std::vector<Tclave>		obtener_claves() const 
 	{
