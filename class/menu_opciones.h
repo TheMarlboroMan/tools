@@ -12,6 +12,7 @@
 #include <memory>
 
 #include "valor_limitado.h"
+#include "dnot_parser.h"
 
 #ifdef WINCOMPIL
 //Localización del parche mingw32... Esto debería estar en otro lado, supongo.
@@ -407,6 +408,35 @@ class Menu_opciones
 	mutable std::vector<Tclave>					claves;
 	std::map<Tclave, std::unique_ptr<Base_seleccion>>		opciones;
 };
+
+template<typename Tclave>
+void menu_opciones_desde_dnot(
+	const std::string& filename, 
+	const std::string& root, 
+	Menu_opciones<Tclave>& opciones_menu, 
+	std::map<Tclave, int>& mapa_traducciones, 
+	Tclave defecto)
+{
+	const auto parser=parsear_dnot(filename);
+	const auto opciones=parser[root].acc_lista();
+
+	for(const auto& opcion : opciones)
+	{
+		const std::string k_opcion=opcion["c"];
+		mapa_traducciones[k_opcion]=opcion["t"];
+		//Bufff... Ese "template" está para que el compilador no se grille: es el "template disambiguator", 
+		//que ayuda a saber que es un método templatizado y no una propiedad seguida de "menor que".
+		opciones_menu.template insertar_opcion_templated<Tclave>(k_opcion, defecto);
+
+		const auto& selecciones=opcion["o"].acc_lista();
+		for(const auto& seleccion : selecciones)
+		{
+			const std::string k_seleccion=seleccion["c"];
+			mapa_traducciones[k_seleccion]=seleccion["t"];
+			opciones_menu.template insertar_seleccion_templated<std::string>(k_opcion, k_seleccion, defecto, seleccion["v"]);
+		}
+	}
+}
 
 }
 
