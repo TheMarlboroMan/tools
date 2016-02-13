@@ -8,6 +8,14 @@
 #include <vector>
 #include <exception>
 #include <algorithm>
+#include <memory>
+
+#include "valor_limitado.h"
+
+#ifdef WINCOMPIL
+//Localización del parche mingw32... Esto debería estar en otro lado, supongo.
+#include <herramientas/herramientas/herramientas.h>
+#endif
 
 /*
 La representación interna de un menú de opciones de un único nivel en el que
@@ -17,6 +25,7 @@ menu:
 	resolución de pantalla : [800x600], [1000x1000]
 	volumen_audio : [Sin sonido, Medio, Alto]
 	idioma: [Español, Inglés, Francés, Japonés]
+	cantidad: [un número entre 1 y 99]
 
 El menu sería el primer nivel. El segundo nivel "resolución de pantalla",
 "volumen_audio" e "idioma" serían "opciones" y el último nivel serían 
@@ -42,64 +51,9 @@ Al final de este archivo hay un ejemplo de uso.
 
 Por lo general todos los métodos lanzan excepción si la clave no existe.
 
-class Menu_opciones_exception:public std::runtime_error;
-
-Estructura de traducción: podemos hacer un vector de estas y pasarlo al método
-"traducir" para que traduzca las opciones y selecciones con la clave "busca"
-con los textos "reemplaza".
-
-struct struct_traduccion
-{
-	Tclave busca;
-	std::string reemplaza;
-};
-
-Los métodos son:
-
-Inserta una opción.
-void		insertar_opcion(const Tclave& clave, const std::string& nombre);
-
-Elimina una opción por su clave.
-void		eliminar_opcion(const Tclave& clave)
-
-Crea una selección en una opción. Lanza excepción si las claves están duplicadas.
-void		insertar_seleccion_en_opcion(const Tclave& clave_opcion, const Tclave& clave_seleccion, const std::string& nombre, const Tvalor& valor)
-
-Elimina una selección de una opción.
-void		eliminar_seleccion(const Tclave& clave_opcion, const Tclave& clave_seleccion)
-
-Cambia la selección de una opción hacia adelante (dir=1) o atrás (dir=-1).
-void		rotar_opcion(const Tclave& clave, int dir)
-
-Indica la cantidad de selecciones de una opción.
-size_t		size_opcion(const Tclave& clave) const
-
-Indica el valor actual de la opción.
-Tvalor		valor_opcion(const Tclave& clave) const
-
-Indica el nombre visible de la opción.
-std::string	nombre_opcion(const Tclave& clave) const
-
-Indica el nombre visible de la selección para la opción.
-std::string	nombre_seleccion(const Tclave& clave) const
-
-Traduce el menú.
-void		traducir(const std::vector<struct_traduccion>& v)
-
-Traduce el menú.
-void		traducir(const struct_traduccion& t)
-
-Indica la cantidad de opciones.
-size_t		size() const
-
-Cambia la selección actual de una opción.
-void		seleccionar_opcion(const Tclave& clave_opcion, const Tclave& clave_seleccion)
-
-Cambia la selección actual de una opción por su valor.
-void		seleccionar_opcion_por_valor(const Tclave& clave_opcion, const Tvalor& valor_seleccion)
-
-Obtiene un vector con las claves de las opciones, sin las claves de las selecciones.
-std::vector<Tclave>		obtener_claves() const 
+//TODO: Recrear interface.
+//TODO: Recrear ejemplo.
+//TODO: Crear desde dnot.
 */
 
 namespace Herramientas_proyecto
@@ -112,29 +66,70 @@ class Menu_opciones_exception:
 	Menu_opciones_exception(const std::string& s):std::runtime_error(s) {}
 };
 
-template<typename Tvalor, typename Tclave>
+template<typename Tclave>
 class Menu_opciones
 {
-	private:
+	public:
 
-	struct Seleccion_menu
-	{		
-		Tvalor				valor;
-		std::string			nombre;
+	struct struct_traduccion
+	{
+		Tclave busca;
+		std::string reemplaza;
+
+		void reemplazar(const Tclave& clave, std::string& cad) const
+		{
+			if(clave==busca) 
+			{
+				cad=reemplaza;
+			}
+		};
 	};
 
-	struct Opcion_menu
+	private:
+
+	enum class tipos			{tstring, tint};
+
+	struct Base_seleccion
 	{
-		std::string 			nombre;
-		std::map<Tclave, Seleccion_menu>	selecciones;
-		Tclave				clave_actual;
+		std::string 				nombre;
 
-		void				comprobar_opciones_existen(const std::string& msj) const
+		virtual	std::string		valor_visible() const=0;
+		virtual std::string		valor_string() const {return "";}
+		virtual int			valor_int() const {return 0;}
+		virtual tipos			tipo() const=0;
+		virtual void			rotar(int)=0;
+		virtual void			traducir(const struct_traduccion& t)=0;
+						Base_seleccion(const std::string& n):nombre(n){}
+	};
+
+	typedef std::unique_ptr<Base_seleccion>				uptr_base;
+
+	//Opción del menú de tipo string, rotatoria.
+	struct Opcion_menu_string:public Base_seleccion
+	{
+		//El tipo de una selección de menú de tipo string.
+		struct Seleccion_menu_string
+		{		
+			std::string			valor, 
+							nombre;
+		};
+
+		std::map<Tclave, Seleccion_menu_string>	selecciones;
+		Tclave					clave_actual;
+
+		virtual std::string			valor_string() const 
 		{
-			if(!selecciones.size()) throw Menu_opciones_exception(msj);
+			comprobar_opciones_existen("La opción no tiene selecciones para valor_string");
+			return selecciones.at(clave_actual).valor;
 		}
+		virtual std::string			valor_visible() const 
+		{
+			comprobar_opciones_existen("La opción no tiene selecciones para valor_visible");
+			return selecciones.at(clave_actual).nombre;
+		}
+		virtual tipos				tipo() const {return tipos::tstring;}
 
-		void 				rotar(int dir)
+		virtual void 				rotar(int dir)
 		{
 			auto it=selecciones.find(clave_actual);
 
@@ -163,17 +158,84 @@ class Menu_opciones
 					clave_actual=sigue->first;
 				}
 			}
-
 		}
 
-		void				insertar_seleccion(const Tclave& clave, const Tvalor& valor, const std::string& nombre)
+		void 					asignar_por_valor(const std::string& valor_seleccion)
+		{
+			for(auto& seleccion : selecciones)
+			{
+				if(seleccion.second.valor==valor_seleccion) 
+				{
+					clave_actual=seleccion.first;
+					return;
+				}
+			}
+
+			throw Menu_opciones_exception("El valor no existe al asignar selección");
+		}
+
+		void					seleccionar_opcion(const Tclave& clave_seleccion)
+		{
+			if(!selecciones.count(clave_seleccion)) 
+			{
+				throw Menu_opciones_exception("La clave no existe al asignar selección");
+			}
+			else clave_actual=clave_seleccion;
+		}
+
+		size_t				size() const
+		{
+			return selecciones.size();
+		}
+
+		void				comprobar_opciones_existen(const std::string& msj) const
+		{
+			if(!selecciones.size()) throw Menu_opciones_exception(msj);
+		}
+
+		void				insertar_seleccion(const Tclave& clave, const std::string& valor, const std::string& nombre)
 		{
 			if(!selecciones.size()) clave_actual=clave;
 			selecciones[clave]={valor, nombre};
 		}
 
+		void 				eliminar_seleccion(const Tclave& clave_seleccion)
+		{
+			if(!selecciones.count(clave_seleccion)) throw Menu_opciones_exception("La clave no existe en selecciones para eliminar");
+			selecciones.erase(clave_seleccion);
+		}
 
-						Opcion_menu(const std::string& n):nombre(n), clave_actual() {}
+		virtual void			traducir(const struct_traduccion& t)
+		{
+			for(auto& seleccion : selecciones)
+			{
+				t.reemplazar(seleccion.first, seleccion.second.nombre);
+			}
+		}
+						Opcion_menu_string(const std::string& n):Base_seleccion(n), clave_actual() {}
+	};
+
+	//Estructura para la selección de un valor de enteros.
+	struct Opcion_menu_int:public Base_seleccion
+	{
+		Valor_limitado<int>		val;
+
+		virtual std::string		valor_visible() const 
+		{
+			#ifdef WINCOMPIL
+			using namespace parche_mingw;
+			#else
+			using namespace std;
+			#endif
+
+			return to_string(val.actual());
+		}
+		virtual int			valor_int() const {return val.actual();}
+		virtual tipos			tipo() const {return tipos::tint;}
+		virtual void			rotar(int d){val+=d;}
+		virtual void			traducir(const struct_traduccion& t){}
+
+		Opcion_menu_int(const std::string& n, int min, int max, int a):Base_seleccion(n), val(min, max, a) {} 
 	};
 
 	void	comprobar_opcion_existe(const Tclave& clave, const std::string& msj) const
@@ -192,19 +254,23 @@ class Menu_opciones
 		claves.push_back(clave);
 	}
 
+	void	validar_tipo(tipos ot, tipos t, const std::string& msj) const
+	{
+		if(ot!=t) throw new Menu_opciones_exception(msj);
+	}
+
 	public:
 
-	struct struct_traduccion
-	{
-		Tclave busca;
-		std::string reemplaza;
-	};
-
-
-	void		insertar_opcion(const Tclave& clave, const std::string& nombre)
+	void		insertar_opcion_string(const Tclave& clave, const std::string& nombre)
 	{
 		comprobar_clave_unica(clave);
-		opciones.insert(std::pair<Tclave, Opcion_menu>(clave, Opcion_menu(nombre)));
+		opciones.insert(std::pair<Tclave, uptr_base>(clave, uptr_base(new Opcion_menu_string(nombre))));
+	}
+
+	void		insertar_opcion_int(const Tclave& clave, const std::string& nombre, int min, int max, int act)
+	{
+		comprobar_clave_unica(clave);
+		opciones.insert(std::pair<Tclave, uptr_base>(clave, uptr_base(new Opcion_menu_int(nombre, min, max, act))));
 	}
 
 	void		eliminar_opcion(const Tclave& clave)
@@ -213,80 +279,75 @@ class Menu_opciones
 		opciones.erase(clave);
 	}
 
-	void		insertar_seleccion_en_opcion(const Tclave& clave_opcion, const Tclave& clave_seleccion, const std::string& nombre, const Tvalor& valor)
+	void		insertar_seleccion_string(const Tclave& clave_opcion, const Tclave& clave_seleccion, const std::string& nombre, const std::string& valor)
 	{
 		comprobar_clave_unica(clave_seleccion);
 		comprobar_opcion_existe(clave_opcion, "La clave no existe para insertar seleccion "+nombre+" en selecciones");
 		auto& o=opciones.at(clave_opcion);
-		o.insertar_seleccion(clave_seleccion, valor, nombre);
+		validar_tipo(o->tipo(), tipos::tstring, "Insertar_seleccion_string : opción no es tipo string");
+		static_cast<Opcion_menu_string *>(o.get())->insertar_seleccion(clave_seleccion, valor, nombre);
 	}
 
-	void		eliminar_seleccion(const Tclave& clave_opcion, const Tclave& clave_seleccion)
+	void		eliminar_seleccion_string(const Tclave& clave_opcion, const Tclave& clave_seleccion)
 	{
 		comprobar_opcion_existe(clave_opcion, "La clave no existe para eliminar seleccion en selecciones");
 		auto& o=opciones.at(clave_opcion);
-
-		if(!o.selecciones.count(clave_seleccion)) throw Menu_opciones_exception("La clave no existe en selecciones para eliminar");
-		o.selecciones.erase(clave_seleccion);
+		validar_tipo(o->tipo(), tipos::tstring, "Eliminar_seleccion_string : opción no es de tipo string");
+		static_cast<Opcion_menu_string *>(o.get())->eliminar_seleccion(clave_seleccion);
 	}
 
 	void		rotar_opcion(const Tclave& clave, int dir)
 	{
 		comprobar_opcion_existe(clave, "La clave no existe para ser rotada");
-		opciones.at(clave).rotar(dir);
+		opciones.at(clave)->rotar(dir);
 	}
 
-	size_t		size_opcion(const Tclave& clave) const
+	size_t		size_opcion_string(const Tclave& clave) const
 	{
-		comprobar_opcion_existe(clave, "La clave no existe para obtener_valor");
-		return opciones.at(clave).selecciones.size();
+		comprobar_opcion_existe(clave, "La clave no existe para size_opcion");
+		auto& o=opciones.at(clave);
+		validar_tipo(o->tipo(), tipos::tstring, "size_opcion_string : opción no es de tipo string");
+		return static_cast<Opcion_menu_string *>(o.get())->size();
 	}
 
-	Tvalor		valor_opcion(const Tclave& clave) const
+	std::string	valor_string(const Tclave& clave) const
 	{
 		comprobar_opcion_existe(clave, "La clave no existe para obtener_valor");
 		const auto& o=opciones.at(clave);
-		o.comprobar_opciones_existen("La opción no tiene selecciones para obtener valor");
-		return o.selecciones.at(o.clave_actual).valor;
+		validar_tipo(o->tipo(), tipos::tstring, "valor_opcion : opción no es de tipo string");
+		return o->valor_string();
+	}
+
+	int	valor_int(const Tclave& clave) const
+	{
+		comprobar_opcion_existe(clave, "La clave no existe para obtener_valor");
+		const auto& o=opciones.at(clave);
+		validar_tipo(o->tipo(), tipos::tint, "valor_opcion : opción no es de tipo int");
+		return o->valor_int();
 	}
 
 	std::string	nombre_opcion(const Tclave& clave) const
 	{
-		comprobar_opcion_existe(clave, "La clave no existe para obtener_valor");
-		return opciones.at(clave).nombre;
+		comprobar_opcion_existe(clave, "La clave no existe para nombre_opcion");
+		return opciones.at(clave)->nombre;
 	}
 
 	std::string	nombre_seleccion(const Tclave& clave) const
 	{
-		comprobar_opcion_existe(clave, "La clave no existe para obtener_valor");
+		comprobar_opcion_existe(clave, "La clave no existe para nombre_seleccion");
 		const auto& o=opciones.at(clave);
-		o.comprobar_opciones_existen("La opción no tiene selecciones para obtener valor");
-		return o.selecciones.at(o.clave_actual).nombre;
+		return o->valor_visible();
 	}
+
 
 	void		traducir(const std::vector<struct_traduccion>& v)
 	{
-		for(const auto& t : v) traducir(t); 
-	}
-
-	void		traducir(const struct_traduccion& t)
-	{
-		const auto busca=t.busca, reemplaza=t.reemplaza;
-
-		auto reemplazar=[&busca, &reemplaza](const Tclave& clave, std::string& cad)
+		for(const auto& t : v) 
 		{
-			if(clave==busca) 
+			for(auto& opcion : opciones)
 			{
-				cad=reemplaza;
-			}
-		};
-
-		for(auto& opcion : opciones)
-		{
-			reemplazar(opcion.first, opcion.second.nombre);
-			for(auto& seleccion : opcion.second.selecciones)
-			{
-				reemplazar(seleccion.first, seleccion.second.nombre);
+				t.reemplazar(opcion.first, opcion.second->nombre);
+				opcion.second->traducir(t);
 			}
 		}
 	}
@@ -296,32 +357,30 @@ class Menu_opciones
 		return opciones.size();
 	}
 	
-	void		seleccionar_opcion(const Tclave& clave_opcion, const Tclave& clave_seleccion)
+	//Sólo para tipo string.
+	void		asignar_por_clave_string(const Tclave& clave_opcion, const Tclave& clave_seleccion)
 	{
 		comprobar_opcion_existe(clave_opcion, "La clave no existe para seleccionar opción");
-		auto& opcion=opciones.at(clave_opcion);
-		if(!opcion.selecciones.count(clave_seleccion)) 
-		{
-			throw Menu_opciones_exception("La clave no existe al asignar selección");
-		}
-		else opcion.clave_actual=clave_seleccion;		
+		auto& o=opciones.at(clave_opcion);
+		validar_tipo(o->tipo(), tipos::tstring, "seleccionar_opcion_string : opción no es de tipo string");
+		static_cast<Opcion_menu_string *>(o.get())->seleccionar_opcion(clave_seleccion);
 	}
 
-	void		seleccionar_opcion_por_valor(const Tclave& clave_opcion, const Tvalor& valor_seleccion)
+
+	void		asignar_por_valor(const Tclave& clave_opcion, const std::string& valor_seleccion)
 	{
 		comprobar_opcion_existe(clave_opcion, "La clave no existe para seleccionar opción");
-		auto& opcion=opciones.at(clave_opcion);
+		auto& o=opciones.at(clave_opcion);
+		validar_tipo(o->tipo(), tipos::tstring, "asignar_por_valor : opción no es de tipo string");
+		static_cast<Opcion_menu_string *>(o.get())->asignar_por_valor(valor_seleccion);
+	}
 
-		for(auto& seleccion : opcion.selecciones)
-		{
-			if(seleccion.second.valor==valor_seleccion) 
-			{
-				opcion.clave_actual=seleccion.first;
-				return;
-			}
-		}
-
-		throw Menu_opciones_exception("El valor no existe al asignar selección");
+	void		asignar_por_valor(const Tclave& clave_opcion, int valor_seleccion)
+	{
+		comprobar_opcion_existe(clave_opcion, "La clave no existe para seleccionar opción");
+		auto& o=opciones.at(clave_opcion);
+		validar_tipo(o->tipo(), tipos::tint, "asignar_por_valor : opción no es de tipo string");
+		static_cast<Opcion_menu_int *>(o.get())->val=valor_seleccion;
 	}
 
 	std::vector<Tclave>		obtener_claves() const 
@@ -334,8 +393,8 @@ class Menu_opciones
 
 	private:
 
-	mutable std::vector<Tclave>		claves;
-	std::map<Tclave, Opcion_menu>		opciones;
+	mutable std::vector<Tclave>					claves;
+	std::map<Tclave, std::unique_ptr<Base_seleccion>>		opciones;
 };
 
 }
