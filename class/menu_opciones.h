@@ -450,7 +450,7 @@ void menu_opciones_desde_dnot(
 		}
 		else if(tipo_menu=="int")
 		{
-
+			opciones_menu.insertar_opcion_int(k_opcion, "-", opcion["min"], opcion["max"], opcion["min"]);
 		}
 	}
 }

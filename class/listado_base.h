@@ -35,8 +35,17 @@ class Listado_base
 		return lineas[v];
 	}
 
+	T&					operator[](size_t v)
+	{
+		return lineas[v];
+	}
 
 	const T&				item_actual() const 
+	{
+		return lineas[estructura_paginacion.acc_indice_actual()];
+	}
+
+	T&					item_actual()
 	{
 		return lineas[estructura_paginacion.acc_indice_actual()];
 	}
