@@ -163,7 +163,7 @@ class Menu_opciones
 			}
 		}
 
-		void 					asignar_por_valor(const std::string& valor_seleccion)
+		void 					asignar_por_valor(const Tvalor& valor_seleccion)
 		{
 			for(auto& seleccion : selecciones)
 			{
