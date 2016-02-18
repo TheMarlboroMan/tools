@@ -89,7 +89,7 @@ class Menu_opciones
 
 	private:
 
-	enum class tipos			{ttemplated, tint};
+	enum class tipos			{ttemplated, tint, tbool};
 
 	struct Base_seleccion
 	{
@@ -242,6 +242,29 @@ class Menu_opciones
 		Opcion_menu_int(const std::string& n, int min, int max, int a):Base_seleccion(n), val(min, max, a) {} 
 	};
 
+	//Estructura para la selección de un valor booleano.
+	struct Opcion_menu_bool:public Base_seleccion
+	{
+		bool				valor;	
+	
+		virtual std::string		valor_visible() const 
+		{
+			#ifdef WINCOMPIL
+			using namespace parche_mingw;
+			#else
+			using namespace std;
+			#endif
+
+			return to_string(valor);
+		}
+		virtual bool			obtener_valor() const {return valor;}
+		virtual tipos			tipo() const {return tipos::tbool;}
+		virtual void			rotar(int d){valor=!valor;}
+		virtual void			traducir(const struct_traduccion& t){}
+
+		Opcion_menu_bool(const std::string& n, bool v):Base_seleccion(n), valor(v) {} 
+	};
+
 	void	comprobar_opcion_existe(const Tclave& clave, const std::string& msj) const
 	{
 		if(!opciones.count(clave)) 
@@ -269,6 +292,12 @@ class Menu_opciones
 	{
 		comprobar_clave_unica(clave);
 		opciones.insert(std::pair<Tclave, uptr_base>(clave, uptr_base(new Opcion_menu_int(nombre, min, max, act))));
+	}
+
+	void		insertar_opcion_bool(const Tclave& clave, const std::string& nombre, bool val)
+	{
+		comprobar_clave_unica(clave);
+		opciones.insert(std::pair<Tclave, uptr_base>(clave, uptr_base(new Opcion_menu_bool(nombre, val))));
 	}
 
 	void		eliminar_opcion(const Tclave& clave)
@@ -363,6 +392,22 @@ class Menu_opciones
 		static_cast<Opcion_menu_int *>(o.get())->val=valor_seleccion;
 	}
 
+	//Para el tipo bool.
+	int	valor_bool(const Tclave& clave) const
+	{
+		comprobar_opcion_existe(clave, "La clave no existe para obtener_valor");
+		const auto& o=opciones.at(clave);
+		validar_tipo(o->tipo(), tipos::tbool, "valor_opcion : opción no es de tipo bool");
+		return static_cast<Opcion_menu_bool *>(o.get())->obtener_valor();
+	}
+
+	void	asignar_por_valor_bool(const Tclave& clave_opcion, bool valor_seleccion)
+	{
+		comprobar_opcion_existe(clave_opcion, "La clave no existe para seleccionar opción");
+		auto& o=opciones.at(clave_opcion);
+		validar_tipo(o->tipo(), tipos::tbool, "asignar_por_valor : opción no es tipo bool");
+		static_cast<Opcion_menu_bool *>(o.get())->val=valor_seleccion;
+	}
 
 	std::string	nombre_opcion(const Tclave& clave) const
 	{
