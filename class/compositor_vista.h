@@ -111,8 +111,8 @@ class Compositor_vista
 		DLibV::Representacion *		ptr;
 		int 				orden;
 
-		item(uptr_representacion&& rep, int orden=0)
-			:rep(std::move(rep)), ptr(rep.get()), orden(orden)
+		item(uptr_representacion&& r, int orden=0)
+			:rep(std::move(r)), ptr(rep.get()), orden(orden)
 		{
 
 		}
@@ -123,7 +123,7 @@ class Compositor_vista
 
 		bool operator<(const item& o) const
 		{
-			return o.orden < orden;
+			return orden < o.orden;
 		}
 
 		void volcar(DLibV::Pantalla& p)
