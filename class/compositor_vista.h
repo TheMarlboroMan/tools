@@ -84,7 +84,6 @@ class Compositor_vista
 	static const std::string		clave_estatica;
 	static const std::string		clave_pincel;
 	static const std::string		clave_visibilidad;
-	static const std::string		clave_en_camara;
 
 	struct color
 	{
@@ -105,10 +104,9 @@ class Compositor_vista
 	{
 		uptr_representacion		rep;
 		int 				orden;
-		bool				en_camara;
 
-		item(uptr_representacion&& rep, int orden=0, bool camara=true)
-			:rep(std::move(rep)), orden(orden), en_camara(camara)
+		item(uptr_representacion&& rep, int orden=0)
+			:rep(std::move(rep)), orden(orden)
 		{}
 
 		bool operator<(const item& o) const

@@ -22,7 +22,6 @@ const std::string Compositor_vista::clave_textura="textura";
 const std::string Compositor_vista::clave_estatica="estatica";
 const std::string Compositor_vista::clave_pincel="pincel";
 const std::string Compositor_vista::clave_visibilidad="visible";
-const std::string Compositor_vista::clave_en_camara="en_camara";
 
 Compositor_vista::Compositor_vista()
 	:con_pantalla(false), color_pantalla{0,0,0, 255}
@@ -52,7 +51,7 @@ void Compositor_vista::volcar(DLibV::Pantalla& p, const DLibV::Camara& cam)
 	
 	for(const auto& r : representaciones)
 	{
-		if(r.en_camara) r.rep->volcar(p, cam);
+		if(!r.rep->es_estatica()) r.rep->volcar(p, cam);
 		else r.rep->volcar(p);
 	}
 }
@@ -148,7 +147,6 @@ void Compositor_vista::parsear(const std::string& ruta, const std::string& nodo)
 		uptr_representacion ptr;
 		const auto& tipo=token[clave_tipo].acc_string(); //Si no hay tipo vamos a explotar. Correcto.
 		int orden=0;
-		bool en_camara=true;
 
 		if(tipo==clave_caja) ptr=std::move(crear_caja(token));
 		else if(tipo==clave_bitmap) ptr=std::move(crear_bitmap(token));
@@ -177,11 +175,6 @@ void Compositor_vista::parsear(const std::string& ruta, const std::string& nodo)
 		}
 
 		//Tratamiento de cosas comunes...
-		if(token.existe_clave(clave_en_camara)) 
-		{
-			en_camara=token[clave_en_camara];
-		}
-
 		if(token.existe_clave(clave_alpha))
 		{
 			ptr->establecer_modo_blend(DLibV::Representacion::BLEND_ALPHA);
@@ -212,7 +205,7 @@ void Compositor_vista::parsear(const std::string& ruta, const std::string& nodo)
 		}
 
 		//Y finalmente insertamos.
-		representaciones.push_back(item(std::move(ptr), orden, en_camara));
+		representaciones.push_back(item(std::move(ptr), orden));
 	}
 
 	std::sort(std::begin(representaciones), std::end(representaciones));
