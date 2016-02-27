@@ -24,6 +24,7 @@ const std::string Compositor_vista::clave_pincel="pincel";
 const std::string Compositor_vista::clave_visibilidad="visible";
 const std::string Compositor_vista::clave_externa="externa";
 const std::string Compositor_vista::clave_ref_externa="ref";
+const std::string Compositor_vista::clave_rotacion="rotacion";
 
 Compositor_vista::Compositor_vista()
 	:con_pantalla(false), color_pantalla{0,0,0, 255}
@@ -201,6 +202,23 @@ void Compositor_vista::parsear(const std::string& ruta, const std::string& nodo)
 		if(token.existe_clave(clave_estatica))
 		{
 			ptr->hacer_estatica();
+		}
+
+		if(token.existe_clave(clave_rotacion))
+		{
+			if(tipo==clave_caja)
+			{
+				throw std::runtime_error("La rotación sólo es aplicable a representaciones gráficas");
+			}
+			else
+			{
+				auto valores=token[clave_rotacion].acc_lista();
+				if(valores.size()!=3) throw std::runtime_error("La rotación recibe tres parámetros exactamente");
+
+				auto * rrot=static_cast<DLibV::Representacion_grafica *>(ptr.get());
+				rrot->transformar_rotar((int)valores[0]);
+				rrot->transformar_centro_rotacion((int)valores[1], (int)valores[2]);
+			}
 		}
 
 		if(token.existe_clave(clave_visibilidad))

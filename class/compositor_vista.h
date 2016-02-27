@@ -87,6 +87,7 @@ class Compositor_vista
 	static const std::string		clave_visibilidad;
 	static const std::string		clave_externa;
 	static const std::string		clave_ref_externa;
+	static const std::string		clave_rotacion;
 
 	struct color
 	{
