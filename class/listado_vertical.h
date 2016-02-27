@@ -85,6 +85,16 @@ class Listado_vertical:public Listado_base<T>
 	size_t					acc_h_item() const	{return h_item;}
 	size_t					acc_margen_h() const	{return margen_h;}
 	void					mut_margen_h(size_t v) {margen_h=v;}
+	void					mut_h_disponible(size_t v) 
+	{
+		h_disponible=v;
+		this->estructura_paginacion.establecer_registros_por_pagina(floor(h_disponible / h_item));
+	}
+	void					mut_h_item(size_t v) 
+	{
+		h_item=v;
+		this->estructura_paginacion.establecer_registros_por_pagina(floor(h_disponible / h_item));
+	}
 
 	private:
 

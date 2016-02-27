@@ -7,6 +7,7 @@ const std::string Compositor_vista::clave_bitmap="bitmap";
 const std::string Compositor_vista::clave_ttf="ttf";
 const std::string Compositor_vista::clave_patron="patron";
 const std::string Compositor_vista::clave_pantalla="pantalla";
+const std::string Compositor_vista::clave_constante="const";
 const std::string Compositor_vista::clave_alpha="alpha";
 const std::string Compositor_vista::clave_orden="orden";
 const std::string Compositor_vista::clave_id="id";
@@ -21,6 +22,7 @@ const std::string Compositor_vista::clave_textura="textura";
 const std::string Compositor_vista::clave_estatica="estatica";
 const std::string Compositor_vista::clave_pincel="pincel";
 const std::string Compositor_vista::clave_visibilidad="visible";
+const std::string Compositor_vista::clave_en_camara="en_camara";
 
 Compositor_vista::Compositor_vista()
 	:con_pantalla(false), color_pantalla{0,0,0, 255}
@@ -50,7 +52,8 @@ void Compositor_vista::volcar(DLibV::Pantalla& p, const DLibV::Camara& cam)
 	
 	for(const auto& r : representaciones)
 	{
-		r.rep->volcar(p, cam);
+		if(r.en_camara) r.rep->volcar(p, cam);
+		else r.rep->volcar(p);
 	}
 }
 
@@ -145,6 +148,7 @@ void Compositor_vista::parsear(const std::string& ruta, const std::string& nodo)
 		uptr_representacion ptr;
 		const auto& tipo=token[clave_tipo].acc_string(); //Si no hay tipo vamos a explotar. Correcto.
 		int orden=0;
+		bool en_camara=true;
 
 		if(tipo==clave_caja) ptr=std::move(crear_caja(token));
 		else if(tipo==clave_bitmap) ptr=std::move(crear_bitmap(token));
@@ -156,6 +160,11 @@ void Compositor_vista::parsear(const std::string& ruta, const std::string& nodo)
 			procesar_tipo_pantalla(token);
 			continue;
 		}
+		else if(tipo==clave_constante)
+		{
+			procesar_tipo_constante(token);
+			continue;
+		}
 		else
 		{
 			throw std::runtime_error("Tipo '"+tipo+"' desconocido al parsear escena");
@@ -165,6 +174,12 @@ void Compositor_vista::parsear(const std::string& ruta, const std::string& nodo)
 		if(token.existe_clave(clave_orden)) 
 		{
 			orden=token[clave_orden];
+		}
+
+		//Tratamiento de cosas comunes...
+		if(token.existe_clave(clave_en_camara)) 
+		{
+			en_camara=token[clave_en_camara];
 		}
 
 		if(token.existe_clave(clave_alpha))
@@ -197,8 +212,10 @@ void Compositor_vista::parsear(const std::string& ruta, const std::string& nodo)
 		}
 
 		//Y finalmente insertamos.
-		representaciones.push_back(item(std::move(ptr), orden));
-	}	
+		representaciones.push_back(item(std::move(ptr), orden, en_camara));
+	}
+
+	std::sort(std::begin(representaciones), std::end(representaciones));
 }
 
 Compositor_vista::uptr_representacion Compositor_vista::crear_caja(const Dnot_token& token)
@@ -273,6 +290,14 @@ void Compositor_vista::procesar_tipo_pantalla(const Dnot_token& token)
 	con_pantalla=true;
 }
 
+void Compositor_vista::procesar_tipo_constante(const Dnot_token& token)
+{
+	const std::string& clave=token["clave"].acc_string();
+	if(constantes_int.count(clave)) throw std::runtime_error("Constante "+clave+" declarada en más de una ocasión");
+	if(!token["valor"].es_valor_int()) throw std::runtime_error("La clave valor no es int para constante");
+	constantes_int[clave]=token["valor"].acc_int();
+}
+
 SDL_Rect Compositor_vista::caja_desde_lista(const Dnot_token& tok)
 {
 	int x=tok[0], y=tok[1], w=tok[2], h=tok[3];
@@ -301,4 +326,16 @@ void Compositor_vista::vaciar_vista()
 {
 	representaciones.clear();
 	mapa_ids.clear();
+}
+
+int Compositor_vista::const_int(const std::string& k) const
+{
+	try
+	{
+		return constantes_int.at(k);
+	}
+	catch(std::exception& e)
+	{
+		throw std::runtime_error("No se localiza la clave de constante "+k);
+	}
 }

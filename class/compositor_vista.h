@@ -2,6 +2,7 @@
 #define COMPOSITOR_VISTA_H
 
 #include <memory>
+#include <algorithm>
 
 #include "dnot_parser.h"
 #include <video/pantalla/pantalla.h>
@@ -57,6 +58,7 @@ class Compositor_vista
 	void			vaciar_vista();
 	DLibV::Representacion * obtener_por_id(const std::string&);
 	bool			existe_id(const std::string&) const;
+	int			const_int(const std::string&) const;
 
 	private:
 
@@ -67,6 +69,7 @@ class Compositor_vista
 	static const std::string		clave_patron;
 	static const std::string		clave_ttf;
 	static const std::string		clave_pantalla;
+	static const std::string		clave_constante;
 	static const std::string		clave_orden;
 	static const std::string		clave_alpha;
 	static const std::string		clave_id;
@@ -80,6 +83,7 @@ class Compositor_vista
 	static const std::string		clave_estatica;
 	static const std::string		clave_pincel;
 	static const std::string		clave_visibilidad;
+	static const std::string		clave_en_camara;
 
 	struct color
 	{
@@ -100,12 +104,13 @@ class Compositor_vista
 	{
 		uptr_representacion		rep;
 		int 				orden;
+		bool				en_camara;
 
-		item(uptr_representacion&& rep, int orden=0)
-			:rep(std::move(rep)), orden(orden)
+		item(uptr_representacion&& rep, int orden=0, bool camara=true)
+			:rep(std::move(rep)), orden(orden), en_camara(camara)
 		{}
 
-		bool operator<(const item& o)
+		bool operator<(const item& o) const
 		{
 			return o.orden < orden;
 		}
@@ -118,6 +123,7 @@ class Compositor_vista
 	uptr_representacion	crear_texto(const Dnot_token&);
 	uptr_representacion	crear_ttf(const Dnot_token&);
 	void			procesar_tipo_pantalla(const Dnot_token&);
+	void			procesar_tipo_constante(const Dnot_token&);
 
 	SDL_Rect		caja_desde_lista(const Dnot_token&);
 	color			color_desde_lista(const Dnot_token&);
@@ -129,6 +135,7 @@ class Compositor_vista
 	std::map<std::string, DLibV::Textura*>		mapa_texturas;
 	std::map<std::string, DLibV::Superficie*>	mapa_superficies;
 	std::map<std::string, const DLibV::Fuente_TTF*>	mapa_fuentes;
+	std::map<std::string, int>			constantes_int;
 
 	bool 						con_pantalla;
 	SDL_Color					color_pantalla;
