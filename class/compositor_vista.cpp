@@ -328,6 +328,11 @@ void Compositor_vista::vaciar_vista()
 	mapa_ids.clear();
 }
 
+void Compositor_vista::vaciar_constantes()
+{
+	constantes_int.clear();
+}
+
 int Compositor_vista::const_int(const std::string& k) const
 {
 	try
