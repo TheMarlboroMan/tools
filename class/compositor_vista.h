@@ -60,6 +60,7 @@ class Compositor_vista
 	DLibV::Representacion * obtener_por_id(const std::string&);
 	bool			existe_id(const std::string&) const;
 	int			const_int(const std::string&) const;
+	void			registrar_externa(const std::string&, DLibV::Representacion&);
 
 	private:
 
@@ -84,6 +85,8 @@ class Compositor_vista
 	static const std::string		clave_estatica;
 	static const std::string		clave_pincel;
 	static const std::string		clave_visibilidad;
+	static const std::string		clave_externa;
+	static const std::string		clave_ref_externa;
 
 	struct color
 	{
@@ -100,18 +103,38 @@ class Compositor_vista
 		int x, y;
 	};
 
+	//TODO: Comentar...
+
 	struct item
 	{
 		uptr_representacion		rep;
+		DLibV::Representacion *		ptr;
 		int 				orden;
 
 		item(uptr_representacion&& rep, int orden=0)
-			:rep(std::move(rep)), orden(orden)
+			:rep(std::move(rep)), ptr(rep.get()), orden(orden)
+		{
+
+		}
+
+		item(DLibV::Representacion * p, int orden=0)
+			:rep(nullptr), ptr(p), orden(orden)
 		{}
 
 		bool operator<(const item& o) const
 		{
 			return o.orden < orden;
+		}
+
+		void volcar(DLibV::Pantalla& p)
+		{
+			ptr->volcar(p);
+		}
+
+		void volcar(DLibV::Pantalla& p, const DLibV::Camara& cam)
+		{
+			if(!ptr->es_estatica()) ptr->volcar(p, cam);
+			else ptr->volcar(p);
 		}
 	};
 
@@ -131,6 +154,7 @@ class Compositor_vista
 
 	std::vector<item>				representaciones;
 	std::map<std::string, DLibV::Representacion*>	mapa_ids;
+	std::map<std::string, DLibV::Representacion*>	mapa_externas;
 	std::map<std::string, DLibV::Textura*>		mapa_texturas;
 	std::map<std::string, DLibV::Superficie*>	mapa_superficies;
 	std::map<std::string, const DLibV::Fuente_TTF*>	mapa_fuentes;

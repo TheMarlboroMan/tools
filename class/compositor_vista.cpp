@@ -22,6 +22,8 @@ const std::string Compositor_vista::clave_textura="textura";
 const std::string Compositor_vista::clave_estatica="estatica";
 const std::string Compositor_vista::clave_pincel="pincel";
 const std::string Compositor_vista::clave_visibilidad="visible";
+const std::string Compositor_vista::clave_externa="externa";
+const std::string Compositor_vista::clave_ref_externa="ref";
 
 Compositor_vista::Compositor_vista()
 	:con_pantalla(false), color_pantalla{0,0,0, 255}
@@ -36,9 +38,9 @@ void Compositor_vista::volcar(DLibV::Pantalla& p)
 		p.limpiar(color_pantalla.r, color_pantalla.g, color_pantalla.b, color_pantalla.a);
 	}
 	
-	for(const auto& r : representaciones)
+	for(auto& r : representaciones)
 	{
-		r.rep->volcar(p);
+		r.volcar(p);
 	}
 }
 
@@ -49,10 +51,9 @@ void Compositor_vista::volcar(DLibV::Pantalla& p, const DLibV::Camara& cam)
 		p.limpiar(color_pantalla.r, color_pantalla.g, color_pantalla.b, color_pantalla.a);
 	}
 	
-	for(const auto& r : representaciones)
+	for(auto& r : representaciones)
 	{
-		if(!r.rep->es_estatica()) r.rep->volcar(p, cam);
-		else r.rep->volcar(p);
+		r.volcar(p, cam);
 	}
 }
 
@@ -153,6 +154,22 @@ void Compositor_vista::parsear(const std::string& ruta, const std::string& nodo)
 		else if(tipo==clave_texto) ptr=std::move(crear_texto(token));
 		else if(tipo==clave_ttf) ptr=std::move(crear_ttf(token));
 		else if(tipo==clave_patron) ptr=std::move(crear_patron(token));
+		else if(tipo==clave_externa)
+		{
+			const std::string& ref=token[clave_ref_externa];
+			if(!mapa_externas.count(ref))
+			{
+				throw std::runtime_error("La clave '"+ref+"' no se ha registrado externamente.");
+			}
+
+			if(token.existe_clave(clave_orden)) 
+			{
+				orden=token[clave_orden];
+			}
+
+			representaciones.push_back(item(mapa_externas[ref], orden));
+			continue;
+		}
 		else if(tipo==clave_pantalla) 
 		{
 			procesar_tipo_pantalla(token);
@@ -210,6 +227,16 @@ void Compositor_vista::parsear(const std::string& ruta, const std::string& nodo)
 
 	std::sort(std::begin(representaciones), std::end(representaciones));
 }
+
+void Compositor_vista::registrar_externa(const std::string& clave, DLibV::Representacion& rep)
+{
+	if(mapa_externas.count(clave))
+	{
+		throw std::runtime_error("La clave "+clave+" ya existe al registrar representación externa");
+	}
+	
+	mapa_externas[clave]=&rep;
+} 
 
 Compositor_vista::uptr_representacion Compositor_vista::crear_caja(const Dnot_token& token)
 {
@@ -319,6 +346,7 @@ void Compositor_vista::vaciar_vista()
 {
 	representaciones.clear();
 	mapa_ids.clear();
+	mapa_externas.clear();
 }
 
 void Compositor_vista::vaciar_constantes()
