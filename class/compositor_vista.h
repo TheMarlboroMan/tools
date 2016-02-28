@@ -60,9 +60,23 @@ class Compositor_vista
 	DLibV::Representacion * obtener_por_id(const std::string&);
 	bool			existe_id(const std::string&) const;
 	int			const_int(const std::string&) const;
+	float			const_float(const std::string&) const;
 	void			registrar_externa(const std::string&, DLibV::Representacion&);
 
 	private:
+
+	template<typename T> 
+	T obtener_const(const std::string k, const std::map<std::string, T>& map) const
+	{
+		try
+		{
+			return map.at(k);
+		}
+		catch(std::exception& e)
+		{
+			throw std::runtime_error("No se localiza la clave de constante "+k);
+		}
+	}
 
 	static const std::string		clave_tipo;
 	static const std::string		clave_caja;
@@ -160,6 +174,7 @@ class Compositor_vista
 	std::map<std::string, DLibV::Superficie*>	mapa_superficies;
 	std::map<std::string, const DLibV::Fuente_TTF*>	mapa_fuentes;
 	std::map<std::string, int>			constantes_int;
+	std::map<std::string, float>			constantes_float;
 
 	bool 						con_pantalla;
 	SDL_Color					color_pantalla;

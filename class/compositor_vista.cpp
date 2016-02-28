@@ -331,9 +331,12 @@ void Compositor_vista::procesar_tipo_pantalla(const Dnot_token& token)
 void Compositor_vista::procesar_tipo_constante(const Dnot_token& token)
 {
 	const std::string& clave=token["clave"].acc_string();
+
 	if(constantes_int.count(clave)) throw std::runtime_error("Constante "+clave+" declarada en más de una ocasión");
-	if(!token["valor"].es_valor_int()) throw std::runtime_error("La clave valor no es int para constante");
-	constantes_int[clave]=token["valor"].acc_int();
+
+	if(token["valor"].es_valor_int()) constantes_int[clave]=token["valor"].acc_int();
+	else if(token["valor"].es_valor_float()) constantes_float[clave]=token["valor"].acc_float();
+	else throw std::runtime_error("La clave valor no es tipo constante válido.");	
 }
 
 SDL_Rect Compositor_vista::caja_desde_lista(const Dnot_token& tok)
@@ -374,12 +377,10 @@ void Compositor_vista::vaciar_constantes()
 
 int Compositor_vista::const_int(const std::string& k) const
 {
-	try
-	{
-		return constantes_int.at(k);
-	}
-	catch(std::exception& e)
-	{
-		throw std::runtime_error("No se localiza la clave de constante "+k);
-	}
+	return obtener_const(k, constantes_int);
+}
+
+float Compositor_vista::const_float(const std::string& k) const
+{
+	return obtener_const(k, constantes_float);
 }
