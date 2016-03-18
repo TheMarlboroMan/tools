@@ -280,10 +280,17 @@ Dnot_token Dnot_parser::generar_token_valor(const std::string& v)
 	{
 		t.asignar(v.substr(1, v.size()-2));
 	}
-	//Float...
+	//Float y double...
 	else if(v.find(".") != std::string::npos)
 	{
-		t.asignar((float)std::atof(v.c_str()));
+		if(v.back()=='f')
+		{
+			t.asignar((float)std::atof(v.c_str()));
+		}
+		else
+		{
+			t.asignar(std::atof(v.c_str()));
+		}
 	}
 	//Entero...
 	else if(std::all_of(std::begin(v), std::end(v), [](const char c) {return isdigit(c) || c=='-';}))

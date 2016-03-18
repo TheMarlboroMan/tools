@@ -107,7 +107,8 @@ complejo:{
 	parametro_complejo_uno:true,
 	parametro_complejo_dos:{
 		cosa_uno: "Hola dos puntos : hola",
-		cosa_dos:2.34
+		cosa_dos:2.34f,
+		cosa_tres:2.340343243
 	},
 	parametro_complejo_tres:-3,
 	parametro_complejo_cuatro:{

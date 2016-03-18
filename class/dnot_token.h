@@ -47,6 +47,7 @@ class Dnot_token
 	bool 					es_valor_string() const {return tipo==tipos::valor_string;}
 	bool 					es_valor_int() const {return tipo==tipos::valor_int;}
 	bool 					es_valor_float() const {return tipo==tipos::valor_float;}
+	bool 					es_valor_double() const {return tipo==tipos::valor_double;}
 	bool 					es_valor_bool() const {return tipo==tipos::valor_bool;}
 	bool 					es_compuesto() const {return tipo==tipos::compuesto;}
 	bool 					es_lista() const {return tipo==tipos::lista;}
@@ -55,6 +56,7 @@ class Dnot_token
 	void 					asignar(const char * c);
 	void		 			asignar(int c);
 	void 					asignar(float c);
+	void 					asignar(double c);
 	void 					asignar(bool c);
 	void 					asignar(const t_mapa& t);
 	void 					asignar(const t_vector& t);
@@ -66,6 +68,7 @@ class Dnot_token
 	const std::string& 			acc_string() const;
 	int 					acc_int() const;
 	float 					acc_float() const;
+	double 					acc_double() const;
 	bool 					acc_bool() const;
 
 	bool 					existe_clave(const std::string&) const;
@@ -100,14 +103,18 @@ class Dnot_token
 	operator				int() const {return acc_int();}
 	operator				bool() const {return acc_bool();}
 	operator				float() const {return acc_float();}
+	operator				double() const {return acc_double();}
 
 						Dnot_token();
-						explicit Dnot_token(const std::string& v);
-						explicit Dnot_token(const char *);
-						explicit Dnot_token(const char);
-						explicit Dnot_token(int v);
-						explicit Dnot_token(float v);
-						explicit Dnot_token(bool v);
+	explicit				Dnot_token(const std::string& v);
+	explicit 				Dnot_token(const char *);
+	explicit 				Dnot_token(const char);
+	explicit 				Dnot_token(int v);
+	explicit 				Dnot_token(float v);
+	explicit 				Dnot_token(double v);
+	explicit 				Dnot_token(bool v);
+	explicit 				Dnot_token(const t_mapa& v);
+	explicit 				Dnot_token(const t_vector& v);
 	private:
 
 	enum class tipos {
@@ -115,6 +122,7 @@ class Dnot_token
 		valor_string,	//El token tiene un valor string
 		valor_int,	//El token tiene un valor int
 		valor_float,	//El token tiene un valor float
+		valor_double,	//El token tiene un valor double
 		valor_bool,	//El token tiene un valor bool
 		lista};		//El token es una lista de otros tokens anónimos.
 
@@ -127,6 +135,7 @@ class Dnot_token
 	std::string				valor_string;
 	int					valor_int;
 	float					valor_float;
+	double					valor_double;
 	bool					valor_bool;
 
 	friend class Dnot_parser;
