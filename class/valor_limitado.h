@@ -108,10 +108,12 @@ class Valor_limitado
  
 	private:
 
+	//Se pueden usar valores máximos menores que el mínimo y viceversa para
+	//no limitar por algún lado.
 	void		regular()
-	{
-		if(valor_actual > valor_max) valor_actual=valor_max;
-		else if(valor_actual < valor_min) valor_actual=valor_min;
+	{		
+		if(valor_actual > valor_max && valor_max > valor_min) valor_actual=valor_max;
+		else if(valor_actual < valor_min && valor_min < valor_max) valor_actual=valor_min;
 	}
 
 	T		valor_min,

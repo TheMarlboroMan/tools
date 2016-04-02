@@ -115,3 +115,20 @@ size_t Herramientas_proyecto::digitos_en_entero(int p_entero)
 	}
 	return resultado;
 }
+
+void Herramientas_proyecto::reemplazar_str(std::string& sujeto, const std::string& busca, const std::string& reemplaza)
+{
+	size_t pos = 0, l=reemplaza.length();
+	while ((pos = sujeto.find(busca, pos)) != std::string::npos) 
+	{
+		sujeto.replace(pos, busca.length(), reemplaza);
+		pos += l;
+	}
+}
+
+std::string Herramientas_proyecto::reemplazar_str(const std::string& sujeto, const std::string& busca, const std::string& reemplaza)
+{
+	std::string res=sujeto;
+	reemplazar_str(res, busca, reemplaza);
+	return res;
+}

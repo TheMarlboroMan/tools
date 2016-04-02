@@ -27,6 +27,8 @@ namespace Herramientas_proyecto
 std::vector<std::string> 		explotar(const std::string &, const char, size_t max=0);
 std::map<std::string, std::string> 	generar_mapa_pares(const std::string& fichero, const char separador, const char comentario);
 size_t					digitos_en_entero(int);
+void					reemplazar_str(std::string& sujeto, const std::string& busca, const std::string& reemplaza);
+std::string				reemplazar_str(const std::string& sujeto, const std::string& busca, const std::string& reemplaza);
 
 
 }
