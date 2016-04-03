@@ -11,10 +11,13 @@ class Valor_limitado
 {
 	public:
 
-			Valor_limitado(T vmin, T vmax, T vact):
+	enum tlim{superior=1, inferior=2, ambos=4};
+
+			Valor_limitado(T vmin, T vmax, T vact, int l=ambos):
 				valor_min(vmin),
 				valor_max(vmax),
-				valor_actual(vact)
+				valor_actual(vact),
+				limites(l)
 			{}
 
 	T		min() const {return valor_min;}
@@ -111,14 +114,21 @@ class Valor_limitado
 	//Se pueden usar valores máximos menores que el mínimo y viceversa para
 	//no limitar por algún lado.
 	void		regular()
-	{		
-		if(valor_actual > valor_max && valor_max > valor_min) valor_actual=valor_max;
-		else if(valor_actual < valor_min && valor_min < valor_max) valor_actual=valor_min;
+	{
+		if(valor_actual > valor_max && limites & superior) 
+		{
+			valor_actual=valor_max;
+		}
+		else if(valor_actual < valor_min && limites & inferior) 
+		{
+			valor_actual=valor_min;
+		}
 	}
 
 	T		valor_min,
 			valor_max,
 			valor_actual;
+	int		limites;
 };
 }
 
