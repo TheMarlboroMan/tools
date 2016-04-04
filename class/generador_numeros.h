@@ -6,6 +6,26 @@
 namespace Herramientas_proyecto
 {
 
+#ifdef WINCOMPIL
+
+class Generador_int
+{
+	public:
+
+	Generador_int(int vmin, int vmax):vmin(vmin), vmax(vmax){}
+	int operator()() 
+	{
+			int res=rand() % (vmax-vmin);
+			return res+vmin;
+	}
+
+	private:
+
+	int vmin, vmax;	
+};
+
+#else
+
 class Generador_int
 {
 	public:
@@ -19,6 +39,8 @@ class Generador_int
 	std::default_random_engine re;
 	
 };
+
+#endif
 
 }
 #endif
