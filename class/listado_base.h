@@ -17,6 +17,7 @@ class Listado_base
 	{
 		lineas.clear();
 		estructura_paginacion.establecer_total_elementos(0);
+		estructura_paginacion.mut_indice(0);
 	}
 
 	void 					insertar(const T& v)

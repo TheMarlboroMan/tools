@@ -55,7 +55,6 @@ Por lo general todos los métodos lanzan excepción si la clave no existe.
 
 //TODO: Recrear interface.
 //TODO: Recrear ejemplo.
-//TODO: Crear desde dnot.
 */
 
 namespace Herramientas_proyecto
@@ -89,7 +88,7 @@ class Menu_opciones
 
 	private:
 
-	enum class tipos			{ttemplated, tint, tbool};
+	enum class tipos			{ttemplated, tint, tbool, tstring};
 
 	struct Base_seleccion
 	{
@@ -234,7 +233,7 @@ class Menu_opciones
 
 			return to_string(val.actual());
 		}
-		virtual int			obtener_valor() const {return val.actual();}
+		int				obtener_valor() const {return val.actual();}
 		virtual tipos			tipo() const {return tipos::tint;}
 		virtual void			rotar(int d){val+=d;}
 		virtual void			traducir(const struct_traduccion& t){}
@@ -257,12 +256,26 @@ class Menu_opciones
 
 			return to_string(valor);
 		}
-		virtual bool			obtener_valor() const {return valor;}
+		bool				obtener_valor() const {return valor;}
 		virtual tipos			tipo() const {return tipos::tbool;}
 		virtual void			rotar(int d){valor=!valor;}
 		virtual void			traducir(const struct_traduccion& t){}
 
 		Opcion_menu_bool(const std::string& n, bool v):Base_seleccion(n), valor(v) {} 
+	};
+
+	//Estructura para la selección de un valor string abierto.
+	struct Opcion_menu_string:public Base_seleccion
+	{
+		std::string			valor;
+	
+		std::string			obtener_valor() const {return valor;}
+		virtual std::string		valor_visible() const {return valor;}
+		virtual tipos			tipo() const {return tipos::tstring;}
+		virtual void			rotar(int d){}
+		virtual void			traducir(const struct_traduccion& t){}
+
+		Opcion_menu_string(const std::string& n, const std::string& v):Base_seleccion(n), valor(v) {} 
 	};
 
 	void	comprobar_opcion_existe(const Tclave& clave, const std::string& msj) const
@@ -298,6 +311,12 @@ class Menu_opciones
 	{
 		comprobar_clave_unica(clave);
 		opciones.insert(std::pair<Tclave, uptr_base>(clave, uptr_base(new Opcion_menu_bool(nombre, val))));
+	}
+
+	void		insertar_opcion_string(const Tclave& clave, const std::string& nombre, const std::string& val)
+	{
+		comprobar_clave_unica(clave);
+		opciones.insert(std::pair<Tclave, uptr_base>(clave, uptr_base(new Opcion_menu_string(nombre, val))));
 	}
 
 	void		eliminar_opcion(const Tclave& clave)
@@ -389,7 +408,7 @@ class Menu_opciones
 		comprobar_opcion_existe(clave_opcion, "La clave no existe para seleccionar opción");
 		auto& o=opciones.at(clave_opcion);
 		validar_tipo(o->tipo(), tipos::tint, "asignar_por_valor : opción no es tipo int");
-		static_cast<Opcion_menu_int *>(o.get())->val=valor_seleccion;
+		static_cast<Opcion_menu_int *>(o.get())->valor=valor_seleccion;
 	}
 
 	//Para el tipo bool.
@@ -406,7 +425,24 @@ class Menu_opciones
 		comprobar_opcion_existe(clave_opcion, "La clave no existe para seleccionar opción");
 		auto& o=opciones.at(clave_opcion);
 		validar_tipo(o->tipo(), tipos::tbool, "asignar_por_valor : opción no es tipo bool");
-		static_cast<Opcion_menu_bool *>(o.get())->val=valor_seleccion;
+		static_cast<Opcion_menu_bool *>(o.get())->valor=valor_seleccion;
+	}
+
+	//Para el tipo string.
+	std::string	valor_string(const Tclave& clave) const
+	{
+		comprobar_opcion_existe(clave, "La clave no existe para obtener_valor");
+		const auto& o=opciones.at(clave);
+		validar_tipo(o->tipo(), tipos::tstring, "valor_opcion : opción no es de tipo string");
+		return static_cast<Opcion_menu_string *>(o.get())->obtener_valor();
+	}
+
+	void	asignar_por_valor_string(const Tclave& clave_opcion, const std::string& valor_seleccion)
+	{
+		comprobar_opcion_existe(clave_opcion, "La clave no existe para seleccionar opción");
+		auto& o=opciones.at(clave_opcion);
+		validar_tipo(o->tipo(), tipos::tstring, "asignar_por_valor : opción no es tipo string");
+		static_cast<Opcion_menu_string *>(o.get())->valor=valor_seleccion;
 	}
 
 	std::string	nombre_opcion(const Tclave& clave) const
@@ -496,6 +532,14 @@ void menu_opciones_desde_dnot(
 		else if(tipo_menu=="int")
 		{
 			opciones_menu.insertar_opcion_int(k_opcion, "-", opcion["min"], opcion["max"], opcion["min"]);
+		}
+		else if(tipo_menu=="bool")
+		{
+			opciones_menu.insertar_opcion_bool(k_opcion, "-", true);
+		}
+		else if(tipo_menu=="string")
+		{
+			opciones_menu.insertar_opcion_string(k_opcion, "-", "-");
 		}
 	}
 }
