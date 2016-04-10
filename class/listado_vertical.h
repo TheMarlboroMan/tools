@@ -88,7 +88,7 @@ class Listado_vertical:public Listado_base<T>
 	void					mut_h_disponible(size_t v) 
 	{
 		h_disponible=v;
-		this->estructura_paginacion.establecer_registros_por_pagina(floor(h_disponible / h_item));
+		if(h_item) this->estructura_paginacion.establecer_registros_por_pagina(floor(h_disponible / h_item));
 	}
 	void					mut_h_item(size_t v) 
 	{

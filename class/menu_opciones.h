@@ -88,7 +88,7 @@ class Menu_opciones
 
 	private:
 
-	enum class tipos			{ttemplated, tint, tbool, tstring};
+	enum class tipos			{ttemplated, tint, tbool, tstring, tvoid};
 
 	struct Base_seleccion
 	{
@@ -278,6 +278,18 @@ class Menu_opciones
 		Opcion_menu_string(const std::string& n, const std::string& v):Base_seleccion(n), valor(v) {} 
 	};
 
+	//Estructura para la selección de una entrada sin valor.
+	struct Opcion_menu_void:public Base_seleccion
+	{
+		void				obtener_valor() const {}
+		virtual std::string		valor_visible() const {return "";}
+		virtual tipos			tipo() const {return tipos::tvoid;}
+		virtual void			rotar(int d){}
+		virtual void			traducir(const struct_traduccion& t){}
+
+		Opcion_menu_void(const std::string& n):Base_seleccion(n) {} 
+	};
+
 	void	comprobar_opcion_existe(const Tclave& clave, const std::string& msj) const
 	{
 		if(!opciones.count(clave)) 
@@ -317,6 +329,12 @@ class Menu_opciones
 	{
 		comprobar_clave_unica(clave);
 		opciones.insert(std::pair<Tclave, uptr_base>(clave, uptr_base(new Opcion_menu_string(nombre, val))));
+	}
+
+	void		insertar_opcion_void(const Tclave& clave, const std::string& nombre)
+	{
+		comprobar_clave_unica(clave);
+		opciones.insert(std::pair<Tclave, uptr_base>(clave, uptr_base(new Opcion_menu_void(nombre))));
 	}
 
 	void		eliminar_opcion(const Tclave& clave)
@@ -540,6 +558,10 @@ void menu_opciones_desde_dnot(
 		else if(tipo_menu=="string")
 		{
 			opciones_menu.insertar_opcion_string(k_opcion, "-", "-");
+		}
+		else if(tipo_menu=="void")
+		{
+			opciones_menu.insertar_opcion_void(k_opcion, "-");
 		}
 	}
 }

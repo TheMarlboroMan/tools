@@ -35,7 +35,7 @@ void Estructura_paginacion::establecer_registros_por_pagina(size_t val)
 
 void Estructura_paginacion::calcular_informacion_paginas()
 {
-	total_paginas=ceil(total_elementos / registros_por_pagina);
+	if(registros_por_pagina) total_paginas=ceil(total_elementos / registros_por_pagina);
 }
 
 bool Estructura_paginacion::cambiar_pagina(int val, bool forzar)

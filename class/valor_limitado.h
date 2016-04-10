@@ -11,7 +11,7 @@ class Valor_limitado
 {
 	public:
 
-	enum tlim{superior=1, inferior=2, ambos=4};
+	enum tlim{superior=1, inferior=2, ambos=3};
 
 			Valor_limitado(T vmin, T vmax, T vact, int l=ambos):
 				valor_min(vmin),
