@@ -196,7 +196,7 @@ void Compositor_vista::parsear(const std::string& ruta, const std::string& nodo)
 		if(token.existe_clave(clave_alpha))
 		{
 			ptr->establecer_modo_blend(DLibV::Representacion::BLEND_ALPHA);
-			ptr->establecer_alpha(token[clave_alpha].acc_int());
+			ptr->establecer_alpha((Uint8)token[clave_alpha].acc_int());
 		}
 
 		if(token.existe_clave(clave_estatica))
