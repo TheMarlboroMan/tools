@@ -55,7 +55,7 @@ void Lector_txt::abrir_archivo(const std::string& ruta)
 	archivo.open(ruta.c_str());
 }
 
-std::vector<std::string> obtener_entradas_lector_txt_desde_ruta(const std::string& ruta)
+std::vector<std::string> Herramientas_proyecto::obtener_entradas_lector_txt_desde_ruta(const std::string& ruta)
 {
 	Lector_txt L(ruta, '#');
 	std::vector<std::string> resultado;
