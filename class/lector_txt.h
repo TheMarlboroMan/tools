@@ -3,6 +3,8 @@
 
 #include <string>
 #include <fstream>
+#include <vector>
+
 
 namespace Herramientas_proyecto
 {
@@ -33,6 +35,9 @@ class Lector_txt
 	void establecer_comentario(const char v) {comentario=v;}
 	void rebobinar(){archivo.seekg(0, archivo.beg);}
 };
+
+std::vector<std::string> obtener_entradas_lector_txt_desde_ruta(const std::string& ruta);
+
 }
 
 #endif

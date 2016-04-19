@@ -1,5 +1,6 @@
 #include "lector_txt.h"
 #include <iostream>
+#include <stdexcept>
 
 using namespace Herramientas_proyecto;
 
@@ -52,4 +53,24 @@ void Lector_txt::abrir_archivo(const std::string& ruta)
 	numero_linea=0;
 	linea_actual="";
 	archivo.open(ruta.c_str());
+}
+
+std::vector<std::string> obtener_entradas_lector_txt_desde_ruta(const std::string& ruta)
+{
+	Lector_txt L(ruta, '#');
+	std::vector<std::string> resultado;
+
+	if(!L)
+	{
+		throw std::runtime_error("Imposible obtener_entradas_lector_txt_desde_ruta en "+ruta);
+	}
+
+	while(true)
+	{
+		std::string linea=L.leer_linea();
+		if(!L) break;
+		resultado.push_back(linea);
+	}
+
+	return resultado;
 }
