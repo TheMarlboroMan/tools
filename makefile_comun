@@ -5,15 +5,10 @@ DIR_O=./objects/
 
 all:\
 $(DIR_O)dummy\
-$(DIR_O)generador_numeros.o\
-$(DIR_O)selector_aleatorio.o\
 $(DIR_O)tabla_sprites.o\
+$(DIR_O)gestor_fuentes_ttf.o\
 $(DIR_O)tabla_animaciones.o\
-$(DIR_O)listado_rejilla.o\
-$(DIR_O)listado_vertical.o\
 $(DIR_O)estructura_paginacion.o\
-$(DIR_O)matriz2d.o\
-$(DIR_O)valor_limitado.o\
 $(DIR_O)dnot_token.o\
 $(DIR_O)dnot_parser.o\
 $(DIR_O)lector_txt.o\
@@ -22,8 +17,7 @@ $(DIR_O)controlador_argumentos.o\
 $(DIR_O)localizador_base.o\
 $(DIR_O)fichero_pares.o\
 $(DIR_O)ficheros_utilidades.o\
-$(DIR_O)string_utilidades.o\
-$(DIR_O)menu_opciones.o
+$(DIR_O)string_utilidades.o
 	@echo Objetos generados.
 
 clean:
@@ -34,17 +28,6 @@ clean:
 
 $(DIR_O)dummy :
 	$(MKDIR) objects
-
-$(DIR_O)generador_numeros.o :\
-$(DIR_HERRAMIENTAS_PROYECTO)generador_numeros.h \
-$(DIR_HERRAMIENTAS_PROYECTO)generador_numeros.cpp
-	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)generador_numeros.cpp -o $(DIR_O)generador_numeros.o
-
-$(DIR_O)selector_aleatorio.o :\
-$(DIR_O)generador_numeros.o\
-$(DIR_HERRAMIENTAS_PROYECTO)selector_aleatorio.h \
-$(DIR_HERRAMIENTAS_PROYECTO)selector_aleatorio.cpp
-	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)selector_aleatorio.cpp -o $(DIR_O)selector_aleatorio.o  
 
 $(DIR_O)tabla_sprites.o :\
 $(DIR_HERRAMIENTAS_PROYECTO)tabla_sprites.h \
@@ -57,34 +40,10 @@ $(DIR_HERRAMIENTAS_PROYECTO)tabla_animaciones.h \
 $(DIR_HERRAMIENTAS_PROYECTO)tabla_animaciones.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)tabla_animaciones.cpp -o $(DIR_O)tabla_animaciones.o
 
-$(DIR_O)listado_rejilla.o :\
-$(DIR_O)estructura_paginacion.o\
-$(DIR_HERRAMIENTAS_PROYECTO)listado_base.h \
-$(DIR_HERRAMIENTAS_PROYECTO)listado_rejilla.h \
-$(DIR_HERRAMIENTAS_PROYECTO)listado_rejilla.cpp
-	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)listado_rejilla.cpp -o $(DIR_O)listado_rejilla.o
-
-$(DIR_O)listado_vertical.o :\
-$(DIR_O)estructura_paginacion.o\
-$(DIR_HERRAMIENTAS_PROYECTO)listado_base.h \
-$(DIR_HERRAMIENTAS_PROYECTO)listado_vertical.h \
-$(DIR_HERRAMIENTAS_PROYECTO)listado_vertical.cpp
-	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)listado_vertical.cpp -o $(DIR_O)listado_vertical.o
-
 $(DIR_O)estructura_paginacion.o :\
 $(DIR_HERRAMIENTAS_PROYECTO)estructura_paginacion.h \
 $(DIR_HERRAMIENTAS_PROYECTO)estructura_paginacion.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)estructura_paginacion.cpp -o $(DIR_O)estructura_paginacion.o
-
-$(DIR_O)matriz2d.o :\
-$(DIR_HERRAMIENTAS_PROYECTO)matriz2d.h \
-$(DIR_HERRAMIENTAS_PROYECTO)matriz2d.cpp
-	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)matriz2d.cpp -o $(DIR_O)matriz2d.o
-
-$(DIR_O)valor_limitado.o :\
-$(DIR_HERRAMIENTAS_PROYECTO)valor_limitado.h \
-$(DIR_HERRAMIENTAS_PROYECTO)valor_limitado.cpp
-	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)valor_limitado.cpp -o $(DIR_O)valor_limitado.o
 
 $(DIR_O)compositor_vista.o :\
 $(DIR_O)dnot_parser.o \
@@ -97,6 +56,11 @@ $(DIR_O)dnot_token.o \
 $(DIR_HERRAMIENTAS_PROYECTO)dnot_parser.h \
 $(DIR_HERRAMIENTAS_PROYECTO)dnot_parser.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)dnot_parser.cpp -o $(DIR_O)dnot_parser.o
+
+$(DIR_O)gestor_fuentes_ttf.o :\
+$(DIR_HERRAMIENTAS_PROYECTO)gestor_fuentes_ttf.h \
+$(DIR_HERRAMIENTAS_PROYECTO)gestor_fuentes_ttf.cpp
+	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)gestor_fuentes_ttf.cpp -o $(DIR_O)gestor_fuentes_ttf.o
 
 $(DIR_O)dnot_token.o :\
 $(DIR_HERRAMIENTAS_PROYECTO)dnot_token.h \
@@ -134,8 +98,3 @@ $(DIR_O)lector_txt.o \
 $(DIR_SOURCE)string_utilidades.h \
 $(DIR_SOURCE)string_utilidades.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_SOURCE)string_utilidades.cpp -o $(DIR_O)string_utilidades.o
-
-$(DIR_O)menu_opciones.o :\
-$(DIR_HERRAMIENTAS_PROYECTO)menu_opciones.h \
-$(DIR_HERRAMIENTAS_PROYECTO)menu_opciones.cpp
-	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)menu_opciones.cpp -o $(DIR_O)menu_opciones.o
