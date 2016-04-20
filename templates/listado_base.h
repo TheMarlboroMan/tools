@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <vector>
-#include "estructura_paginacion.h"
+#include "../class/estructura_paginacion.h"
 
 namespace Herramientas_proyecto
 {
