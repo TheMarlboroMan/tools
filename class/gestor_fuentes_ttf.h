@@ -16,7 +16,7 @@ ttf y un tamaño. Se trabaja en dos pasos:
 En caso de no existir la fuente se lanzará un std::runtime_error.
 */
 
-namespace App
+namespace Herramientas_proyecto
 {
 
 class Gestor_Fuentes_TTF

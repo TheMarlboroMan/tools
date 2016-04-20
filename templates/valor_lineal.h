@@ -24,7 +24,7 @@ actual.
 asignar nuevos valores al objeto.
 */
 
-namespace App
+namespace Herramientas_proyecto
 {
 template <typename T>
 class Valor_lineal

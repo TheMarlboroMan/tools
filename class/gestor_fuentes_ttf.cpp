@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-using namespace App;
+using namespace Herramientas_proyecto;
 
 const DLibV::Fuente_TTF& Gestor_Fuentes_TTF::obtener_fuente(const std::string& f, int t) const
 {
