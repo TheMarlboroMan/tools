@@ -4,7 +4,7 @@
 
 using namespace Herramientas_proyecto;
 
-const DLibV::Fuente_TTF& Gestor_Fuentes_TTF::obtener_fuente(const std::string& f, int t) const
+const DLibV::Fuente_TTF& Gestor_fuentes_TTF::obtener_fuente(const std::string& f, int t) const
 {
 	if(!fuentes.count({f, t}))
 	{
@@ -14,7 +14,7 @@ const DLibV::Fuente_TTF& Gestor_Fuentes_TTF::obtener_fuente(const std::string& f
 	return fuentes.at({f,t});
 }
 
-void Gestor_Fuentes_TTF::registrar_fuente(const std::string& f, int t, const std::string& r)
+void Gestor_fuentes_TTF::registrar_fuente(const std::string& f, int t, const std::string& r)
 {
 	if(!fuentes.count({f, t}))
 	{

@@ -19,7 +19,7 @@ En caso de no existir la fuente se lanzará un std::runtime_error.
 namespace Herramientas_proyecto
 {
 
-class Gestor_Fuentes_TTF
+class Gestor_fuentes_TTF
 {
 	public:
 
