@@ -11,7 +11,6 @@ const std::string Compositor_vista::clave_constante="const";
 const std::string Compositor_vista::clave_alpha="alpha";
 const std::string Compositor_vista::clave_orden="orden";
 const std::string Compositor_vista::clave_id="id";
-const std::string Compositor_vista::clave_rgb="rgb";
 const std::string Compositor_vista::clave_rgba="rgba";
 const std::string Compositor_vista::clave_pos="pos";
 const std::string Compositor_vista::clave_rec="rec";
@@ -19,7 +18,6 @@ const std::string Compositor_vista::clave_texto="texto";
 const std::string Compositor_vista::clave_superficie="superficie";
 const std::string Compositor_vista::clave_fuente="fuente";
 const std::string Compositor_vista::clave_textura="textura";
-const std::string Compositor_vista::clave_estatica="estatica";
 const std::string Compositor_vista::clave_pincel="pincel";
 const std::string Compositor_vista::clave_visibilidad="visible";
 const std::string Compositor_vista::clave_externa="externa";
@@ -36,7 +34,7 @@ void Compositor_vista::volcar(DLibV::Pantalla& p)
 {
 	if(con_pantalla)
 	{
-		p.limpiar(color_pantalla.r, color_pantalla.g, color_pantalla.b, color_pantalla.a);
+		p.limpiar(DLibV::rgba8(color_pantalla.r, color_pantalla.g, color_pantalla.b, color_pantalla.a));
 	}
 	
 	for(auto& r : representaciones)
@@ -49,7 +47,7 @@ void Compositor_vista::volcar(DLibV::Pantalla& p, const DLibV::Camara& cam)
 {
 	if(con_pantalla)
 	{
-		p.limpiar(color_pantalla.r, color_pantalla.g, color_pantalla.b, color_pantalla.a);
+		p.limpiar(DLibV::rgba8(color_pantalla.r, color_pantalla.g, color_pantalla.b, color_pantalla.a));
 	}
 	
 	for(auto& r : representaciones)
@@ -152,7 +150,6 @@ void Compositor_vista::parsear(const std::string& ruta, const std::string& nodo)
 
 		if(tipo==clave_caja) ptr=std::move(crear_caja(token));
 		else if(tipo==clave_bitmap) ptr=std::move(crear_bitmap(token));
-		else if(tipo==clave_texto) ptr=std::move(crear_texto(token));
 		else if(tipo==clave_ttf) ptr=std::move(crear_ttf(token));
 		else if(tipo==clave_patron) ptr=std::move(crear_patron(token));
 		else if(tipo==clave_externa)
@@ -195,13 +192,8 @@ void Compositor_vista::parsear(const std::string& ruta, const std::string& nodo)
 		//Tratamiento de cosas comunes...
 		if(token.existe_clave(clave_alpha))
 		{
-			ptr->establecer_modo_blend(DLibV::Representacion::BLEND_ALPHA);
+			ptr->establecer_modo_blend(DLibV::Representacion::blends::BLEND_ALPHA);
 			ptr->establecer_alpha((Uint8)token[clave_alpha].acc_int());
-		}
-
-		if(token.existe_clave(clave_estatica))
-		{
-			ptr->hacer_estatica();
 		}
 
 		if(token.existe_clave(clave_rotacion))
@@ -258,8 +250,8 @@ void Compositor_vista::registrar_externa(const std::string& clave, DLibV::Repres
 
 Compositor_vista::uptr_representacion Compositor_vista::crear_caja(const Dnot_token& token)
 {
-	auto color=color_desde_lista(token[clave_rgb]);
-	uptr_representacion res(new DLibV::Representacion_primitiva_caja(caja_desde_lista(token[clave_pos]), color.r, color.g, color.b));
+	auto color=rgba_desde_lista(token[clave_rgba]);
+	uptr_representacion res(new DLibV::Representacion_primitiva_caja(caja_desde_lista(token[clave_pos]), DLibV::rgba8(color.r, color.g, color.b, 255)));
 	return res;
 }
 
@@ -273,21 +265,6 @@ Compositor_vista::uptr_representacion Compositor_vista::crear_bitmap(const Dnot_
 	uptr_representacion res(new DLibV::Representacion_bitmap(mapa_texturas[token[clave_textura]]));
 	res->establecer_posicion(caja_desde_lista(token[clave_pos]));
 	res->establecer_recorte(caja_desde_lista(token[clave_rec]));
-
-	return res;
-}
-
-Compositor_vista::uptr_representacion Compositor_vista::crear_texto(const Dnot_token& token)
-{
-	if(!mapa_superficies.count(token[clave_superficie]))
-	{
-		throw std::runtime_error("No se localiza la superficie "+token[clave_superficie].acc_string()+" para texto");
-	}
-
-	uptr_representacion res(new DLibV::Representacion_texto_auto(mapa_superficies[token[clave_superficie]], token[clave_texto].acc_string()));
-
-	auto posicion=posicion_desde_lista(token[clave_pos]);
-	res->establecer_posicion(posicion.x, posicion.y);
 
 	return res;
 }
@@ -345,16 +322,17 @@ SDL_Rect Compositor_vista::caja_desde_lista(const Dnot_token& tok)
 	return SDL_Rect{x, y, w, h};
 }
 
-Compositor_vista::color Compositor_vista::color_desde_lista(const Dnot_token& tok)
+DLibV::ColorRGBA Compositor_vista::rgba_desde_lista(const Dnot_token& tok)
 {
-	int r=tok[0], g=tok[1], b=tok[2];
-	return color{r, g, b};
-}
-
-SDL_Color Compositor_vista::rgba_desde_lista(const Dnot_token& tok)
-{
-	int r=tok[0], g=tok[1], b=tok[2], a=tok[3];
-	return SDL_Color{(Uint8)r, (Uint8)g, (Uint8)b, (Uint8)a};
+	try
+	{
+		int r=tok[0], g=tok[1], b=tok[2], a=tok[3];
+		return DLibV::rgba8(r, g, b, a);
+	}
+	catch(std::exception& e)
+	{
+		throw std::runtime_error(std::string("Imposible obtener rgba... Has olvidado el valor a? : ")+e.what());
+	}
 }
 
 Compositor_vista::posicion Compositor_vista::posicion_desde_lista(const Dnot_token& tok)

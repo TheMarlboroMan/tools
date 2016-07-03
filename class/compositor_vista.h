@@ -5,13 +5,13 @@
 #include <algorithm>
 
 #include "dnot_parser.h"
+#include <video/color/color.h>
 #include <video/pantalla/pantalla.h>
 #include <video/camara/camara.h>
 #include <video/representacion/representacion.h>
 #include <video/representacion/representacion_primitiva/representacion_primitiva_caja/representacion_primitiva_caja.h>
 #include <video/representacion/representacion_grafica/representacion_bitmap/representacion_bitmap.h>
 #include <video/representacion/representacion_grafica/representacion_bitmap/representacion_bitmap_patron.h>
-#include <video/representacion/representacion_grafica/representacion_texto/representacion_texto_auto.h>
 #include <video/representacion/representacion_grafica/representacion_ttf/representacion_ttf.h>
 
 /**
@@ -94,29 +94,17 @@ class Compositor_vista
 	static const std::string		clave_orden;
 	static const std::string		clave_alpha;
 	static const std::string		clave_id;
-	static const std::string		clave_rgb;
 	static const std::string		clave_rgba;
 	static const std::string		clave_pos;
 	static const std::string		clave_rec;
 	static const std::string		clave_textura;
 	static const std::string		clave_superficie;
 	static const std::string		clave_fuente;
-	static const std::string		clave_estatica;
 	static const std::string		clave_pincel;
 	static const std::string		clave_visibilidad;
 	static const std::string		clave_externa;
 	static const std::string		clave_ref_externa;
 	static const std::string		clave_rotacion;
-
-	struct color
-	{
-		int r, g, b;
-	};
-
-	struct color_rgba
-	{
-		int r, g, b, a;
-	};
 
 	struct posicion
 	{
@@ -153,8 +141,7 @@ class Compositor_vista
 
 		void volcar(DLibV::Pantalla& p, const DLibV::Camara& cam)
 		{
-			if(!ptr->es_estatica()) ptr->volcar(p, cam);
-			else ptr->volcar(p);
+			ptr->volcar(p, cam);
 		}
 	};
 
@@ -162,14 +149,12 @@ class Compositor_vista
 	uptr_representacion	crear_caja(const Dnot_token&);
 	uptr_representacion	crear_bitmap(const Dnot_token&);
 	uptr_representacion	crear_patron(const Dnot_token&);
-	uptr_representacion	crear_texto(const Dnot_token&);
 	uptr_representacion	crear_ttf(const Dnot_token&);
 	void			procesar_tipo_pantalla(const Dnot_token&);
 	void			procesar_tipo_constante(const Dnot_token&);
 
 	SDL_Rect		caja_desde_lista(const Dnot_token&);
-	color			color_desde_lista(const Dnot_token&);
-	SDL_Color		rgba_desde_lista(const Dnot_token&);
+	DLibV::ColorRGBA	rgba_desde_lista(const Dnot_token&);
 	posicion		posicion_desde_lista(const Dnot_token&);
 
 	std::vector<item>				representaciones;
@@ -182,7 +167,7 @@ class Compositor_vista
 	std::map<std::string, float>			constantes_float;
 
 	bool 						con_pantalla;
-	SDL_Color					color_pantalla;
+	DLibV::ColorRGBA				color_pantalla;
 };
 }
 
@@ -209,10 +194,7 @@ class Compositor_vista
 *	rec[x, y, w, h] : recorte de la textura
 *	textura["cadena"] : cadena de mapeo de la textura
 *	pincel:[x, y, w, h] : rectángulo de pincel que se usará para dibujar
-* - texto:
-*	pos[x, y] : posición del texto
-*	superficie["cadena"] : cadena de mapeo de la superficie de texto
-*	texto["texto"] : Texto que se dibujará
+* INIT DEPRECATED DEPRECATED DEPRECATED DEPRECATED DEPRECATED DEPRECATED DEPRECATED 
 * - ttf:
 *	pos[x, y] : posición del texto
 *	fuente["cadena"] : cadena de mapeo de la fuente TTF
@@ -248,12 +230,6 @@ escena_prueba:
 		rec:[0, 0, 64, 32],
 		pincel:[0, 0, 64, 32],
 		textura:"tiles"
-	},
-	{
-		tipo:"texto", 
-		pos:[20, 150],
-		superficie:"fuente",
-		texto:"Hola... Salgo de un fichero."
 	},
 	{
 		tipo:"ttf",
