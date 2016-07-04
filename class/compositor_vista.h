@@ -11,7 +11,6 @@
 #include <video/representacion/representacion.h>
 #include <video/representacion/representacion_primitiva/representacion_primitiva_caja/representacion_primitiva_caja.h>
 #include <video/representacion/representacion_grafica/representacion_bitmap/representacion_bitmap.h>
-#include <video/representacion/representacion_grafica/representacion_bitmap/representacion_bitmap_patron.h>
 #include <video/representacion/representacion_grafica/representacion_ttf/representacion_ttf.h>
 
 /**
@@ -87,7 +86,6 @@ class Compositor_vista
 	static const std::string		clave_caja;
 	static const std::string		clave_bitmap;
 	static const std::string		clave_texto;
-	static const std::string		clave_patron;
 	static const std::string		clave_ttf;
 	static const std::string		clave_pantalla;
 	static const std::string		clave_constante;
@@ -148,7 +146,6 @@ class Compositor_vista
 
 	uptr_representacion	crear_caja(const Dnot_token&);
 	uptr_representacion	crear_bitmap(const Dnot_token&);
-	uptr_representacion	crear_patron(const Dnot_token&);
 	uptr_representacion	crear_ttf(const Dnot_token&);
 	void			procesar_tipo_pantalla(const Dnot_token&);
 	void			procesar_tipo_constante(const Dnot_token&);
@@ -189,12 +186,12 @@ class Compositor_vista
 *	pos[x, y, w, h] : posición de la caja
 *	rec[x, y, w, h] : recorte de la textura
 *	textura["cadena"] : cadena de mapeo de la textura
+* INIT DEPRECATED DEPRECATED DEPRECATED DEPRECATED DEPRECATED DEPRECATED DEPRECATED 
 * - patron:
 *	pos[x, y, w, h] : posición de la caja
 *	rec[x, y, w, h] : recorte de la textura
 *	textura["cadena"] : cadena de mapeo de la textura
 *	pincel:[x, y, w, h] : rectángulo de pincel que se usará para dibujar
-* INIT DEPRECATED DEPRECATED DEPRECATED DEPRECATED DEPRECATED DEPRECATED DEPRECATED 
 * - ttf:
 *	pos[x, y] : posición del texto
 *	fuente["cadena"] : cadena de mapeo de la fuente TTF
@@ -223,13 +220,6 @@ escena_prueba:
 		tipo:"bitmap",
 		pos:[200, 200, 14, 30], rec:[0, 0, 14, 30],
 		textura:"sprites", alpha:192
-	},
-	{
-		tipo:"patron",
-		pos:[0, 128, 256, 64], 
-		rec:[0, 0, 64, 32],
-		pincel:[0, 0, 64, 32],
-		textura:"tiles"
 	},
 	{
 		tipo:"ttf",
