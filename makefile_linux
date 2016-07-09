@@ -1,4 +1,4 @@
-#OPTIMIZACION=-O3
+OPTIMIZACION=-O3
 #SIMBOLOS_DEBUG=-g
 FLAGS_BASE=-Wno-deprecated -Wall -ansi -pedantic -std=c++11
  

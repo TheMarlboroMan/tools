@@ -190,7 +190,7 @@ void Compositor_vista::parsear(const std::string& ruta, const std::string& nodo)
 		//Tratamiento de cosas comunes...
 		if(token.existe_clave(clave_alpha))
 		{
-			ptr->establecer_modo_blend(DLibV::Representacion::blends::BLEND_ALPHA);
+			ptr->establecer_modo_blend(DLibV::Representacion::blends::alpha);
 			ptr->establecer_alpha((Uint8)token[clave_alpha].acc_int());
 		}
 
@@ -249,7 +249,7 @@ void Compositor_vista::registrar_externa(const std::string& clave, DLibV::Repres
 Compositor_vista::uptr_representacion Compositor_vista::crear_caja(const Dnot_token& token)
 {
 	auto color=rgba_desde_lista(token[clave_rgba]);
-	uptr_representacion res(new DLibV::Representacion_primitiva_caja(caja_desde_lista(token[clave_pos]), DLibV::rgba8(color.r, color.g, color.b, 255)));
+	uptr_representacion res(new DLibV::Representacion_primitiva_caja(DLibV::Representacion_primitiva_poligono::tipo::relleno, caja_desde_lista(token[clave_pos]), DLibV::rgba8(color.r, color.g, color.b, 255)));
 	return res;
 }
 
@@ -260,9 +260,7 @@ Compositor_vista::uptr_representacion Compositor_vista::crear_bitmap(const Dnot_
 		throw std::runtime_error("No se localiza la textura "+token[clave_textura].acc_string()+" para bitmap");
 	}
 	
-	uptr_representacion res(new DLibV::Representacion_bitmap(mapa_texturas[token[clave_textura]]));
-	res->establecer_posicion(caja_desde_lista(token[clave_pos]));
-	res->establecer_recorte(caja_desde_lista(token[clave_rec]));
+	uptr_representacion res(new DLibV::Representacion_bitmap(mapa_texturas[token[clave_textura]], caja_desde_lista(token[clave_pos]), caja_desde_lista(token[clave_rec])));
 
 	return res;
 }
@@ -277,7 +275,7 @@ Compositor_vista::uptr_representacion Compositor_vista::crear_ttf(const Dnot_tok
 	uptr_representacion res(new DLibV::Representacion_TTF(*mapa_fuentes[token[clave_fuente]], rgba_desde_lista(token[clave_rgba]), token[clave_texto].acc_string()));
 
 	auto posicion=posicion_desde_lista(token[clave_pos]);
-	res->establecer_posicion(posicion.x, posicion.y);
+	res->ir_a(posicion.x, posicion.y);
 	return res;
 }
 
