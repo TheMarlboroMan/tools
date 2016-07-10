@@ -11,14 +11,6 @@ Conjunto de utilidades libres con dependencias de pequeñas clases sueltas.
 La idea es reemplazar en la medida de lo posible a muchas funciones que están
 en libdansdl2 y que no deben estar ahí (manipulación de cadenas, porcentajes,
 etc...
-
-Algunas tendrán que quedarse en libdansdl2 (por ejemplo, las que hacen falta
-para separar las representaciones de texto) pero otras las podremos sacar fuera.
-
-Ya de paso podriamos sacar fuera tambien el localizador base y el controlador
-de argumentos e integrarlos con "Herramientas proyecto".
-
-//TODO: Revisar "Herramientas" en libdansdl2 porque casi todo puede irse fuera.
 */
 
 namespace Herramientas_proyecto
@@ -29,7 +21,15 @@ std::map<std::string, std::string> 	generar_mapa_pares(const std::string& ficher
 size_t					digitos_en_entero(int);
 void					reemplazar_str(std::string& sujeto, const std::string& busca, const std::string& reemplaza);
 std::string				reemplazar_str(const std::string& sujeto, const std::string& busca, const std::string& reemplaza);
-
+unsigned short int tipo_inicio_utf8(const char c);
+bool es_inicio_utf8_2b(const char c);
+bool es_inicio_utf8_3b(const char c);
+bool es_inicio_utf8_4b(const char c);
+bool es_inicio_utf8_5b(const char c);
+bool es_inicio_utf8_6b(const char c);
+unsigned char utf8_2b_a_uchar(char a, char b);
+char * cadena_w_a_8(const wchar_t * p_cadena);
+std::string cadena_a_maximo_ancho(std::string const &, unsigned int);
 
 }
 

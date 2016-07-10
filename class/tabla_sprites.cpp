@@ -1,4 +1,6 @@
 #include "tabla_sprites.h"
+#include "../source/string_utilidades.h"
+#include "../templates/parches_compat.h"
 
 using namespace Herramientas_proyecto;
 
@@ -29,8 +31,7 @@ void Tabla_sprites::cargar(const std::string& ruta)
 
 	if(!L)	
 	{
-		LOG<<"ERROR: Para Tabla_sprites no se ha podido abrir el archivo "<<ruta<<std::endl;
-		throw std::runtime_error("No se puede localizar archivo de frames");
+		throw std::runtime_error(std::string("No se puede localizar archivo de frames:")+ruta);
 	}
 	else
 	{
@@ -42,11 +43,10 @@ void Tabla_sprites::cargar(const std::string& ruta)
 			linea=L.leer_linea();
 			if(L.es_eof()) 
 			{
-				LOG<<"Fin fichero tabla sprites "<<ruta<<std::endl;
 				break;
 			}
 
-			std::vector<std::string> valores=DLibH::Herramientas::explotar(linea, separador);
+			std::vector<std::string> valores=explotar(linea, separador);
 			if(valores.size()==7)
 			{
 				Frame_sprites f;
@@ -61,8 +61,7 @@ void Tabla_sprites::cargar(const std::string& ruta)
 			}
 			else
 			{
-				LOG<<"ERROR: En tabla sprites, la línea "<<L.obtener_numero_linea()<<" no está bien formada."<<std::endl;
-				throw std::runtime_error("Linea de frame mal formada");
+				throw std::runtime_error(std::string("Linea de frame mal formada ")+ruta+std::string(" : ")+compat::to_string(L.obtener_numero_linea()));
 			}
 		}
 	}

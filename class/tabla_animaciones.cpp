@@ -1,4 +1,6 @@
 #include "tabla_animaciones.h"
+#include "../source/string_utilidades.h"
+#include "../templates/parches_compat.h"
 
 using namespace Herramientas_proyecto;
 
@@ -84,13 +86,10 @@ void Tabla_animaciones::cargar(const std::string& ruta)
 
 	if(!L)	
 	{
-		LOG<<"ERROR: Para Tabla_animaciones no se ha podido abrir el archivo "<<ruta<<std::endl;
-		throw std::runtime_error("Imposible localizar archivo de animación.");
+		throw std::runtime_error(std::string("Imposible localizar archivo de animación ")+ruta);
 	}
 	else
 	{
-		LOG<<"Iniciando inserción de animaciones de "<<ruta<<std::endl;
-
 		std::string linea;
 		const char inicio_titulo='*';
 		const char inicio_cabecera='!';
@@ -101,7 +100,6 @@ void Tabla_animaciones::cargar(const std::string& ruta)
 		{
 			animacion.reajustar_tiempo_frames();
 			animaciones[id]=animacion;		
-			LOG<<"Insertada animacion "<<id<<" con "<<animacion.size()<<" frames y "<<animacion.acc_duracion_total()<<"ms."<<std::endl;			
 		};
 
 		try
@@ -113,7 +111,6 @@ void Tabla_animaciones::cargar(const std::string& ruta)
 				{	
 					//Insertar la última animación...
 					if(animacion) insertar_anim(animacion, id);
-					LOG<<"Fin fichero animaciones "<<ruta<<std::endl;
 					break;
 				}
 
@@ -134,15 +131,10 @@ void Tabla_animaciones::cargar(const std::string& ruta)
 				}
 			}
 		}
-		catch(std::runtime_error& e)
+		catch(std::exception& e)
 		{
-			LOG<<e.what()<<" : Línea "<<L.obtener_numero_linea()<<" ["<<linea<<"]. Cancelando."<<std::endl;
-			throw e;
-		}
-		catch(std::out_of_range& e)
-		{
-			LOG<<e.what()<<" : Línea "<<L.obtener_numero_linea()<<" ["<<linea<<"]. Cancelando."<<std::endl;
-			throw e;
+			std::string error=e.what()+std::string(" : Linea ")+compat::to_string(L.obtener_numero_linea())+std::string(" ["+linea+"]. Cancelando");
+			throw std::runtime_error(error);
 		}
 	}
 }
@@ -150,7 +142,7 @@ void Tabla_animaciones::cargar(const std::string& ruta)
 size_t Tabla_animaciones::interpretar_como_cabecera(const std::string& linea)
 {
 	const char separador='\t';
-	const std::vector<std::string> valores=DLibH::Herramientas::explotar(linea, separador);
+	const std::vector<std::string> valores=explotar(linea, separador);
 	if(valores.size()==1)
 	{
 		int id=std::atoi(valores[0].c_str());
@@ -165,7 +157,7 @@ size_t Tabla_animaciones::interpretar_como_cabecera(const std::string& linea)
 void Tabla_animaciones::interpretar_como_linea(const std::string& linea, Animacion& animacion)
 {
 	const char separador='\t';
-	std::vector<std::string> valores=DLibH::Herramientas::explotar(linea, separador);
+	std::vector<std::string> valores=explotar(linea, separador);
 	if(valores.size()==2)
 	{
 		int duracion=std::atoi(valores[0].c_str());
@@ -182,7 +174,6 @@ void Tabla_animaciones::interpretar_como_linea(const std::string& linea, Animaci
 		}
 		catch(std::out_of_range& e)
 		{
-			LOG<<e.what()<<" : no se localiza el indice frame "<<indice_frame<<" para interpretar como línea"<<std::endl;
 			throw e;
 		}
 	}

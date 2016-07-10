@@ -37,9 +37,6 @@ comparten la misma hoja de sprites aunque representan cosas distintas.
 
 #include <herramientas/herramientas/herramientas.h>
 #include "lector_txt.h"
-#include <herramientas/log_base/log_base.h>
-
-extern DLibH::Log_base LOG;
 
 
 namespace Herramientas_proyecto

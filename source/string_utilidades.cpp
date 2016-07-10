@@ -122,3 +122,107 @@ std::string Herramientas_proyecto::reemplazar_str(const std::string& sujeto, con
 	reemplazar_str(res, busca, reemplaza);
 	return res;
 }
+
+unsigned short int Herramientas_proyecto::tipo_inicio_utf8(const char c)
+{
+	if(es_inicio_utf8_6b(c)) return 6;
+	else if(es_inicio_utf8_5b(c)) return 5;
+	else if(es_inicio_utf8_4b(c)) return 4;
+	else if(es_inicio_utf8_3b(c)) return 3;
+	else if(es_inicio_utf8_2b(c)) return 2;
+	else return 0;
+}
+
+bool Herramientas_proyecto::es_inicio_utf8_2b(const char c)
+{
+	return c & 128;
+}
+
+bool Herramientas_proyecto::es_inicio_utf8_3b(const char c)
+{
+	return es_inicio_utf8_2b(c) && (c & 64);
+}
+
+bool Herramientas_proyecto::es_inicio_utf8_4b(const char c)
+{
+	return es_inicio_utf8_3b(c) && (c & 32);
+}
+
+bool Herramientas_proyecto::es_inicio_utf8_5b(const char c)
+{
+	return es_inicio_utf8_4b(c) && (c & 16);
+}
+
+bool Herramientas_proyecto::es_inicio_utf8_6b(const char c)
+{
+	return es_inicio_utf8_5b(c) && (c & 8);
+}
+
+unsigned char Herramientas_proyecto::utf8_2b_a_uchar(char a, char b)
+{
+	a=a & 3;	//Nos quedamos con los 2 bits de la derecha.
+	a=a<<6;		//Desplazamos 6 a la izquierda para que esos dos estén a la izquierda del todo.
+	b=b & 63;	//Nos quedamos con los 6 bits de la derecha.
+
+	unsigned char r=a|b;	//Combinamos.
+	return r;
+}
+
+char * Herramientas_proyecto::cadena_w_a_8(const wchar_t * p_cadena)
+{
+	char * buffer=new char[1024];
+	unsigned int i=0;
+
+	std::locale loc;
+
+	while(p_cadena[i]!='\0')
+	{
+		buffer[i]=std::use_facet<std::ctype<wchar_t> >(loc).widen(p_cadena[i]);
+		i++;
+	}
+
+	buffer[i]='\0';
+
+//			=st.narrow(p_cadena[i], '?');
+
+	return buffer;
+}
+
+//Corta una cadena en varias líneas con el máximo de p_maximo caracteres
+//por línea.
+std::string Herramientas_proyecto::cadena_a_maximo_ancho(std::string const &p_cadena, unsigned int p_maximo)
+{
+	unsigned int leidos=0;
+	std::string resultado;
+	auto it=std::begin(p_cadena), fin=std::end(p_cadena);
+	
+	while(it != fin)
+	{
+		++leidos;
+		resultado+=(*it);
+
+		//TODO: REvisar: si hacemos líneas de exactamente el mismo
+		//ancho hace dos veces \n.
+
+		if((*it)=='\n') 
+		{
+			leidos=0;
+		}
+		else if(leidos % p_maximo==0)
+		{
+			//TODO
+			//Aquí cabe un poco más de rollo... 
+			//Por ejemplo, si lo que hemos leido es un 
+			//espacio lo podemos quitar. Si vamos a partir
+			//una cadena en dos podemos directamente cortar
+			//hacia atrás (siempre que haya un espacio cerca)
+			//Y pasar a la siguiente.
+
+			resultado+='\n';
+		}
+
+		++it;
+	}
+
+	return resultado;
+}
