@@ -14,11 +14,7 @@
 #include "valor_limitado.h"
 #include "dnot_parser.h"
 
-#ifdef WINCOMPIL
-//Localización del parche mingw32... Esto debería estar en otro lado, supongo.
-#include <herramientas/herramientas/herramientas.h>
-#endif
-
+#include "../templates/parches_compat.h"
 /*
 La representación interna de un menú de opciones de un único nivel en el que
 cada opción puede tener N valores que van "rotando", por ejemplo:
@@ -223,16 +219,7 @@ class Menu_opciones
 	{
 		Valor_limitado<int>		val;
 
-		virtual std::string		valor_visible() const 
-		{
-			#ifdef WINCOMPIL
-			using namespace parche_mingw;
-			#else
-			using namespace std;
-			#endif
-
-			return to_string(val.actual());
-		}
+		virtual std::string		valor_visible() const {return compat::to_string(val.actual());}
 		int				obtener_valor() const {return val.actual();}
 		virtual tipos			tipo() const {return tipos::tint;}
 		virtual void			rotar(int d){val+=d;}
@@ -246,16 +233,7 @@ class Menu_opciones
 	{
 		bool				valor;	
 	
-		virtual std::string		valor_visible() const 
-		{
-			#ifdef WINCOMPIL
-			using namespace parche_mingw;
-			#else
-			using namespace std;
-			#endif
-
-			return to_string(valor);
-		}
+		virtual std::string		valor_visible() const {return compat::to_string(valor);}
 		bool				obtener_valor() const {return valor;}
 		virtual tipos			tipo() const {return tipos::tbool;}
 		virtual void			rotar(int d){valor=!valor;}

@@ -1,9 +1,6 @@
 #include "localizador_base.h"
 
-#ifdef WINCOMPIL
-/* Localización del parche mingw32... Esto debería estar en otro lado, supongo. */
-#include <herramientas/herramientas/herramientas.h>
-#endif
+#include "../templates/parches_compat.h"
 
 using namespace Herramientas_proyecto;
 
@@ -35,16 +32,10 @@ void Localizador_base::insertar_cadena(unsigned int p_indice, t_cadena const& p_
 
 t_cadena Localizador_base::generar_nombre_archivo(t_cadena const& p_original)
 {
-#ifdef WINCOMPIL
-	using namespace parche_mingw;
-#else
-	using namespace std;
-#endif
-	
 	t_cadena nombre_archivo(p_original);
 
 	nombre_archivo.append(".");
-	nombre_archivo.append(to_string(this->idioma));
+	nombre_archivo.append(compat::to_string(this->idioma));
 	nombre_archivo.append(".dat");
 
 	return nombre_archivo;

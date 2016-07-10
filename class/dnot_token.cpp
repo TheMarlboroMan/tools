@@ -1,9 +1,6 @@
 #include "dnot_token.h"
 
-#ifdef WINCOMPIL
-/* Localización del parche mingw32... Esto debería estar en otro lado, supongo. */
-#include <herramientas/herramientas/herramientas.h>
-#endif
+#include "../templates/parches_compat.h"
 
 using namespace Herramientas_proyecto;
 
@@ -266,12 +263,6 @@ std::string Dnot_token::serializar(const Dnot_token_opciones_serializador& opcio
 {
 	std::string resultado;
 
-#ifdef WINCOMPIL
-	using namespace parche_mingw;
-#else
-	using namespace std;
-#endif
-
 	size_t tot=0, cur=0;
 
 	auto nl=[&resultado, &opciones](int rec)
@@ -330,13 +321,13 @@ std::string Dnot_token::serializar(const Dnot_token_opciones_serializador& opcio
 			resultado+="\""+valor_string+"\"";
 		break;
 		case tipos::valor_int: 
-			resultado+=to_string(valor_int);
+			resultado+=compat::to_string(valor_int);
 		break;
 		case tipos::valor_float:
-			resultado+=to_string(valor_float)+'f';
+			resultado+=compat::to_string(valor_float)+'f';
 		break;
 		case tipos::valor_double:
-			resultado+=to_string(valor_double);
+			resultado+=compat::to_string(valor_double);
 		break;
 		case tipos::valor_bool:
 			resultado+=valor_bool ? "true" : "false";
@@ -364,21 +355,15 @@ std::string Dnot_token::traducir_tipo(Dnot_token::tipos t)const
 
 std::string Dnot_token::valor_como_string()const
 {
-#ifdef WINCOMPIL
-	using namespace parche_mingw;
-#else
-	using namespace std;
-#endif
-
 	switch(tipo)
 	{
-		case tipos::compuesto: return "compuesto ("+to_string(tokens.size())+")"; break;
+		case tipos::compuesto: return "compuesto ("+compat::to_string(tokens.size())+")"; break;
 		case tipos::valor_string: return valor_string; break;
-		case tipos::valor_int: return to_string(valor_int); break;
-		case tipos::valor_float: return to_string(valor_float); break;
-		case tipos::valor_double: return to_string(valor_double); break;
+		case tipos::valor_int: return compat::to_string(valor_int); break;
+		case tipos::valor_float: return compat::to_string(valor_float); break;
+		case tipos::valor_double: return compat::to_string(valor_double); break;
 		case tipos::valor_bool: return valor_bool ? "true" : "false"; break;
-		case tipos::lista:	return "lista ("+to_string(lista.size())+")"; break;
+		case tipos::lista:	return "lista ("+compat::to_string(lista.size())+")"; break;
 		default: return "** desconocido **"; break;
 	}
 }
