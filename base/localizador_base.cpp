@@ -1,5 +1,5 @@
-#include "localizador_base.h"
-
+﻿#include "localizador_base.h"
+#include <cstdlib>
 #include "../templates/parches_compat.h"
 
 using namespace Herramientas_proyecto;

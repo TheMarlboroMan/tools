@@ -2,12 +2,12 @@
 #define MULTIPLATAFORM_PATCHES_COMPAT_H
 
 #include <string>
+#include <sstream>
 
 namespace compat
 {
 
 #ifdef WINCOMPIL
-#include <sstream>
 
 template <typename T> std::string to_string(const T& n)
 {
