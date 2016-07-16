@@ -3,6 +3,8 @@
 
 #include <random>
 
+//TODO: How's this a template???.
+
 namespace Herramientas_proyecto
 {
 
