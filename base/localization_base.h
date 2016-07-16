@@ -1,5 +1,5 @@
-#ifndef LOCALIZADOR_BASE_H
-#define LOCALIZADOR_BASE_H
+#ifndef TOOLS_LOCALIZATION_BASE_H
+#define TOOLS_LOCALIZATION_BASE_H
 
 #include <string>
 #include <map>

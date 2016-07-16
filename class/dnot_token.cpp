@@ -1,6 +1,6 @@
 #include "dnot_token.h"
 
-#include "../templates/parches_compat.h"
+#include "../templates/compatibility_patches.h"
 
 using namespace Herramientas_proyecto;
 
