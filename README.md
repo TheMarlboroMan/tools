@@ -1,7 +1,13 @@
 # herramientas_proyecto
 
-Herramientas comunes para varios proyectos. Casi todas ellas dependen en cierta medida de la libdansdl2 pero tienen funcionalidades muy específicas como para incluirlas dentro de la librería. 
+Common tools for various projects. Most of them depend on libdansdl2 but are developed to fullfill very specifics needs (much too specific to get a part in the main library).
 
-La idea es que el código sea reutilizable en varios proyectos con tanta independencia como sea posible. Con esta finalidad, el makefile de estas herramientas genera tan sólo un puñado de object files que hay que linkar posteriormente con el proyecto de turno (en el que deberíamos incluir los headers, por supuesto).,
+With the purpose of reusability and independence the makefile only generate object files that have to be linked with the project later. Of course, this does not apply to the templates.
 
-Hay cosas como listados verticales y en rejilla, un parser de "casi JSON", una matriz 2d basada en std::map, tablas de animaciones y sprites, un compositor de vistas basado en ficheros... Estas herramientas están en constante expansión :).
+As for July 2016 these tools have been translated into english and retooled to some point (some things have been changed, all interfaces have been redone and some utilities have been deleted). As a result of this, all compatibility with the previous versions has been broken. There should still be copies in the branches "master" and "classic" of the "herramientas_proyecto" repository, but these will be developed no more.
+
+## TODO
+
+- Test all functionality in the test directory.
+- Delete old tests.
+- Properly document the use of the more complicated tools (like the menu).
