@@ -493,7 +493,7 @@ void options_menu_from_dnot(
 	const std::string& filename, 
 	const std::string& root, 
 	options_menu<Tkey>& data, //This should be a reference to the real menu.
-	std::map<Tkey, int>& translation_map)
+	std::map<Tkey, int>& translation_map) //This seems to be a reference to the real translation map
 {
 	const auto parser=dnot_parse(filename);
 	const auto options=parser[root].get_vector();
