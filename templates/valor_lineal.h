@@ -1,5 +1,5 @@
-#ifndef VALOR_LINEAL_H
-#define VALOR_LINEAL_H
+#ifndef TOOLS_LINEAR_VALUE_H
+#define TOOLS_LINEAR_VALUE_H
 
 #include <algorithm>
 
