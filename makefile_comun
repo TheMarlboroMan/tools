@@ -29,11 +29,6 @@ clean:
 $(DIR_O)dummy :
 	$(MKDIR) objects
 
-########################
-## IF YOU REACHED HERE
-## YOU SHOULD REVIEW
-## AND TRANSLATE THE TEMPLATES
-
 $(DIR_O)animation_table.o :\
 $(DIR_O)sprite_table.o\
 $(DIR_HERRAMIENTAS_PROYECTO)animation_table.h \
