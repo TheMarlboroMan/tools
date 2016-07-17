@@ -1,22 +1,22 @@
 #include "dnot_parser.h"
 
-using namespace Herramientas_proyecto;
+using namespace tools;
 
-Dnot_parser::Dnot_parser(std::istream& stream, tipos t)
-	:estado(estados::leyendo), 
-	leer_comillas(false), finalizado(false),
-	tipo(t),
+dnot_parser::dnot_parser(std::istream& stream, types t)
+	:estado(tstates::reading), 
+	read_quotes(false), done(false),
+	type(t),
 	stream(stream)
 {
 	buffer.reserve(1024);
-	token.tipo=Dnot_token::tipos::compuesto;
+	token.type=dnot_token::types::tmap;
 }
 
-void Dnot_parser::operator()()
+void dnot_parser::operator()()
 {
 	while(true)
 	{	
-		if(estado==estados::salir) 
+		if(estado==tstates::exiting) 
 		{
 			break;
 		}
@@ -24,19 +24,19 @@ void Dnot_parser::operator()()
 		//Tenemos dos modos de lectura: estoy "dentro de una string"
 		//o fuera.
 
-		char cb=leer_comillas ? leer_string() : leer_stream();
+		char cb=read_quotes ? read_string() : read_stream();
 
 		if(stream.eof())
 		{
-			//TODO: Es posible que esté malformado si estamos leyendo comillas;
-			if(estado==estados::leyendo) asignar_valor_objeto();
-			estado=estados::salir;				
-			finalizado=true;
+			//TODO: Es posible que esté malformado si estamos reading quotes;
+			if(estado==tstates::reading) assign_tobject();
+			estado=tstates::exiting;				
+			done=true;
 			break;
 		}
 
 		buffer+=cb;
-		leer_comillas ? procesar_string(cb) : procesar_stream(cb);
+		read_quotes ? process_string(cb) : process_stream(cb);
 	}
 }
 
@@ -44,7 +44,7 @@ void Dnot_parser::operator()()
 * Lee lo que sea que haya en el stream, sea o no whitespace.
 */
 
-char Dnot_parser::leer_string()
+char dnot_parser::read_string()
 {
 	char cb;
 	stream.get(cb);
@@ -55,7 +55,7 @@ char Dnot_parser::leer_string()
 * Lee el stream ignorando whitespace.
 */
 
-char Dnot_parser::leer_stream()
+char dnot_parser::read_stream()
 {
 	char cb;
 	stream>>cb;
@@ -64,123 +64,123 @@ char Dnot_parser::leer_stream()
 
 /*
 * Procesa el carácter leido en modo string. Se guarda lo que sea que tenga a 
-* no ser que encuentre unas comillas, que finaliza el modo de lectura
+* no ser que encuentre unas quotes, que finaliza el modo de lectura
 * entrecomillada.
-* TODO: No es posible escapar comillas dentro de una secuencia de comillas.
+* TODO: No es posible escapar quotes dentro de una secuencia de quotes.
 * Podríamos usar una secuencia de escape para leer, simplemente si encontramos
 * el carácter \ lo siguiente entraría en el buffer tal cual.
 */
 
-void Dnot_parser::procesar_string(char cb)
+void dnot_parser::process_string(char cb)
 {
-	if(cb=='"') comillas();
+	if(cb=='"') quotes();
 }
 
 /*
 * Procesa el carácter leido en modo stream, lo que indica que si lee algún
-* carácter de control le asignará su significado.
+* carácter de control le assigná su significado.
 */
 
-void Dnot_parser::procesar_stream(char cb)
+void dnot_parser::process_stream(char cb)
 {
 	switch(cb)
 	{
-		case ',': coma(); break;
-		case '"': comillas(); break;
-		case '{': abre_llave(); break;
-		case '}': cierra_llave(); break;
-		case '[': abre_corchete(); break;
-		case ']': cierra_corchete(); break;
+		case ',': comma(); break;
+		case '"': quotes(); break;
+		case '{': open_brace(); break;
+		case '}': close_brace(); break;
+		case '[': open_bracket(); break;
+		case ']': close_bracket(); break;
 	}
 }
 
 /**
 * Indica que ha leido el carácter de control ", que abre o cierra una secuencia
-* de comillas.
+* de quotes.
 */
 
-void Dnot_parser::comillas()
+void dnot_parser::quotes()
 {
-	leer_comillas=!leer_comillas;
+	read_quotes=!read_quotes;
 }
 
 /**
-* La coma indica que se ha llegado al final de una enumeración. En función de
-* si el parser es de objeto o lista llamaremos a la función de turno.
-* Se contempla el caso que encontremos una coma tras ] o }, que indicaría el
+* La comma indica que se ha llegado al final de una enumeración. En función de
+* si el parser es de tobject o tarray llamaremos a la función de turno.
+* Se contempla el caso que encontremos una comma tras ] o }, que indicaría el
 * fin de un subparser. Dado que el estado de [ o { contempla la inserción
 * no haríamos nada.
 */
 
-void Dnot_parser::coma()
+void dnot_parser::comma()
 {
 	switch(estado)
 	{	
-		case estados::leyendo:
-			switch(tipo)
+		case tstates::reading:
+			switch(type)
 			{
-				case tipos::objeto: asignar_valor_objeto(); break;
-				case tipos::lista: asignar_valor_lista(); break;
+				case types::tmap: assign_tobject(); break;
+				case types::tvector: assign_tarray(); break;
 			}
 		break;
-		case estados::fin_subparser:
+		case tstates::exiting_subparser:
 			//NOOP;
 		break;
 		default:	
-			error("Encontrado , en estado incorrecto");
+			error("found comma in invalid state");
 		break;
 	}
 
-	estado=estados::leyendo;
+	estado=tstates::reading;
 	buffer.clear();
 }
 
 /**
-* Crea un subparser en modo objeto y asigna los tokens leidos del mismo. El
-* estado final es "fin_subparser", que indica que la siguiente coma debe 
+* Crea un subparser en modo tobject y asigna los tokens leidos del mismo. El
+* estado final es "exiting_subparser", que indica que la siguiente comma debe 
 * ignorarse con respecto a la inserción.
 */
 
-void Dnot_parser::abre_llave()
+void dnot_parser::open_brace()
 {
 	switch(estado)
 	{
-		case estados::leyendo:
+		case tstates::reading:
 		{
-			Dnot_parser p(stream);
+			dnot_parser p(stream);
 			p();
-			asignar_subparser_objeto(p.token.tokens);
-			estado=estados::fin_subparser;
+			assign_tobject_subparser(p.token.tokens);
+			estado=tstates::exiting_subparser;
 		}
 		break;
 
 		default:
-			error("Encontrado { en estado incorrecto : ");
+			error("found open brace in incorrect state : ");
 		break;
 	}
 }
 
 /*
-* Eso se hará desde dentro de un subparser y asignará el último valor, como
-* si fuera una coma. Luego marcará el subparser como "finalizado".
+* Eso se hará desde dentro de un subparser y assigná el último valor, como
+* si fuera una comma. Luego marcará el subparser como "done".
 */
 
-void Dnot_parser::cierra_llave()
+void dnot_parser::close_brace()
 {
 	switch(estado)
 	{
-		case estados::leyendo:
-			asignar_valor_objeto();
+		case tstates::reading:
+			assign_tobject();
 		break;
-		case estados::fin_subparser:
+		case tstates::exiting_subparser:
 			//NOOP.
 		break;
 		default:
-			error("Encontrado } en estado incorrecto");
+			error("found close brace in incorrect state");
 		break;
 	}
 
-	estado=estados::salir;
+	estado=tstates::exiting;
 	buffer.clear();
 }
 
@@ -188,21 +188,21 @@ void Dnot_parser::cierra_llave()
 * Idem que abre llave.
 */
 
-void Dnot_parser::abre_corchete()
+void dnot_parser::open_bracket()
 {
 	switch(estado)
 	{
-		case estados::leyendo:
+		case tstates::reading:
 		{
-			Dnot_parser p(stream, tipos::lista);
+			dnot_parser p(stream, types::tvector);
 			p();
-			asignar_subparser_lista(p.token.lista);
-			estado=estados::fin_subparser;
+			assign_tarray_subparser(p.token.vector);
+			estado=tstates::exiting_subparser;
 		}
 		break;
 
 		default:
-			error("Encontrado [ en estado incorrecto : ");
+			error("found open bracket in incorrect state : ");
 		break;
 	}
 }
@@ -211,37 +211,37 @@ void Dnot_parser::abre_corchete()
 * Idem que "cierra llave.
 */
 
-void Dnot_parser::cierra_corchete()
+void dnot_parser::close_bracket()
 {
 	switch(estado)
 	{
-		case estados::leyendo:
-			asignar_valor_lista();
+		case tstates::reading:
+			assign_tarray();
 		break;
-		case estados::fin_subparser:
+		case tstates::exiting_subparser:
 			//NOOP.
 		break;
 		default:
-			error("Encontrado ] en estado incorrecto");
+			error("found close bracket in incorrect state");
 		break;
 	}
 
-	estado=estados::salir;
+	estado=tstates::exiting;
 	buffer.clear();
 }
 
 /**
-* Se asigna un valor textual a un token, ya sea por encontrar una coma o por
+* Se asigna un valor textual a un token, ya sea por encontrar una comma o por
 * llegarse al fin del fichero. Se partirá el buffer en dos para separar la
 * clave del valor.
 */
 
-void Dnot_parser::asignar_valor_objeto()
+void dnot_parser::assign_tobject()
 {
 	size_t pos=buffer.find(":");
 	if(pos==std::string::npos)
 	{
-		error("No se localizan : para objeto");
+		error("no color for object found");
 	}
 	else
 	{
@@ -250,95 +250,95 @@ void Dnot_parser::asignar_valor_objeto()
 
 		if(token.tokens.count(clave))
 		{
-			error("La clave "+clave+" ya existe para token");
+			error("repeated key "+clave+" for object");
 		}
 
-		token.tipo=Dnot_token::tipos::compuesto;
-		token.tokens[clave]=generar_token_valor(valor);
+		token.type=dnot_token::types::tmap;
+		token.tokens[clave]=generate_token(valor);
 		buffer.clear();
 	}
 }
 
 /*
-* Infiere el tipo de valor y lo asigna a un token que devuelve. Las normas de 
+* Infiere el type de valor y lo asigna a un token que devuelve. Las normas de 
 * inferencia son bastante naive, pero de momento nos valen así. Ojo, los 
 * operadores de asignación del token son explícitos, de modo que necesitamos el 
-* tipo de dato exacto.
+* type de dato exacto.
 */ 
 
-Dnot_token Dnot_parser::generar_token_valor(const std::string& v)
+dnot_token dnot_parser::generate_token(const std::string& v)
 {
-	Dnot_token t;
+	dnot_token t;
 
 	//Comprobar bool
 	if(v=="true" || v=="false")
 	{			
-		t.asignar(v=="true");
+		t.assign(v=="true");
 	}
 	//String...
 	else if(v.front()=='"' && v.back()=='"')
 	{
-		t.asignar(v.substr(1, v.size()-2));
+		t.assign(v.substr(1, v.size()-2));
 	}
 	//Float y double...
 	else if(v.find(".") != std::string::npos)
 	{
 		if(v.back()=='f')
 		{
-			t.asignar((float)std::atof(v.c_str()));
+			t.assign((float)std::atof(v.c_str()));
 		}
 		else
 		{
-			t.asignar(std::atof(v.c_str()));
+			t.assign(std::atof(v.c_str()));
 		}
 	}
 	//Entero...
 	else if(std::all_of(std::begin(v), std::end(v), [](const char c) {return isdigit(c) || c=='-';}))
 	{
-		t.asignar(std::atoi(v.c_str()));
+		t.assign(std::atoi(v.c_str()));
 	}
 	else
 	{
-		error("Imposible inferir valor");
+		error("unable to infer value");
 	}
 
 	return t;
 }
 
 /**
-* Cuando estamos en un parser de modo lista no podemos tener dos puntos: una
-* lista es un array de tokens anónimos. A esta función la llamaremos tras
-* encontrar una coma en un parser de lista.
+* Cuando estamos en un parser de modo tarray no podemos tener dos puntos: una
+* tarray es un array de tokens anónimos. A esta función la llamaremos tras
+* encontrar una comma en un parser de tarray.
 */
 
-void Dnot_parser::asignar_valor_lista()
+void dnot_parser::assign_tarray()
 {
 	size_t pos=buffer.find(":");
 	if(pos!=std::string::npos)
 	{
-		error("Se encuentra : asignando valor a lista.");
+		error("colon found in array");
 	}
 
 	std::string valor=buffer.substr(0, buffer.size()-1);
-	token.tipo=Dnot_token::tipos::lista;
-	if(valor.size()) token.lista.push_back(generar_token_valor(valor));
+	token.type=dnot_token::types::tvector;
+	if(valor.size()) token.vector.push_back(generate_token(valor));
 	buffer.clear();
 }
 
 /**
-* Se asigna el array de tokens como "grupo" o "objeto" del token actual. Se
-* contempla el caso de un token anónimo (para crear un objeto dentro de una 
-* lista.
+* Se asigna el array de tokens como "grupo" o "tobject" del token actual. Se
+* contempla el caso de un token anónimo (para crear un tobject dentro de una 
+* tarray.
 */
 
-void Dnot_parser::asignar_subparser_objeto(const std::map<std::string, Dnot_token>& aux)
+void dnot_parser::assign_tobject_subparser(const std::map<std::string, dnot_token>& aux)
 {
-	Dnot_token T;
-	T.asignar(aux);
+	dnot_token T;
+	T.assign(aux);
 	size_t pos=buffer.find(":");
 	if(pos==std::string::npos)
 	{
-		token.lista.push_back(T);
+		token.vector.push_back(T);
 	}
 	else
 	{
@@ -348,25 +348,25 @@ void Dnot_parser::asignar_subparser_objeto(const std::map<std::string, Dnot_toke
 
 /*
 * Se asigna el array de tokens (supuestamente todos son anónimos) como 
-* lista para el token actual al cerrar un corchete. Al igual que en el caso
+* tarray para el token actual al cerrar un corchete. Al igual que en el caso
 * anterior, el token puede o no ser anónimo.
 */
 
-void Dnot_parser::asignar_subparser_lista(const std::vector<Dnot_token>& aux)
+void dnot_parser::assign_tarray_subparser(const std::vector<dnot_token>& aux)
 {
-	//TODO: Esto falla: no podemos asignar listas. El buffer sigue lleno
-	//cuando llegamos a este punto. se asigna la lista del token pero
+	//TODO: Esto falla: no podemos assign tarrays. El buffer sigue lleno
+	//cuando llegamos a este punto. se asigna la tarray del token pero
 	//el token no tiene nombre!!!. No tenemos una estructura capaz de 
 	//representar eso.
 
-	Dnot_token T;
-	T.asignar(aux);
+	dnot_token T;
+	T.assign(aux);
 
 	size_t pos=buffer.find(":");
-	//Si el token es anónimo simplemente insertamos algo en la lista...
+	//Si el token es anónimo simplemente insertamos algo en la tarray...
 	if(pos==std::string::npos)
 	{
-		token.lista.push_back(T);
+		token.vector.push_back(T);
 	}
 	else
 	{
@@ -374,30 +374,33 @@ void Dnot_parser::asignar_subparser_lista(const std::vector<Dnot_token>& aux)
 	}
 }
 
-void Dnot_parser::error(const std::string& msj)
+void dnot_parser::error(const std::string& msj)
 {
-	throw std::runtime_error(msj+"\nESTADO:"+traducir_estado()+"\nBUFFER:"+buffer);
+	throw std::runtime_error(msj+"\nstate:"+get_state()+"\nbuffer:"+buffer);
 }
 
-std::string Dnot_parser::traducir_estado()
+std::string dnot_parser::get_state()
 {
 	switch(estado)
 	{
-		case estados::leyendo: return "LEYENDO"; break;
-		case estados::fin_subparser: return "FIN SUBPARSER"; break;		
-		case estados::salir: return "SALIR"; break;
-		default: return "DESCONOCIDO"; break;
+		case tstates::reading: return "reading"; break;
+		case tstates::exiting_subparser: return "exit subparser"; break;		
+		case tstates::exiting: return "exit"; break;
 	}
+
+	//Shut compiler up.
+	return std::string();
 }
 
-Dnot_token Herramientas_proyecto::parsear_dnot(const std::string& c)
+dnot_token tools::dnot_parse(const std::string& c)
 {
 	std::ifstream f(c.c_str());
 	if(!f.is_open()) 
 	{
-		throw std::runtime_error("Imposible abrir fichero "+c);
+		throw std::runtime_error("unable to parse file "+c);
 	}
-	Dnot_parser p(f);
+
+	dnot_parser p(f);
 	p();
-	return p.acc_token();
+	return p.get_token();
 }

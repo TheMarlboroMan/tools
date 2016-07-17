@@ -1,5 +1,5 @@
-#ifndef DNOT_PARSER_H
-#define DNOT_PARSER_H
+#ifndef TOOLS_DNOT_PARSER_H
+#define TOOLS_DNOT_PARSER_H
 
 /**
 * Parser de algo que se parece a JSON pero no termina de serlo porque no he
@@ -19,78 +19,79 @@
 #include <algorithm>
 #include "dnot_token.h"
 
-namespace Herramientas_proyecto
+namespace tools
 {
 
-class Dnot_parser
+class dnot_parser
 {
 	private:
 
-	enum class tipos {objeto, lista};
+	enum class types {tmap, tvector};
 
 	public:
 
-						Dnot_parser(std::istream&, tipos t=tipos::objeto);
+						dnot_parser(std::istream&, types t=types::tmap);
 	void 					operator()();
 
 	//TODO: Un problema con el parser es que los ficheros no tienen un nodo
-	//"raiz". Asumiremos siempre que la base es un objeto mientras no pensemos
+	//"raiz". Asumiremos siempre que la base es un tobject mientras no pensemos
 	//en una solución.
 
-	const Dnot_token&			acc_token() const 
+	const dnot_token&			get_token() const 
 	{
-		if(!finalizado) throw std::runtime_error("El parser no se ha ejecutado");
+		if(!done) throw std::runtime_error("dnot parser was not executed");
 		return token;
 	}
 
-	Dnot_token&				acc_token() 
+	dnot_token&				get_token() 
 	{
-		if(!finalizado) throw std::runtime_error("El parser no se ha ejecutado");
+		if(!done) throw std::runtime_error("dnot parser was not executed");
 		return token;
 	}
 
-//	std::map<std::string, Dnot_token>& 	acc_tokens() {return tokens;}
+//	std::map<std::string, dnot_token>& 	get_tokens() {return tokens;}
 	
 	private:
  
 	
-	char 					leer_string();
-	char 					leer_stream();
-	void 					procesar_string(char cb);
-	void 					procesar_stream(char cb);
-	void 					comillas();
-	void 					coma();
-	void 					abre_llave();
-	void 					cierra_llave();
-	void 					abre_corchete();
-	void 					cierra_corchete();
-	void 					asignar_valor_objeto();
-	Dnot_token 				generar_token_valor(const std::string& v);
-	void 					asignar_valor_lista();
-	void 					asignar_subparser_objeto(const std::map<std::string, Dnot_token>& aux);
-	void 					asignar_subparser_lista(const std::vector<Dnot_token>& aux);
+	char 					read_string();
+	char 					read_stream();
+	void 					process_string(char cb);
+	void 					process_stream(char cb);
+	void 					quotes();
+	void 					comma();
+	void 					open_brace();
+	void 					close_brace();
+	void 					open_bracket();
+	void 					close_bracket();
+	void 					assign_tobject();
+	dnot_token 				generate_token(const std::string& v);
+	void 					assign_tarray();
+	void 					assign_tobject_subparser(const std::map<std::string, dnot_token>& aux);
+	void 					assign_tarray_subparser(const std::vector<dnot_token>& aux);
 	void 					error(const std::string& msj);
-	std::string 				traducir_estado();
+	std::string 				get_state();
 
-	enum class estados {leyendo, salir, fin_subparser};
+	enum class tstates {reading, exiting, exiting_subparser};
 
-	estados			estado;
-	bool			leer_comillas, finalizado;
-	tipos			tipo;
+	tstates			estado;
+	bool			read_quotes, 
+				done;
+	types			type;
 	std::istream&		stream; //El stream es una referencia para poder pasarlo a los parsers recursivos.
 	std::string 		buffer;
 
 	//TODO: std::map no conserva el orden de inserción: Tal vez necesitemos
 	//un vector de pares std::string - token, para poder hacer esto.
 
-	Dnot_token				token; //El token base.
+	dnot_token				token; //El token base.
 
 
-	//std::map<std::string, Dnot_token>	tokens;
-	//std::vector<Dnot_token>	lista;
+	//std::map<std::string, dnot_token>	tokens;
+	//std::vector<dnot_token>	tarray;
 };
 
-Dnot_token	parsear_dnot(const std::string&);
+dnot_token	dnot_parse(const std::string&);
 }
 
 /*
@@ -98,7 +99,7 @@ Dnot puede leer algo como...
 
 inicio:1,
 sencillo:{
-	ps1:"una cadena con espacios y : y cosas así, con comas y {abre} y [cierra]",
+	ps1:"una cadena con espacios y : y cosas así, con commas y {abre} y [cierra]",
 	ps2:12
 34
 },
@@ -117,7 +118,7 @@ complejo:{
 			dos:2},
 		p_b:"beee"
 	},
-	lista:[1,2,3, {uno:1, dos:2}, 4, 5, ["uno", "dos", "tres"]],
+	tarray:[1,2,3, {uno:1, dos:2}, 4, 5, ["uno", "dos", "tres"]],
 	obj:{a:"b", c:"d"}
 }
 

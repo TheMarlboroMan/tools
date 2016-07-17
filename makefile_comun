@@ -5,19 +5,19 @@ DIR_O=./objects/
 
 all:\
 $(DIR_O)dummy\
-$(DIR_O)tabla_sprites.o\
-$(DIR_O)gestor_fuentes_ttf.o\
-$(DIR_O)tabla_animaciones.o\
+$(DIR_O)sprite_table.o\
+$(DIR_O)ttf_manager.o\
+$(DIR_O)animation_table.o\
 $(DIR_O)pager.o\
 $(DIR_O)dnot_token.o\
 $(DIR_O)dnot_parser.o\
 $(DIR_O)text_reader.o\
-$(DIR_O)compositor_vista.o\
-$(DIR_O)controlador_argumentos.o\
+$(DIR_O)view_composer.o\
+$(DIR_O)arg_manager.o\
 $(DIR_O)localization_base.o\
-$(DIR_O)fichero_pares.o\
+$(DIR_O)pair_file_parser.o\
 $(DIR_O)file_utils.o\
-$(DIR_O)string_utilidades.o
+$(DIR_O)string_utils.o
 	@echo Objetos generados.
 
 clean:
@@ -34,17 +34,19 @@ $(DIR_O)dummy :
 ## YOU SHOULD REVIEW
 ## AND TRANSLATE THE TEMPLATES
 
-$(DIR_O)tabla_animaciones.o :\
-$(DIR_O)tabla_sprites.o\
-$(DIR_HERRAMIENTAS_PROYECTO)tabla_animaciones.h \
-$(DIR_HERRAMIENTAS_PROYECTO)tabla_animaciones.cpp
-	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)tabla_animaciones.cpp -o $(DIR_O)tabla_animaciones.o
+$(DIR_O)animation_table.o :\
+$(DIR_O)sprite_table.o\
+$(DIR_HERRAMIENTAS_PROYECTO)animation_table.h \
+$(DIR_HERRAMIENTAS_PROYECTO)animation_table.cpp
+	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)animation_table.cpp -o $(DIR_O)animation_table.o
 
-$(DIR_O)compositor_vista.o :\
+## I HAVE TRANSLATED EVERYTHING BELOW THIS.
+
+$(DIR_O)view_composer.o :\
 $(DIR_O)dnot_parser.o \
-$(DIR_HERRAMIENTAS_PROYECTO)compositor_vista.h \
-$(DIR_HERRAMIENTAS_PROYECTO)compositor_vista.cpp
-	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)compositor_vista.cpp -o $(DIR_O)compositor_vista.o
+$(DIR_HERRAMIENTAS_PROYECTO)view_composer.h \
+$(DIR_HERRAMIENTAS_PROYECTO)view_composer.cpp
+	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)view_composer.cpp -o $(DIR_O)view_composer.o
 
 $(DIR_O)dnot_parser.o :\
 $(DIR_O)dnot_token.o \
@@ -52,46 +54,45 @@ $(DIR_HERRAMIENTAS_PROYECTO)dnot_parser.h \
 $(DIR_HERRAMIENTAS_PROYECTO)dnot_parser.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)dnot_parser.cpp -o $(DIR_O)dnot_parser.o
 
-$(DIR_O)fichero_pares.o :\
-$(DIR_O)string_utilidades.o \
-$(DIR_HERRAMIENTAS_PROYECTO)fichero_pares.h \
-$(DIR_HERRAMIENTAS_PROYECTO)fichero_pares.cpp
-	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)fichero_pares.cpp -o $(DIR_O)fichero_pares.o
+$(DIR_O)pair_file_parser.o :\
+$(DIR_O)string_utils.o \
+$(DIR_HERRAMIENTAS_PROYECTO)pair_file_parser.h \
+$(DIR_HERRAMIENTAS_PROYECTO)pair_file_parser.cpp
+	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)pair_file_parser.cpp -o $(DIR_O)pair_file_parser.o
 
 $(DIR_O)localization_base.o :\
-$(DIR_O)string_utilidades.o \
+$(DIR_O)string_utils.o \
 $(DIR_BASE)localization_base.h \
 $(DIR_BASE)localization_base.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_BASE)localization_base.cpp -o $(DIR_O)localization_base.o
 
-$(DIR_O)controlador_argumentos.o :\
+$(DIR_O)arg_manager.o :\
 $(DIR_O)string_utils.o \
-$(DIR_HERRAMIENTAS_PROYECTO)controlador_argumentos.h \
-$(DIR_HERRAMIENTAS_PROYECTO)controlador_argumentos.cpp
-	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)controlador_argumentos.cpp -o $(DIR_O)controlador_argumentos.o
+$(DIR_HERRAMIENTAS_PROYECTO)arg_manager.h \
+$(DIR_HERRAMIENTAS_PROYECTO)arg_manager.cpp
+	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)arg_manager.cpp -o $(DIR_O)arg_manager.o
 
-$(DIR_O)string_utilidades.o :\
-$(DIR_O)text_reader.o \
-$(DIR_SOURCE)string_utilidades.h \
-$(DIR_SOURCE)string_utilidades.cpp
-	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_SOURCE)string_utilidades.cpp -o $(DIR_O)string_utilidades.o
+$(DIR_O)ttf_manager.o :\
+$(DIR_HERRAMIENTAS_PROYECTO)ttf_manager.h \
+$(DIR_HERRAMIENTAS_PROYECTO)ttf_manager.cpp
+	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)ttf_manager.cpp -o $(DIR_O)ttf_manager.o
 
-$(DIR_O)gestor_fuentes_ttf.o :\
-$(DIR_HERRAMIENTAS_PROYECTO)gestor_fuentes_ttf.h \
-$(DIR_HERRAMIENTAS_PROYECTO)gestor_fuentes_ttf.cpp
-	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)gestor_fuentes_ttf.cpp -o $(DIR_O)gestor_fuentes_ttf.o
-
-$(DIR_O)tabla_sprites.o :\
-$(DIR_HERRAMIENTAS_PROYECTO)tabla_sprites.h \
-$(DIR_HERRAMIENTAS_PROYECTO)tabla_sprites.cpp
-	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)tabla_sprites.cpp -o $(DIR_O)tabla_sprites.o
+$(DIR_O)sprite_table.o :\
+$(DIR_O)string_utils.o \
+$(DIR_HERRAMIENTAS_PROYECTO)sprite_table.h \
+$(DIR_HERRAMIENTAS_PROYECTO)sprite_table.cpp
+	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)sprite_table.cpp -o $(DIR_O)sprite_table.o
 
 $(DIR_O)dnot_token.o :\
 $(DIR_HERRAMIENTAS_PROYECTO)dnot_token.h \
 $(DIR_HERRAMIENTAS_PROYECTO)dnot_token.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)dnot_token.cpp -o $(DIR_O)dnot_token.o
 
-## I HAVE TRANSLATED EVERYTHING BELOW THIS.
+$(DIR_O)string_utils.o :\
+$(DIR_O)text_reader.o \
+$(DIR_SOURCE)string_utils.h \
+$(DIR_SOURCE)string_utils.cpp
+	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_SOURCE)string_utils.cpp -o $(DIR_O)string_utils.o
 
 $(DIR_O)text_reader.o :\
 $(DIR_HERRAMIENTAS_PROYECTO)text_reader.h \

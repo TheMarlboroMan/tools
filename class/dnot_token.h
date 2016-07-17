@@ -1,5 +1,5 @@
-#ifndef DNOT_TOKEN_H
-#define DNOT_TOKEN_H
+#ifndef TOOLS_DNOT_TOKEN_H
+#define TOOLS_DNOT_TOKEN_H
 
 #include <iostream>
 #include <vector>
@@ -18,69 +18,69 @@
 *
 */
 
-namespace Herramientas_proyecto
+namespace tools
 {
 
-class Dnot_Parser;
+class dnot_parser;
 
-struct Dnot_token_opciones_serializador
+struct dnot_token_serialize_options
 {
-	bool 		tabular_profundidad;
-	std::string	tabulador;
-	Dnot_token_opciones_serializador()
-		:tabular_profundidad(false),
-		tabulador("\t")
-	{}
+	bool 		tab_depth;
+	std::string	tab_str;
+			dnot_token_serialize_options()
+		:tab_depth(false), tab_str("\t")
+	{
+	}
 };
 
-class Dnot_token
+class dnot_token
 {
 	public:
 
-	std::string				serializar(const Dnot_token_opciones_serializador& = Dnot_token_opciones_serializador(), int=0) const;
+	std::string				serialize(const dnot_token_serialize_options& = dnot_token_serialize_options(), int=0) const;
 
-	typedef					std::pair<std::string, Dnot_token> par_mapa;
-	typedef 				std::map<std::string, Dnot_token> t_mapa;
-	typedef					std::vector<Dnot_token> t_vector;
+	typedef					std::pair<std::string, dnot_token> t_map_pair;
+	typedef 				std::map<std::string, dnot_token> t_map;
+	typedef					std::vector<dnot_token> t_vector;
 
-	bool 					es_valor() const;
-	bool 					es_valor_string() const {return tipo==tipos::valor_string;}
-	bool 					es_valor_int() const {return tipo==tipos::valor_int;}
-	bool 					es_valor_float() const {return tipo==tipos::valor_float;}
-	bool 					es_valor_double() const {return tipo==tipos::valor_double;}
-	bool 					es_valor_bool() const {return tipo==tipos::valor_bool;}
-	bool 					es_compuesto() const {return tipo==tipos::compuesto;}
-	bool 					es_lista() const {return tipo==tipos::lista;}
+	bool 					is_value() const;
+	bool 					is_string_value() const {return type==types::tstring;}
+	bool 					is_int_value() const {return type==types::tint;}
+	bool 					is_float_value() const {return type==types::tfloat;}
+	bool 					is_double_value() const {return type==types::tdouble;}
+	bool 					is_bool_value() const {return type==types::tbool;}
+	bool 					is_map() const {return type==types::tmap;}
+	bool 					is_vector() const {return type==types::tvector;}
 
-	void 					asignar(const std::string c);
-	void 					asignar(const char * c);
-	void		 			asignar(int c);
-	void 					asignar(float c);
-	void 					asignar(double c);
-	void 					asignar(bool c);
-	void 					asignar(const t_mapa& t);
-	void 					asignar(const t_vector& t);
+	void 					assign(const std::string c);
+	void 					assign(const char * c);
+	void		 			assign(int c);
+	void 					assign(float c);
+	void 					assign(double c);
+	void 					assign(bool c);
+	void 					assign(const t_map& t);
+	void 					assign(const t_vector& t);
 
-	const t_mapa& 				acc_tokens() const;
-	t_mapa&					acc_tokens();
-	const t_vector& 			acc_lista() const;
-	t_vector& 				acc_lista();
-	const std::string& 			acc_string() const;
-	int 					acc_int() const;
-	float 					acc_float() const;
-	double 					acc_double() const;
-	bool 					acc_bool() const;
+	const t_map& 				get_map() const;
+	t_map&					get_map();
+	const t_vector& 			get_vector() const;
+	t_vector& 				get_vector();
+	const std::string& 			get_string() const;
+	int 					get_int() const;
+	float 					get_float() const;
+	double 					get_double() const;
+	bool 					get_bool() const;
 
-	bool 					existe_clave(const std::string&) const;
+	bool 					key_exists(const std::string&) const;
 
-	const Dnot_token&			operator[](const std::string&) const;
-	Dnot_token&				operator[](const std::string&);
-	const Dnot_token&			operator[](const char *) const;
-	Dnot_token&				operator[](const char *);
-	const Dnot_token&			operator[](size_t) const;
-	Dnot_token&				operator[](size_t);
-	const Dnot_token&			operator[](int) const;
-	Dnot_token&				operator[](int);
+	const dnot_token&			operator[](const std::string&) const;
+	dnot_token&				operator[](const std::string&);
+	const dnot_token&			operator[](const char *) const;
+	dnot_token&				operator[](const char *);
+	const dnot_token&			operator[](size_t) const;
+	dnot_token&				operator[](size_t);
+	const dnot_token&			operator[](int) const;
+	dnot_token&				operator[](int);
 
 	//TODO...
 /*
@@ -96,53 +96,53 @@ class Dnot_token
 	bool 					operator!=(bool) const;
 */
 
-//	operator				t_mapa& () const {return tokens;}
-//	operator				t_vector& () const {return lista;}
+//	operator				t_map& () const {return tokens;}
+//	operator				t_vector& () const {return vector;}
 
-	operator 				std::string() const {return acc_string();}
-	operator				int() const {return acc_int();}
-	operator				bool() const {return acc_bool();}
-	operator				float() const {return acc_float();}
-	operator				double() const {return acc_double();}
+	operator 				std::string() const {return get_string();}
+	operator				int() const {return get_int();}
+	operator				bool() const {return get_bool();}
+	operator				float() const {return get_float();}
+	operator				double() const {return get_double();}
 
-						Dnot_token();
-	explicit				Dnot_token(const std::string& v);
-	explicit 				Dnot_token(const char *);
-	explicit 				Dnot_token(const char);
-	explicit 				Dnot_token(int v);
-	explicit 				Dnot_token(float v);
-	explicit 				Dnot_token(double v);
-	explicit 				Dnot_token(bool v);
-	explicit 				Dnot_token(const t_mapa& v);
-	explicit 				Dnot_token(const t_vector& v);
+						dnot_token();
+	explicit				dnot_token(const std::string& v);
+	explicit 				dnot_token(const char *);
+	explicit 				dnot_token(const char);
+	explicit 				dnot_token(int v);
+	explicit 				dnot_token(float v);
+	explicit 				dnot_token(double v);
+	explicit 				dnot_token(bool v);
+	explicit 				dnot_token(const t_map& v);
+	explicit 				dnot_token(const t_vector& v);
 	private:
 
-	enum class tipos {
-		compuesto, 	//El token es un objeto...
-		valor_string,	//El token tiene un valor string
-		valor_int,	//El token tiene un valor int
-		valor_float,	//El token tiene un valor float
-		valor_double,	//El token tiene un valor double
-		valor_bool,	//El token tiene un valor bool
-		lista};		//El token es una lista de otros tokens anónimos.
+	enum class types {
+		tmap, 	//El token es un objeto...
+		tstring,	//El token tiene un valor string
+		tint,	//El token tiene un valor int
+		tfloat,	//El token tiene un valor float
+		tdouble,	//El token tiene un valor double
+		tbool,	//El token tiene un valor bool
+		tvector};		//El token es una vector de otros tokens anónimos.
 
-	std::string				traducir_tipo(tipos)const;
-	std::string				valor_como_string()const;
+	std::string				translate_type(types)const;
+	std::string				to_string()const;
 
-	tipos					tipo;
-	t_mapa					tokens;
-	t_vector				lista;
-	std::string				valor_string;
-	int					valor_int;
-	float					valor_float;
-	double					valor_double;
-	bool					valor_bool;
+	types					type;
+	t_map					tokens;
+	t_vector				vector;
+	std::string				string_value;
+	int					int_value;
+	float					float_value;
+	double					double_value;
+	bool					bool_value;
 
-	friend class Dnot_parser;
-	friend std::ostream& operator<<(std::ostream& os, const Herramientas_proyecto::Dnot_token& t);
+	friend class dnot_parser;
+	friend std::ostream& operator<<(std::ostream& os, const tools::dnot_token& t);
 };
 
-std::ostream& operator<<(std::ostream& os, const Herramientas_proyecto::Dnot_token& t);
+std::ostream& operator<<(std::ostream& os, const tools::dnot_token& t);
 
 }
 

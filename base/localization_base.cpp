@@ -1,75 +1,75 @@
-﻿#include "localizador_base.h"
+#include "localization_base.h"
 #include <cstdlib>
-#include "../templates/parches_compat.h"
+#include "../templates/compatibility_patches.h"
 
-using namespace Herramientas_proyecto;
+using namespace tools;
 
-Localizador_base::Localizador_base(unsigned short int p_idioma)
+localization_base::localization_base(unsigned short int p_language)
 {
-	this->idioma=p_idioma;
+	this->language=p_language;
 }
 
-Localizador_base::~Localizador_base()
+localization_base::~localization_base()
 {
-	this->limpiar_cadenas();
+	this->clear();
 }
 
-void Localizador_base::limpiar_cadenas()
+void localization_base::clear()
 {
-	this->cadenas.clear();
+	this->data.clear();
 }
 
-void Localizador_base::cambiar_idioma(unsigned short int p_idioma)
+void localization_base::set_language(unsigned short int p_language)
 {
-	this->idioma=p_idioma;
-	this->inicializar();
+	this->language=p_language;
+	this->init();
 }
 
-void Localizador_base::insertar_cadena(unsigned int p_indice, t_cadena const& p_cadena)
+void localization_base::insert(unsigned int pindex, t_string const& pstring)
 {
-	this->cadenas.insert(std::pair<unsigned int, t_cadena>(p_indice, p_cadena));
+	this->data.insert(std::pair<unsigned int, t_string>(pindex, pstring));
 }
 
-t_cadena Localizador_base::generar_nombre_archivo(t_cadena const& p_original)
+localization_base::t_string localization_base::get_filename(t_string const& p_original)
 {
-	t_cadena nombre_archivo(p_original);
+	t_string nombre_archivo(p_original);
 
 	nombre_archivo.append(".");
-	nombre_archivo.append(compat::to_string(this->idioma));
+	nombre_archivo.append(compat::to_string(this->language));
 	nombre_archivo.append(".dat");
 
 	return nombre_archivo;
 }
 
-void Localizador_base::inicializar()
+void localization_base::init()
 {
-	t_lista_nombres_archivo lista=this->obtener_lista_archivos();
-	t_lista_nombres_archivo::iterator ini=lista.begin(), fin=lista.end();
+	t_filename lista=this->get_file_list();
+	t_filename::iterator ini=lista.begin(), fin=lista.end();
 
 	//Limpiar mapa e ir asignando.
-	this->limpiar_cadenas();
+	this->clear();
 
 	for(;ini<fin; ini++)
 	{
-		this->procesar_fichero(*ini);
+		this->process_file(*ini);
 	}
 
 }
 
-void Localizador_base::procesar_fichero(t_cadena const& nombre_archivo)
+void localization_base::process_file(t_string const& nombre_archivo)
 {
-	const std::string ruta=generar_nombre_archivo(nombre_archivo);
+	const std::string ruta=get_filename(nombre_archivo);
 
 	t_stream_in archivo(ruta.c_str(), std::ios::in | std::ios::binary);
 	if(!archivo)
 	{
-		throw std::runtime_error("Imposible abrir fichero de localización "+ruta);
+		throw std::runtime_error("Unable to load localization file "+ruta);
 	}
 	else
 	{
 		size_t indice=0; //, pos;
 		size_t indice_aux=0;
-		t_cadena_stream cadena, cadena_def;
+		t_string_stream cadena, cadena_def;
 		bool leyendo=false;
 
 		//Leemos de línea en línea, 1024 como mucho. Por cada línea leida procesamos.
@@ -94,15 +94,15 @@ void Localizador_base::procesar_fichero(t_cadena const& nombre_archivo)
 
 			//Delimitador de inicio encontrado?
 		
-			if(delimitador_inicio_en_cadena(cadena, indice_aux))
+			if(begin_delimiter(cadena, indice_aux))
 			{
 				leyendo=true; //Marcar leyendo como true.
 				indice=indice_aux; //Obtener índice.
-				cadena=cadena.substr(3+digitos_en_entero(indice)); //Cortar delimitador inicio. + 3 por el < y el $>
+				cadena=cadena.substr(3+int_digits(indice)); //Cortar delimitador inicio. + 3 por el < y el $>
 			}
 
 			//Delimitador de fin encontrado?
-			if(this->delimitador_fin_en_cadena(cadena))
+			if(this->end_delimiter(cadena))
 			{
 				leyendo=false; //Marcar leyendo como false.
 				cadena=cadena.substr(0, cadena.size()-3); //Cortar resto cadena. -3 es por <#>
@@ -110,7 +110,7 @@ void Localizador_base::procesar_fichero(t_cadena const& nombre_archivo)
 
 				//Insertar en mapa.
 
-				this->insertar_cadena(indice, cadena_def);
+				this->insert(indice, cadena_def);
 				cadena_def.clear();
 				cadena.clear();
 			}		
@@ -134,14 +134,14 @@ void Localizador_base::procesar_fichero(t_cadena const& nombre_archivo)
 Busca <n#> al principio de la cadena donde n# es un número positivo. Si lo
 encuentra devuelve n#. Si no devolverá -1.
 */
-bool Localizador_base::delimitador_inicio_en_cadena(std::string const& p_cadena, size_t &indice)
+bool localization_base::begin_delimiter(std::string const& pstring, size_t &indice)
 {
-	size_t pos=p_cadena.find("$>", 1);
+	size_t pos=pstring.find("$>", 1);
 	std::string cad_indice("");
 
 	if(pos!=std::string::npos)
 	{
-		cad_indice.assign(p_cadena.substr(1, pos-1));
+		cad_indice.assign(pstring.substr(1, pos-1));
 		indice=std::atoi(cad_indice.c_str());
 		return true;
 	}
@@ -151,11 +151,11 @@ bool Localizador_base::delimitador_inicio_en_cadena(std::string const& p_cadena,
 	}
 }
 
-bool Localizador_base::delimitador_fin_en_cadena(std::string const& p_cadena)
+bool localization_base::end_delimiter(std::string const& pstring)
 {
 	bool resultado=false;
 	size_t pos;
-	pos=p_cadena.find("<#>");
+	pos=pstring.find("<#>");
 
 	if(pos!=std::string::npos)
 	{
@@ -165,19 +165,19 @@ bool Localizador_base::delimitador_fin_en_cadena(std::string const& p_cadena)
 	return resultado;
 }
 
-t_cadena const& Localizador_base::obtener(unsigned int p_indice) const
+localization_base::t_string const& localization_base::get(unsigned int pindex) const
 {
-	if(!this->cadenas.size())
+	if(!this->data.size())
 	{
-		return this->cadena_no_cargado();
+		return this->string_not_found();
 	}
 	else
 	{
-		const auto it=this->cadenas.find(p_indice);
+		const auto it=this->data.find(pindex);
 
-		if(it==this->cadenas.end())
+		if(it==this->data.end())
 		{
-			return this->cadena_no_encontrado();
+			return this->string_not_found();
 		}
 		else
 		{

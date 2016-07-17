@@ -3,7 +3,7 @@
 
 #include <random>
 
-//TODO: How's this a template???.
+//TODO: How's this a template???... THIS IS NOT A TEMPLATE...
 
 namespace Herramientas_proyecto
 {

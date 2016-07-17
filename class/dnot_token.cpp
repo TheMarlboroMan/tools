@@ -2,368 +2,369 @@
 
 #include "../templates/compatibility_patches.h"
 
-using namespace Herramientas_proyecto;
+using namespace tools;
 
-bool Dnot_token::es_valor() const 
+bool dnot_token::is_value() const 
 {
-	return tipo==tipos::valor_string ||
-	tipo==tipos::valor_int ||
-	tipo==tipos::valor_float ||
-	tipo==tipos::valor_bool ||
-	tipo==tipos::valor_double;
+	return type==types::tstring||
+	type==types::tint ||
+	type==types::tfloat||
+	type==types::tbool ||
+	type==types::tdouble;
 }
 
-
-
-void Dnot_token::asignar(const std::string c)
+void dnot_token::assign(const std::string c)
 {
-	valor_string=c;
-	tipo=tipos::valor_string;
+	string_value=c;
+	type=types::tstring;
 }
 
-void Dnot_token::asignar(const char * c)
+void dnot_token::assign(const char * c)
 {
-	valor_string=c;
-	tipo=tipos::valor_string;
+	string_value=c;
+	type=types::tstring;
 }
 
-void Dnot_token::asignar(int c)
+void dnot_token::assign(int c)
 {
-	valor_int=c;
-	tipo=tipos::valor_int;
+	int_value=c;
+	type=types::tint;
 }
 
-void Dnot_token::asignar(float c)
+void dnot_token::assign(float c)
 {
-	valor_float=c;
-	tipo=tipos::valor_float;
+	float_value=c;
+	type=types::tfloat;
 }
 
-void Dnot_token::asignar(double c)
+void dnot_token::assign(double c)
 {
-	valor_double=c;
-	tipo=tipos::valor_double;
+	double_value=c;
+	type=types::tdouble;
 }
 
-void Dnot_token::asignar(bool c)
+void dnot_token::assign(bool c)
 {
-	valor_bool=c;
-	tipo=tipos::valor_bool;
+	bool_value=c;
+	type=types::tbool;
 }
 
-void Dnot_token::asignar(const t_mapa& t)
+void dnot_token::assign(const t_map& t)
 {
 	tokens=t;
-	tipo=tipos::compuesto;
+	type=types::tmap;
 }
 
-void Dnot_token::asignar(const t_vector& t)
+void dnot_token::assign(const t_vector& t)
 {
-	lista=t;
-	tipo=tipos::lista;
+	vector=t;
+	type=types::tvector;
 }
 
-Dnot_token::Dnot_token()
-	:tipo(tipos::valor_string),
-	valor_string(""), valor_int(0), valor_float(0.f), valor_double(0.0), valor_bool(false)
-{
-
-}
-
-Dnot_token::Dnot_token(const std::string& v)
-	:tipo(tipos::valor_string), 
-	valor_string(v), valor_int(0), valor_float(0.f), valor_double(0.0), valor_bool(false)
+dnot_token::dnot_token()
+	:type(types::tstring),
+	string_value(""), int_value(0), float_value(0.f), double_value(0.0), bool_value(false)
 {
 
 }
 
-Dnot_token::Dnot_token(const char * v)
-	:tipo(tipos::valor_string), 
-	valor_string(v), valor_int(0), valor_float(0.f), valor_double(0.0), valor_bool(false)
+dnot_token::dnot_token(const std::string& v)
+	:type(types::tstring), 
+	string_value(v), int_value(0), float_value(0.f), double_value(0.0), bool_value(false)
 {
 
 }
 
-Dnot_token::Dnot_token(const char v)
-	:tipo(tipos::valor_string), 
-	valor_string(), valor_int(0), valor_float(0.f), valor_double(0.0), valor_bool(false)
-{
-	valor_string+=v;
-}
-
-Dnot_token::Dnot_token(int v)
-	:tipo(tipos::valor_int),
-	valor_string(""), valor_int(v), valor_float(0.f), valor_double(0.0), valor_bool(false)
+dnot_token::dnot_token(const char * v)
+	:type(types::tstring), 
+	string_value(v), int_value(0), float_value(0.f), double_value(0.0), bool_value(false)
 {
 
 }
 
-Dnot_token::Dnot_token(float v)
-	:tipo(tipos::valor_float),
-	valor_string(""), valor_int(0), valor_float(v), valor_double(0.0), valor_bool(false)
+dnot_token::dnot_token(const char v)
+	:type(types::tstring), 
+	string_value(), int_value(0), float_value(0.f), double_value(0.0), bool_value(false)
+{
+	string_value+=v;
+}
+
+dnot_token::dnot_token(int v)
+	:type(types::tint),
+	string_value(""), int_value(v), float_value(0.f), double_value(0.0), bool_value(false)
 {
 
 }
 
-Dnot_token::Dnot_token(double v)
-	:tipo(tipos::valor_double),
-	valor_string(""), valor_int(0), valor_float(0.0f), valor_double(v), valor_bool(false)
+dnot_token::dnot_token(float v)
+	:type(types::tfloat),
+	string_value(""), int_value(0), float_value(v), double_value(0.0), bool_value(false)
 {
 
 }
 
-Dnot_token::Dnot_token(bool v)
-	:tipo(tipos::valor_bool),
-	valor_string(""), valor_int(0), valor_float(0.f), valor_double(0.0), valor_bool(v)
+dnot_token::dnot_token(double v)
+	:type(types::tdouble),
+	string_value(""), int_value(0), float_value(0.0f), double_value(v), bool_value(false)
 {
 
 }
 
-Dnot_token::Dnot_token(const t_mapa& v)
-	:tipo(tipos::compuesto),
-	valor_string(""), valor_int(0), valor_float(0.f), valor_double(0.0), valor_bool(false)
+dnot_token::dnot_token(bool v)
+	:type(types::tbool),
+	string_value(""), int_value(0), float_value(0.f), double_value(0.0), bool_value(v)
 {
-	asignar(v);
+
 }
 
-Dnot_token::Dnot_token(const t_vector& v)
-	:tipo(tipos::lista),
-	valor_string(""), valor_int(0), valor_float(0.f), valor_double(0.0), valor_bool(false)
+dnot_token::dnot_token(const t_map& v)
+	:type(types::tmap),
+	string_value(""), int_value(0), float_value(0.f), double_value(0.0), bool_value(false)
 {
-	asignar(v);
+	assign(v);
 }
 
-const Dnot_token::t_mapa& Dnot_token::acc_tokens() const 
+dnot_token::dnot_token(const t_vector& v)
+	:type(types::tvector),
+	string_value(""), int_value(0), float_value(0.f), double_value(0.0), bool_value(false)
 {
-	if(tipo!=tipos::compuesto) throw std::runtime_error("El tipo no es compuesto ["+traducir_tipo(tipo)+" - "+valor_como_string()+"]");
+	assign(v);
+}
+
+const dnot_token::t_map& dnot_token::get_map() const 
+{
+	if(type!=types::tmap) throw std::runtime_error("Not a map type ["+translate_type(type)+" - "+to_string()+"]");
 	return tokens;
 }
 
-Dnot_token::t_mapa& Dnot_token::acc_tokens()
+dnot_token::t_map& dnot_token::get_map()
 {
-	if(tipo!=tipos::compuesto) throw std::runtime_error("El tipo no es compuesto ["+traducir_tipo(tipo)+" - "+valor_como_string()+"]");
+	if(type!=types::tmap) throw std::runtime_error("Not a map type ["+translate_type(type)+" - "+to_string()+"]");
 	return tokens;
 }
 
-const Dnot_token::t_vector& Dnot_token::acc_lista() const 
+const dnot_token::t_vector& dnot_token::get_vector() const 
 {
-	if(tipo!=tipos::lista) throw std::runtime_error("El tipo no es lista ["+traducir_tipo(tipo)+" - "+valor_como_string()+"]");
-	return lista;
+	if(type!=types::tvector) throw std::runtime_error("Not a vector type ["+translate_type(type)+" - "+to_string()+"]");
+	return vector;
 }
 
-Dnot_token::t_vector& Dnot_token::acc_lista()
+dnot_token::t_vector& dnot_token::get_vector()
 {
-	if(tipo!=tipos::lista) throw std::runtime_error("El tipo no es lista ["+traducir_tipo(tipo)+" - "+valor_como_string()+"]");
-	return lista;
+	if(type!=types::tvector) throw std::runtime_error("Not a vector type ["+translate_type(type)+" - "+to_string()+"]");
+	return vector;
 }
 
-const std::string& Dnot_token::acc_string() const 
+const std::string& dnot_token::get_string() const 
 {
-	if(tipo!=tipos::valor_string) throw std::runtime_error("El tipo no es string ["+traducir_tipo(tipo)+" - "+valor_como_string()+"]");
-	return valor_string;
+	if(type!=types::tstring) throw std::runtime_error("Not a string type ["+translate_type(type)+" - "+to_string()+"]");
+	return string_value;
 }
 
-int Dnot_token::acc_int() const 
+int dnot_token::get_int() const 
 {
-	if(tipo!=tipos::valor_int) throw std::runtime_error("El tipo no es int ["+traducir_tipo(tipo)+" - "+valor_como_string()+"]");
-	return valor_int;
+	if(type!=types::tint) throw std::runtime_error("Not an int type ["+translate_type(type)+" - "+to_string()+"]");
+	return int_value;
 }
 
-float Dnot_token::acc_float() const 
+float dnot_token::get_float() const 
 {
-	if(tipo!=tipos::valor_float) throw std::runtime_error("El tipo no es float ["+traducir_tipo(tipo)+" - "+valor_como_string()+"]");
-	return valor_float;
+	if(type!=types::tfloat) throw std::runtime_error("Not a float type ["+translate_type(type)+" - "+to_string()+"]");
+	return float_value;
 }
 
-double Dnot_token::acc_double() const 
+double dnot_token::get_double() const 
 {
-	if(tipo!=tipos::valor_double) throw std::runtime_error("El tipo no es double ["+traducir_tipo(tipo)+" - "+valor_como_string()+"]");
-	return valor_double;
+	if(type!=types::tdouble) throw std::runtime_error("Not a double type ["+translate_type(type)+" - "+to_string()+"]");
+	return double_value;
 }
 
-bool Dnot_token::acc_bool() const 
+bool dnot_token::get_bool() const 
 {
-	if(tipo!=tipos::valor_bool) throw std::runtime_error("El tipo no es bool ["+traducir_tipo(tipo)+" - "+valor_como_string()+"]");
-	return valor_bool;
+	if(type!=types::tbool) throw std::runtime_error("Not a bool type ["+translate_type(type)+" - "+to_string()+"]");
+	return bool_value;
 }
 
-const Dnot_token& Dnot_token::operator[](const std::string& k) const
+const dnot_token& dnot_token::operator[](const std::string& k) const
 {
-	if(tipo!=tipos::compuesto) throw std::runtime_error("El tipo no es compuesto ["+traducir_tipo(tipo)+" - "+valor_como_string()+"]");
-	else if(!tokens.count(k)) throw std::runtime_error("La clave "+k+" no existe");
+	if(type!=types::tmap) throw std::runtime_error("Not a map type ["+translate_type(type)+" - "+to_string()+"]");
+	else if(!tokens.count(k)) throw std::runtime_error("Unable to find key "+k+" in map");
 	else return tokens.at(k);
 }
 
-Dnot_token& Dnot_token::operator[](const std::string& k)
+dnot_token& dnot_token::operator[](const std::string& k)
 {
-	if(tipo!=tipos::compuesto) throw std::runtime_error("El tipo no es compuesto ["+traducir_tipo(tipo)+" - "+valor_como_string()+"]");
-	else if(!tokens.count(k)) throw std::runtime_error("La clave "+k+" no existe");
+	if(type!=types::tmap) throw std::runtime_error("Not a map type ["+translate_type(type)+" - "+to_string()+"]");
+	else if(!tokens.count(k)) throw std::runtime_error("Unable to find key "+k+" in map");
 	else return tokens[k];
 }
 
-const Dnot_token& Dnot_token::operator[](const char * k) const
+const dnot_token& dnot_token::operator[](const char * k) const
 {
 	return this->operator[](std::string(k));
 }
 
-Dnot_token& Dnot_token::operator[](const char * k)
+dnot_token& dnot_token::operator[](const char * k)
 {
 	return this->operator[](std::string(k));
 }
 
-const Dnot_token& Dnot_token::operator[](size_t l) const
+const dnot_token& dnot_token::operator[](size_t l) const
 {
-	if(tipo!=tipos::lista) throw std::runtime_error("El tipo no es lista ["+traducir_tipo(tipo)+" - "+valor_como_string()+"]");
-	else if(l >= lista.size()) throw std::runtime_error("El indice de lista es inválido");
-	else return lista.at(l);
+	if(type!=types::tvector) throw std::runtime_error("Not a vector type ["+translate_type(type)+" - "+to_string()+"]");
+	else if(l >= vector.size()) throw std::runtime_error("Invalid vector index");
+	else return vector.at(l);
 }
 
-Dnot_token& Dnot_token::operator[](size_t l)
+dnot_token& dnot_token::operator[](size_t l)
 {
-	if(tipo!=tipos::lista) throw std::runtime_error("El tipo no es lista ["+traducir_tipo(tipo)+" - "+valor_como_string()+"]");
-	else if(l >= lista.size()) throw std::runtime_error("El indice de lista es inválido");
-	else return lista[l];
+	if(type!=types::tvector) throw std::runtime_error("Not a vector type ["+translate_type(type)+" - "+to_string()+"]");
+	else if(l >= vector.size()) throw std::runtime_error("Invalid vector index");
+	else return vector[l];
 }
 
-const Dnot_token& Dnot_token::operator[](int l) const
+const dnot_token& dnot_token::operator[](int l) const
 {
 	return this->operator[]((size_t)l);
 }
 
-Dnot_token& Dnot_token::operator[](int l)
+dnot_token& dnot_token::operator[](int l)
 {
 	return this->operator[]((size_t)l);
 }
 
-std::ostream& Herramientas_proyecto::operator<<(std::ostream& os, const Herramientas_proyecto::Dnot_token& t)
+std::ostream& tools::operator<<(std::ostream& os, const tools::dnot_token& t)
 {
-	using namespace Herramientas_proyecto;
+	using namespace tools;
 
-	switch(t.tipo)
+	switch(t.type)
 	{
-		case Dnot_token::tipos::compuesto: os<<"{compuesto}"; break;
-		case Dnot_token::tipos::lista: os<<"[lista]"; break;
-		case Dnot_token::tipos::valor_string: os<<t.valor_string; break;
-		case Dnot_token::tipos::valor_int: os<<t.valor_int; break;
-		case Dnot_token::tipos::valor_float: os<<t.valor_float; break;
-		case Dnot_token::tipos::valor_double: os<<t.valor_double; break;
-		case Dnot_token::tipos::valor_bool: t.valor_bool ? os<<"true" : os<<"false"; break;
+		case dnot_token::types::tmap: os<<"{tmap}"; break;
+		case dnot_token::types::tvector: os<<"[vector]"; break;
+		case dnot_token::types::tstring: os<<t.string_value; break;
+		case dnot_token::types::tint: os<<t.int_value; break;
+		case dnot_token::types::tfloat: os<<t.float_value; break;
+		case dnot_token::types::tdouble: os<<t.double_value; break;
+		case dnot_token::types::tbool: t.bool_value ? os<<"true" : os<<"false"; break;
 	}
 
 	return os;
 }
 
-bool Dnot_token::existe_clave(const std::string& k) const
+bool dnot_token::key_exists(const std::string& k) const
 {
-	if(tipo!=tipos::compuesto) throw std::runtime_error("El tipo no es compuesto ["+traducir_tipo(tipo)+" - "+valor_como_string()+"]");
+	if(type!=types::tmap) throw std::runtime_error("Not a map type ["+translate_type(type)+" - "+to_string()+"]");
 	else return tokens.count(k);
 }
 
-std::string Dnot_token::serializar(const Dnot_token_opciones_serializador& opciones, int recursividad) const
+std::string dnot_token::serialize(const dnot_token_serialize_options& options, int recursive) const
 {
-	std::string resultado;
+	std::string result;
 
 	size_t tot=0, cur=0;
 
-	auto nl=[&resultado, &opciones](int rec)
+	auto nl=[&result, &options](int rec)
 	{
-		resultado+="\n";
+		result+="\n";
 		for(int i=0; i<rec; ++i) 
 		{
-			resultado+=opciones.tabulador;
+			result+=options.tab_str;
 		}
 	};
 
 
-	auto abre=[&resultado, &nl, &opciones](tipos tipo, int rec)
+	auto abre=[&result, &nl, &options](types type, int rec)
 	{
 		if(rec < 1) return;
-		resultado+=tipo==tipos::lista ? "[" : "{";
-		if(opciones.tabular_profundidad) nl(rec);
+		result+=type==types::tvector ? "[" : "{";
+		if(options.tab_depth) nl(rec);
 	};
 
-	auto cierra=[&resultado, &nl, &opciones](tipos tipo, int rec)
+	auto cierra=[&result, &nl, &options](types type, int rec)
 	{
 		if(rec < 1) return;
-		if(opciones.tabular_profundidad) nl(rec-1);
-		resultado+=tipo==tipos::lista ? "]" : "}";
+		if(options.tab_depth) nl(rec-1);
+		result+=type==types::tvector ? "]" : "}";
 	};
 
-	switch(tipo)
+	switch(type)
 	{
-		case tipos::lista: 
-		case tipos::compuesto:
+		case types::tvector: 
+		case types::tmap:
 
 			cur=0;
-			tot=tipo==tipos::lista ? lista.size()-1 : tokens.size()-1;
+			tot=type==types::tvector ? vector.size()-1 : tokens.size()-1;
 
-			abre(tipo, recursividad);
-			if(tipo==tipos::lista)
+			abre(type, recursive);
+			if(type==types::tvector)
 			{
-				for(const auto& e : lista) 
+				for(const auto& e : vector) 
 				{
-					resultado+=e.serializar(opciones, recursividad+1);
-					if(cur++!=tot) resultado+=", ";
+					result+=e.serialize(options, recursive+1);
+					if(cur++!=tot) result+=", ";
 				}
 			}
-			else if(tipo==tipos::compuesto)
+			else if(type==types::tmap)
 			{
 				for(const auto& e : tokens) 
 				{
-					resultado+=e.first+":"+e.second.serializar(opciones, recursividad+1);
-					if(cur++!=tot) resultado+=", ";
+					result+=e.first+":"+e.second.serialize(options, recursive+1);
+					if(cur++!=tot) result+=", ";
 				}
 			}
-			cierra(tipo, recursividad);
+			cierra(type, recursive);
 
 		break;
-		case tipos::valor_string: 
-			resultado+="\""+valor_string+"\"";
+		case types::tstring: 
+			result+="\""+string_value+"\"";
 		break;
-		case tipos::valor_int: 
-			resultado+=compat::to_string(valor_int);
+		case types::tint: 
+			result+=compat::to_string(int_value);
 		break;
-		case tipos::valor_float:
-			resultado+=compat::to_string(valor_float)+'f';
+		case types::tfloat:
+			result+=compat::to_string(float_value)+'f';
 		break;
-		case tipos::valor_double:
-			resultado+=compat::to_string(valor_double);
+		case types::tdouble:
+			result+=compat::to_string(double_value);
 		break;
-		case tipos::valor_bool:
-			resultado+=valor_bool ? "true" : "false";
+		case types::tbool:
+			result+=bool_value ? "true" : "false";
 		break;
 	}
 
-	return resultado;
+	return result;
 }
 
-std::string Dnot_token::traducir_tipo(Dnot_token::tipos t)const
+std::string dnot_token::translate_type(dnot_token::types t)const
 {
 	switch(t)
 	{
-		case tipos::compuesto: return "compuesto"; break;
-		case tipos::valor_string: return "string"; break;
-		case tipos::valor_int: return "int"; break;
-		case tipos::valor_float: return "float"; break;
-		case tipos::valor_double: return "double"; break;
-		case tipos::valor_bool: return "bool"; break;
-		case tipos::lista:	return "lista"; break;
-		default: return "desconocido"; break;
+		case types::tmap: return "tmap"; break;
+		case types::tstring: return "string"; break;
+		case types::tint: return "int"; break;
+		case types::tfloat: return "float"; break;
+		case types::tdouble: return "double"; break;
+		case types::tbool: return "bool"; break;
+		case types::tvector:	return "vector"; break;
 	}
-	
+
+	//Shut up compiler...
+	return std::string();
 }
 
-std::string Dnot_token::valor_como_string()const
+std::string dnot_token::to_string()const
 {
-	switch(tipo)
+	switch(type)
 	{
-		case tipos::compuesto: return "compuesto ("+compat::to_string(tokens.size())+")"; break;
-		case tipos::valor_string: return valor_string; break;
-		case tipos::valor_int: return compat::to_string(valor_int); break;
-		case tipos::valor_float: return compat::to_string(valor_float); break;
-		case tipos::valor_double: return compat::to_string(valor_double); break;
-		case tipos::valor_bool: return valor_bool ? "true" : "false"; break;
-		case tipos::lista:	return "lista ("+compat::to_string(lista.size())+")"; break;
-		default: return "** desconocido **"; break;
+		case types::tmap: return "tmap ("+compat::to_string(tokens.size())+")"; break;
+		case types::tstring: return string_value; break;
+		case types::tint: return compat::to_string(int_value); break;
+		case types::tfloat: return compat::to_string(float_value); break;
+		case types::tdouble: return compat::to_string(double_value); break;
+		case types::tbool: return bool_value ? "true" : "false"; break;
+		case types::tvector:	return "vector ("+compat::to_string(vector.size())+")"; break;
 	}
+
+	//Shut up compiler...
+	return std::string();
 }

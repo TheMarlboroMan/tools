@@ -7,57 +7,55 @@
 #include <fstream>
 #include <cstring> //Para memset
 #include <utility> //para "pair"
-#include "../source/string_utilidades.h"
 #include <vector>
 #include <stdexcept>
 
-namespace Herramientas_proyecto
+#include "../source/string_utils.h"
+
+namespace tools
 {
 
-//typedef std::map<unsigned int, std::wstring> t_mapa;	//Tipo del mapa.
-//typedef std::wstring t_cadena;				//Tipo de cadena que devuelve.
-typedef std::map<unsigned int, std::string> t_mapa;	//Tipo del mapa.
-typedef std::string t_cadena;				//Tipo de cadena que devuelve.
-typedef std::string t_cadena_stream;				//Tipo de cadena que devuelve.
-typedef char t_char_buffer;				//Tipo del buffer de lectura del archivo.
-typedef std::ifstream t_stream_in;			//Tipo del archivo que abre.
-typedef std::vector<t_cadena> t_lista_nombres_archivo;	//Tipo de dato que devuelve componer_nombre_archivo;
-
-class Localizador_base
+class localization_base
 {
-	protected:
+	public:
 
-	t_mapa cadenas;
-	unsigned short int idioma;
+	//typedef std::map<unsigned int, std::wstring> t_map;	//Tipo del mapa.
+	//typedef std::wstring t_string;				//Tipo de cadena que devuelve.
+	typedef std::map<unsigned int, std::string> t_map;	//Tipo del mapa.
+	typedef std::string t_string;				//Tipo de cadena que devuelve.
+	typedef std::string t_string_stream;				//Tipo de cadena que devuelve.
+	typedef char t_char_buffer;				//Tipo del buffer de lectura del archivo.
+	typedef std::ifstream t_stream_in;			//Tipo del archivo que abre.
+	typedef std::vector<t_string> t_filename;	//Tipo de dato que devuelve componer_nombre_archivo;
 
-	bool delimitador_inicio_en_cadena(t_cadena const&, size_t& indice);
-	bool delimitador_fin_en_cadena(t_cadena const&);
-	void limpiar_cadenas();
-	void insertar_cadena(unsigned int, t_cadena const&);
-	t_cadena generar_nombre_archivo(t_cadena const&);
-	void procesar_fichero(t_cadena const&);
+	enum languages{lspanish=0, lenglish=1};
 
-	public:	
+				localization_base(unsigned short int);
+	virtual 		~localization_base();
 
-	enum IDIOMAS{I_ESPANOL=0, I_INGLES=1};
+	void 			set_language(unsigned short int);
+	t_string const& 	get(unsigned int) const;
 
-	Localizador_base(unsigned short int);
-	virtual ~Localizador_base();
-
-	void cambiar_idioma(unsigned short int);
-	t_cadena const& obtener(unsigned int) const;
+	virtual void 		init();
+	void 			reload() {init();}
 
 	//A implementar...
 
 	protected:
-	virtual t_lista_nombres_archivo obtener_lista_archivos()=0;
-	virtual t_cadena const& cadena_no_cargado()const=0;
-	virtual t_cadena const& cadena_no_encontrado()const=0;
 
-	public:
-	virtual void inicializar();
-	void recargar() {inicializar();}
+	t_map 			data;
+	unsigned short int 	language;
 
+	bool 			begin_delimiter(t_string const&, size_t&);
+	bool 			end_delimiter(t_string const&);
+	void 			clear();
+	void 			insert(unsigned int, t_string const&);
+	t_string 		get_filename(t_string const&);
+	void 			process_file(t_string const&);
+
+	virtual t_filename 	get_file_list()=0;
+	virtual t_string const& string_not_loaded()const=0;
+	virtual t_string const& string_not_found()const=0;
 };
 
 }
