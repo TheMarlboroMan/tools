@@ -1,0 +1,68 @@
+config_app:[
+	{
+		c:"10_VENTANA",
+		t:150,
+		m:"templated",
+		mt:"string",
+		o:[
+			{c:"01_VENTANA_10", v: "800x500", t:151},
+			{c:"01_VENTANA_20", v: "1200x750", t:152},
+			{c:"01_VENTANA_30", v: "1600x1000", t:153}
+		]
+	},
+	{
+		c:"20_AYUDA",
+		t:160,
+		m:"templated",
+		mt:"bool",
+		o:[
+			{c:"02_AYUDA_10", v: true, t:161},
+			{c:"02_AYUDA_20", v: false, t:162}
+		]
+	},
+	{
+		c:"30_SALIR",
+		t:170,
+		m:"void"
+	}
+],
+
+config_controles:[
+	{
+		c:"010_K_IZQUIERDA",
+		t:204,
+		m:"string"
+	},
+	{
+		c:"020_K_DERECHA",
+		t:205,
+		m:"string"
+	},
+	{
+		c:"030_K_ARRIBA",
+		t:206,
+		m:"string"
+	},
+	{
+		c:"040_K_ABAJO",
+		t:207,
+		m:"string"
+	},
+	{
+		c:"050_K_MAPA",
+		t:211,
+		m:"string"
+	},
+	{
+		c:"100_SALIR",
+		t:210,
+		m:"void"
+	}
+],
+
+config_intro:[
+	{c:"10_INICIAR", t:51, m:"void"},
+	{c:"20_CONTROLES", t:52, m:"void"},
+	{c:"25_CONFIG", t:54, m:"void"},
+	{c:"30_SALIR", t:53, m:"void"}
+]
