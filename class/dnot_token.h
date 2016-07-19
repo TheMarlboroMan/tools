@@ -52,14 +52,14 @@ class dnot_token
 	bool 					is_map() const {return type==types::tmap;}
 	bool 					is_vector() const {return type==types::tvector;}
 
-	void 					assign(const std::string c);
-	void 					assign(const char * c);
-	void		 			assign(int c);
-	void 					assign(float c);
-	void 					assign(double c);
-	void 					assign(bool c);
-	void 					assign(const t_map& t);
-	void 					assign(const t_vector& t);
+	void 					set(const std::string c);
+	void 					set(const char * c);
+	void		 			set(int c);
+	void 					set(float c);
+	void 					set(double c);
+	void 					set(bool c);
+	void 					set(const t_map& t);
+	void 					set(const t_vector& t);
 
 	const t_map& 				get_map() const;
 	t_map&					get_map();

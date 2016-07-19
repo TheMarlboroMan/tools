@@ -13,49 +13,49 @@ bool dnot_token::is_value() const
 	type==types::tdouble;
 }
 
-void dnot_token::assign(const std::string c)
+void dnot_token::set(const std::string c)
 {
 	string_value=c;
 	type=types::tstring;
 }
 
-void dnot_token::assign(const char * c)
+void dnot_token::set(const char * c)
 {
 	string_value=c;
 	type=types::tstring;
 }
 
-void dnot_token::assign(int c)
+void dnot_token::set(int c)
 {
 	int_value=c;
 	type=types::tint;
 }
 
-void dnot_token::assign(float c)
+void dnot_token::set(float c)
 {
 	float_value=c;
 	type=types::tfloat;
 }
 
-void dnot_token::assign(double c)
+void dnot_token::set(double c)
 {
 	double_value=c;
 	type=types::tdouble;
 }
 
-void dnot_token::assign(bool c)
+void dnot_token::set(bool c)
 {
 	bool_value=c;
 	type=types::tbool;
 }
 
-void dnot_token::assign(const t_map& t)
+void dnot_token::set(const t_map& t)
 {
 	tokens=t;
 	type=types::tmap;
 }
 
-void dnot_token::assign(const t_vector& t)
+void dnot_token::set(const t_vector& t)
 {
 	vector=t;
 	type=types::tvector;
@@ -121,14 +121,14 @@ dnot_token::dnot_token(const t_map& v)
 	:type(types::tmap),
 	string_value(""), int_value(0), float_value(0.f), double_value(0.0), bool_value(false)
 {
-	assign(v);
+	set(v);
 }
 
 dnot_token::dnot_token(const t_vector& v)
 	:type(types::tvector),
 	string_value(""), int_value(0), float_value(0.f), double_value(0.0), bool_value(false)
 {
-	assign(v);
+	set(v);
 }
 
 const dnot_token::t_map& dnot_token::get_map() const 
