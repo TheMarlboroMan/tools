@@ -256,7 +256,7 @@ view_composer::uptr_rep view_composer::create_bitmap(const dnot_token& token)
 		throw std::runtime_error("Unable to locate texture "+token[texture_key].get_string()+" for bitmap");
 	}
 	
-	uptr_rep res(new ldv::bitmap_representation(texture_map[token[texture_key]], box_from_list(token[location_key]), box_from_list(token[clip_key])));
+	uptr_rep res(new ldv::bitmap_representation(*texture_map[token[texture_key]], box_from_list(token[location_key]), box_from_list(token[clip_key])));
 
 	return res;
 }

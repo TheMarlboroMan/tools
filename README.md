@@ -8,6 +8,7 @@ As for July 2016 these tools have been translated into english and retooled to s
 
 ## TODO
 
+- Fork into new directory name.
 - Test all functionality in the test directory.
 - Delete old tests.
 - Properly document the use of the more complicated tools (like the menu).

@@ -273,29 +273,29 @@ dnot_token dnot_parser::generate_token(const std::string& v)
 	//Comprobar bool
 	if(v=="true" || v=="false")
 	{			
-		t.assign(v=="true");
+		t.set(v=="true");
 	}
 	//String...
 	else if(v.front()=='"' && v.back()=='"')
 	{
-		t.assign(v.substr(1, v.size()-2));
+		t.set(v.substr(1, v.size()-2));
 	}
 	//Float y double...
 	else if(v.find(".") != std::string::npos)
 	{
 		if(v.back()=='f')
 		{
-			t.assign((float)std::atof(v.c_str()));
+			t.set((float)std::atof(v.c_str()));
 		}
 		else
 		{
-			t.assign(std::atof(v.c_str()));
+			t.set(std::atof(v.c_str()));
 		}
 	}
 	//Entero...
 	else if(std::all_of(std::begin(v), std::end(v), [](const char c) {return isdigit(c) || c=='-';}))
 	{
-		t.assign(std::atoi(v.c_str()));
+		t.set(std::atoi(v.c_str()));
 	}
 	else
 	{
@@ -334,7 +334,7 @@ void dnot_parser::assign_tarray()
 void dnot_parser::assign_tobject_subparser(const std::map<std::string, dnot_token>& aux)
 {
 	dnot_token T;
-	T.assign(aux);
+	T.set(aux);
 	size_t pos=buffer.find(":");
 	if(pos==std::string::npos)
 	{
@@ -360,7 +360,7 @@ void dnot_parser::assign_tarray_subparser(const std::vector<dnot_token>& aux)
 	//representar eso.
 
 	dnot_token T;
-	T.assign(aux);
+	T.set(aux);
 
 	size_t pos=buffer.find(":");
 	//Si el token es anónimo simplemente insertamos algo en la tarray...
