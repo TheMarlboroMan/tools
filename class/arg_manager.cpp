@@ -73,10 +73,10 @@ std::string arg_manager::get_value(const std::string& argumento, const char deli
 {
 	std::stringstream ss;
 	ss<<argumento<<delimiter;
-	const std::string find_index=ss.str();
+	const std::string f_index=ss.str();
 
-	auto it=std::find_if(std::begin(data), std::end(data), [&find_index](const std::string& arg)
-		{return arg.find(find_index)!=std::string::npos;});
+	auto it=std::find_if(std::begin(data), std::end(data), [&f_index](const std::string& arg)
+		{return arg.find(f_index)!=std::string::npos;});
 
 	if(it==data.end())
 	{

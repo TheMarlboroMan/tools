@@ -96,10 +96,10 @@ void animation_table::load(const std::string& ruta)
 		size_t id=0;
 		animation animacion;
 
-		auto insertar_anim=[this](animation animacion, size_t id)
+		auto insertar_anim=[this](animation panimacion, size_t pid)
 		{
-			animacion.adjust_frame_time();
-			data[id]=animacion;		
+			panimacion.adjust_frame_time();
+			data[pid]=panimacion;
 		};
 
 		try

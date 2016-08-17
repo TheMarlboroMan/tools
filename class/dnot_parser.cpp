@@ -2,11 +2,11 @@
 
 using namespace tools;
 
-dnot_parser::dnot_parser(std::istream& stream, types t)
+dnot_parser::dnot_parser(std::istream& pstream, types t)
 	:estado(tstates::reading), 
 	read_quotes(false), done(false),
 	type(t),
-	stream(stream)
+	stream(pstream)
 {
 	buffer.reserve(1024);
 	token.type=dnot_token::types::tmap;

@@ -1,10 +1,15 @@
-OPTIMIZACION=-O3
-#SIMBOLOS_DEBUG=-g
-FLAGS_BASE=-Wno-deprecated -Wall -ansi -pedantic -std=c++11
+#OPTIMIZATION=-O2
+#DEBUG -g
+
+#These are either old or plain stupid :P.
+#OTHER_WARNING_FLAGS=-Wno-deprecated -Wfloat-equal
+
+WARNING_FLAGS=-Wall -Wextra -Wundef -Wcast-align -Wwrite-strings -Wlogical-op -Wmissing-declarations -Wredundant-decls -Wshadow -Woverloaded-virtual
+FLAGS_BASE=-Wno-deprecated -ansi -pedantic -std=c++11
  
-CFLAGS=-c $(SIMBOLOS_DEBUG) $(OPTIMIZACION) $(FLAGS_BASE)
+CFLAGS=-c $(DEBUG) $(OPTIMIZATION) $(FLAGS_BASE) $(WARNING_FLAGS)
 CC=g++
-DIR_HOME=/home/dani/programacion/
+DIR_HOME=/home/dani/programacion/c++/
 DIR_LIBDAN2=$(DIR_HOME)libdansdl2
  
 INCLUDES=-I $(DIR_LIBDAN2)

@@ -10,8 +10,8 @@ using namespace tools;
 * @param size_t h : altura del espacio reservado para el listado.
 */
 
-pager::pager(size_t rpp, size_t item_count)
-	:items_per_page(rpp), item_count(item_count), current_page(0),
+pager::pager(size_t rpp, size_t pitem_count)
+	:items_per_page(rpp), item_count(pitem_count), current_page(0),
 	pages_count(0), current_index(0)
 {
 	//Prevenir una división por 0...

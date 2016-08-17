@@ -107,14 +107,14 @@ class view_composer
 		ldv::representation *		ptr;
 		int 				order;
 
-		item(uptr_rep&& r, int order=0)
-			:rep(std::move(r)), ptr(rep.get()), order(order)
+		item(uptr_rep&& pr, int porder=0)
+			:rep(std::move(pr)), ptr(rep.get()), order(porder)
 		{
 
 		}
 
-		item(ldv::representation * p, int order=0)
-			:rep(nullptr), ptr(p), order(order)
+		item(ldv::representation * p, int porder=0)
+			:rep(nullptr), ptr(p), order(porder)
 		{}
 
 		bool operator<(const item& o) const
