@@ -49,7 +49,7 @@ class linear_timed_function
 		return linear_timed_function(v, dest, (dest-v) / time);
 	}
 
-	operator T() const{return val;}
+	T 				operator()() const {return val;}
 
 	void		reset(T a, T d, T s)
 	{
@@ -61,14 +61,7 @@ class linear_timed_function
 	void 		tic(float delta)
 	{
 		T sal=delta * step;
-		if(val > target) 
-		{
-			val-=sal;
-		}
-		else if(val < target) 
-		{
-			val+=sal;
-		}
+		val+=sal;
 	}
 
 	bool		is_done() const {return val==target;}
