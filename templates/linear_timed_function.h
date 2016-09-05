@@ -58,6 +58,13 @@ class linear_timed_function
 		step=s;
 	}
 
+	void		reset_from_time(T a, T d, T t)
+	{
+		val=tools::ranged_value<T>(std::min(a, d), std::max(a, d), a);
+		target=d;
+		step=(d-a) / t;
+	}
+
 	void 		tic(float delta)
 	{
 		T sal=delta * step;
