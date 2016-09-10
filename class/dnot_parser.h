@@ -26,11 +26,11 @@ class dnot_parser
 {
 	private:
 
-	enum class types {tmap, tvector};
+	enum class types {tundefined, tmap, tvector};
 
 	public:
 
-						dnot_parser(std::istream&, types t=types::tmap);
+						dnot_parser(std::istream&);
 	void 					operator()();
 
 	//TODO: Un problema con el parser es que los ficheros no tienen un nodo
@@ -74,9 +74,10 @@ class dnot_parser
 
 	enum class tstates {reading, exiting, exiting_subparser};
 
-	tstates			estado;
+	tstates			state;
 	bool			read_quotes, 
-				done;
+				done,
+				root;
 	types			type;
 	std::istream&		stream; //El stream es una referencia para poder pasarlo a los parsers recursivos.
 	std::string 		buffer;

@@ -188,14 +188,14 @@ bool dnot_token::get_bool() const
 const dnot_token& dnot_token::operator[](const std::string& k) const
 {
 	if(type!=types::tmap) throw std::runtime_error("Not a map type ["+translate_type(type)+" - "+to_string()+"]");
-	else if(!tokens.count(k)) throw std::runtime_error("Unable to find key "+k+" in map");
+	else if(!tokens.count(k)) throw std::runtime_error("Unable to find key '"+k+"' in map");
 	else return tokens.at(k);
 }
 
 dnot_token& dnot_token::operator[](const std::string& k)
 {
 	if(type!=types::tmap) throw std::runtime_error("Not a map type ["+translate_type(type)+" - "+to_string()+"]");
-	else if(!tokens.count(k)) throw std::runtime_error("Unable to find key "+k+" in map");
+	else if(!tokens.count(k)) throw std::runtime_error("Unable to find key '"+k+"' in map");
 	else return tokens[k];
 }
 
