@@ -1,4 +1,5 @@
 #include "dnot_parser.h"
+#include <sstream>
 
 using namespace tools;
 
@@ -9,7 +10,6 @@ dnot_parser::dnot_parser(std::istream& pstream)
 	stream(pstream)
 {
 	buffer.reserve(1024);
-	
 	//TODO: What about the type... this is failing like hell... Where do we control this???.
 }
 
@@ -417,6 +417,16 @@ dnot_token tools::dnot_parse(const std::string& c)
 	}
 
 	dnot_parser p(f);
+	p();
+	return p.get_token();
+}
+
+dnot_token tools::dnot_parse_file(const std::string& c) {return dnot_parse(c);}
+
+dnot_token tools::dnot_parse_string(const std::string& c)
+{
+	std::stringstream ss(c);
+	dnot_parser p(ss);
 	p();
 	return p.get_token();
 }

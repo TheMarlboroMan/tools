@@ -93,6 +93,9 @@ class dnot_parser
 };
 
 dnot_token	dnot_parse(const std::string&);
+dnot_token	dnot_parse_file(const std::string& str);
+dnot_token	dnot_parse_string(const std::string& str);
+
 }
 
 /*
