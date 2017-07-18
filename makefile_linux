@@ -9,7 +9,7 @@ FLAGS_BASE=-Wno-deprecated -ansi -pedantic -std=c++11
  
 CFLAGS=-c $(DEBUG) $(OPTIMIZATION) $(FLAGS_BASE) $(WARNING_FLAGS)
 CC=g++
-DIR_HOME=/home/dani/programacion/c++/
+DIR_HOME=/home/dani/programacion/
 DIR_LIBDAN2=$(DIR_HOME)libdansdl2
  
 INCLUDES=-I $(DIR_LIBDAN2)
