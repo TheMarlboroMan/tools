@@ -107,6 +107,8 @@ class Listado_rejilla:public Listado_base<T>
 	size_t					acc_h_item() const {return h_item;}
 	size_t					acc_margen_w() const {return margen_w;}
 	size_t					acc_margen_h() const {return margen_h;}
+	size_t					acc_reg_fila() const {return reg_fila;}
+	size_t					acc_reg_columna() const {return reg_columna;}
 	void					mut_margen_w(size_t v) {margen_w=v;}
 	void					mut_margen_h(size_t v) {margen_h=v;}
 
