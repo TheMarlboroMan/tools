@@ -30,7 +30,7 @@ class dnot_parser
 
 	public:
 
-						dnot_parser(std::istream&);
+						dnot_parser(std::istream&, int=0, int=0);
 	void 					operator()();
 
 	//TODO: Un problema con el parser es que los ficheros no tienen un nodo
@@ -54,8 +54,7 @@ class dnot_parser
 	private:
  
 	
-	char 					read_string();
-	char 					read_stream();
+	char 					read_stream(bool);
 	void 					process_string(char cb);
 	void 					process_stream(char cb);
 	void 					quotes();
@@ -70,6 +69,7 @@ class dnot_parser
 	void 					assign_tobject_subparser(const std::map<std::string, dnot_token>& aux);
 	void 					assign_tarray_subparser(const std::vector<dnot_token>& aux);
 	void 					error(const std::string& msj);
+	void					clear_buffer();
 	std::string 				get_state();
 
 	enum class tstates {reading, exiting, exiting_subparser};
@@ -81,6 +81,9 @@ class dnot_parser
 	types			type;
 	std::istream&		stream; //El stream es una referencia para poder pasarlo a los parsers recursivos.
 	std::string 		buffer;
+
+	int			line, column;
+	//TODO: It would be great to have some context for 
 
 	//TODO: std::map no conserva el orden de inserción: Tal vez necesitemos
 	//un vector de pares std::string - token, para poder hacer esto.

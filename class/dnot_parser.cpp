@@ -1,13 +1,15 @@
 #include "dnot_parser.h"
+#include "../source/string_utils.h"
+#include "../templates/compatibility_patches.h"
 #include <sstream>
 
 using namespace tools;
 
-dnot_parser::dnot_parser(std::istream& pstream)
+dnot_parser::dnot_parser(std::istream& pstream, int l, int c)
 	:state(tstates::reading), 
 	read_quotes(false), done(false), root(true),
 	type(types::tundefined),
-	stream(pstream)
+	stream(pstream), line(l), column(c)
 {
 	buffer.reserve(1024);
 	//TODO: What about the type... this is failing like hell... Where do we control this???.
@@ -25,13 +27,13 @@ void dnot_parser::operator()()
 		//Tenemos dos modos de lectura: estoy "dentro de una string"
 		//o fuera.
 
-		char cb=read_quotes ? read_string() : read_stream();
+		char cb=read_stream(read_quotes);
 
 		if(stream.eof())
 		{
 			//TODO: Es posible que esté malformado si estamos reading quotes;
 			if(state==tstates::reading) assign_tobject();
-			state=tstates::exiting;				
+			state=tstates::exiting;
 			done=true;
 			break;
 		}
@@ -42,24 +44,30 @@ void dnot_parser::operator()()
 }
 
 /**
-* Lee lo que sea que haya en el stream, sea o no whitespace.
+* Reads stream, ignoring whitespace if we are not quoting
 */
 
-char dnot_parser::read_string()
+char dnot_parser::read_stream(bool reading_quotes)
 {
 	char cb;
+
 	stream.get(cb);
-	return cb;
-}
 
-/**
-* Lee el stream ignorando whitespace.
-*/
+	++column;
+	if(cb=='\n')
+	{
+		++line;
+		column=0;
+	}
+	
+	if(!reading_quotes)
+	{
+		if(isspace(cb))
+		{
+			return read_stream(reading_quotes);
+		}
+	}
 
-char dnot_parser::read_stream()
-{
-	char cb;
-	stream>>cb;
 	return cb;
 }
 
@@ -135,7 +143,7 @@ void dnot_parser::comma()
 	}
 
 	state=tstates::reading;
-	buffer.clear();
+	clear_buffer();
 }
 
 /**
@@ -151,12 +159,16 @@ void dnot_parser::open_brace()
 		error("found open brace in incorrect state : ");
 	}
 
-	dnot_parser p(stream);
+	dnot_parser p(stream, line, column);
 	p.type=types::tmap;
 	p.root=false;
 	p();
 	assign_tobject_subparser(p.token.tokens);
 	state=tstates::exiting_subparser;
+
+	//So the debug can go on...
+	line=p.line;
+	column=p.column;
 }
 
 /*
@@ -169,7 +181,16 @@ void dnot_parser::close_brace()
 	switch(state)
 	{
 		case tstates::reading:
-			assign_tobject();
+
+			//Protection against empty objects...
+			if(str_trim(buffer)!="}")
+			{
+				assign_tobject();
+			}
+			else
+			{
+				clear_buffer();
+			}
 		break;
 		case tstates::exiting_subparser:
 			//NOOP.
@@ -180,7 +201,7 @@ void dnot_parser::close_brace()
 	}
 
 	state=tstates::exiting;
-	buffer.clear();
+	clear_buffer();
 }
 
 /**
@@ -196,12 +217,16 @@ void dnot_parser::open_bracket()
 
 	type=type==types::tundefined ? types::tvector : type;
 
-	dnot_parser p(stream);
+	dnot_parser p(stream, line, column);
 	p.type=types::tvector;
 	p.root=false;
 	p();
 	assign_tarray_subparser(p.token.vector);
 	state=tstates::exiting_subparser;
+
+	//So the debug can go on...
+	line=p.line;
+	column=p.column;
 }
 
 /**
@@ -213,7 +238,15 @@ void dnot_parser::close_bracket()
 	switch(state)
 	{
 		case tstates::reading:
-			assign_tarray();
+			//Protection against empty lists.
+			if(str_trim(buffer)!= "]")
+			{
+				assign_tarray();
+			}
+			else
+			{
+				clear_buffer();
+			}
 		break;
 		case tstates::exiting_subparser:
 			//NOOP.
@@ -224,7 +257,7 @@ void dnot_parser::close_bracket()
 	}
 
 	state=tstates::exiting;
-	buffer.clear();
+	clear_buffer();
 }
 
 /**
@@ -238,7 +271,7 @@ void dnot_parser::assign_tobject()
 	size_t pos=buffer.find(":");
 	if(pos==std::string::npos)
 	{
-		error("no colon for object found");
+		error("no colon for object found with buffer '"+buffer+"'");
 	}
 
 	std::string clave=buffer.substr(0, pos);
@@ -251,7 +284,7 @@ void dnot_parser::assign_tobject()
 
 	token.type=dnot_token::types::tmap;
 	token.tokens[clave]=generate_token(valor);
-	buffer.clear();
+	clear_buffer();
 }
 
 /*
@@ -317,7 +350,7 @@ void dnot_parser::assign_tarray()
 	std::string valor=buffer.substr(0, buffer.size()-1);
 	token.type=dnot_token::types::tvector;
 	if(valor.size()) token.vector.push_back(generate_token(valor));
-	buffer.clear();
+	clear_buffer();
 }
 
 /**
@@ -390,7 +423,7 @@ void dnot_parser::assign_tarray_subparser(const std::vector<dnot_token>& aux)
 
 void dnot_parser::error(const std::string& msj)
 {
-	throw std::runtime_error("dnot_parser error: "+msj+"\nstate:"+get_state()+"\nbuffer:"+buffer);
+	throw std::runtime_error("dnot_parser error: "+msj+"\nstate:"+get_state()+"\nbuffer:"+buffer+"\nline:"+compat::to_string(line)+"\ncolumn:"+compat::to_string(column));
 }
 
 std::string dnot_parser::get_state()
@@ -398,12 +431,17 @@ std::string dnot_parser::get_state()
 	switch(state)
 	{
 		case tstates::reading: return "reading"; break;
-		case tstates::exiting_subparser: return "exit subparser"; break;		
+		case tstates::exiting_subparser: return "exit subparser"; break;
 		case tstates::exiting: return "exit"; break;
 	}
 
 	//Shut compiler up.
 	return std::string();
+}
+
+void dnot_parser::clear_buffer()
+{
+	buffer.clear();
 }
 
 /******************************************************************************/
