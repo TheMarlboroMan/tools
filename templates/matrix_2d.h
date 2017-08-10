@@ -3,6 +3,9 @@
 
 #include <map>
 #include <stdexcept>
+#include <string>
+
+#include "compatibility_patches.h"
 
 /*Una data 2D implementada en términos de un std::map. Se crea a t_pairtir de
 unas dimensiones que le damos y contiene sólo los elementos que le damos.
@@ -51,8 +54,8 @@ struct matrix_2d_exception:
 {
 	int 			x, 
 				y;
-	matrix_2d_exception(int px, int py):
-		std::runtime_error("matrix_2d error"), x(px), y(py) 
+	matrix_2d_exception(int px, int py, const std::string& msg):
+		std::runtime_error("matrix_2d error: "+msg), x(px), y(py) 
 	{
 	}
 };
@@ -61,21 +64,31 @@ struct matrix_2d_exception_bounds:
 	public matrix_2d_exception 
 {
 	matrix_2d_exception_bounds(int px, int py)
-		:matrix_2d_exception(px, py) {}
+		:matrix_2d_exception(
+			px, py, 
+			std::string("out of bounds ")+compat::to_string(px)+","+compat::to_string(py)
+	) {}
 };
 
 struct matrix_2d_exception_missing:
 	public matrix_2d_exception 
 {
 	matrix_2d_exception_missing(int px, int py)
-		:matrix_2d_exception(px, py) {}
+		:matrix_2d_exception(
+			px, py,
+			std::string("no value ")+compat::to_string(px)+","+compat::to_string(py)
+		) {}
 };
+
 
 struct matrix_2d_exception_conflict:
 	public matrix_2d_exception 
 {
 	matrix_2d_exception_conflict(int px, int py)
-		:matrix_2d_exception(px, py) {}
+		:matrix_2d_exception(
+			px, py,
+			std::string("insertion conflict ")+compat::to_string(px)+","+compat::to_string(py)
+		) {}
 };
 
 template<typename T>
@@ -182,17 +195,22 @@ class matrix_2d
 
 	size_t 				size() 	const {return data.size();}
 	void				clear() {data.clear();}
+	unsigned int			get_w() const {return w;}
+	unsigned int			get_h() const {return h;}
 	
 	void				resize(unsigned int pw, unsigned int ph)
 	{
-		if(pw=w && ph==h) return;
-	
+		if(pw==w && ph==h) return;
+
 		//We need to remember the old values to perform index_to_coords.
 		unsigned int ow=w, oh=h;
 
 		//Reassign...
 		w=pw;
 		h=ph;
+
+		//Save some cycles and data.
+		if(!data.size()) return;
 
 		//This is the real final container.
 		std::map<unsigned int, T> 	new_data;
@@ -266,7 +284,7 @@ class matrix_2d
 
 	coords 				index_to_coords(unsigned int index, unsigned int pw, unsigned int ph) const
 	{
-		int y=index / pw;
+		int y=index / ph;
 		int x=index % pw;
 		return coords(x, y);
 	}
