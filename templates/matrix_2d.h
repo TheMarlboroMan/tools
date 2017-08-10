@@ -180,16 +180,40 @@ class matrix_2d
 		}
 	}
 
-	//Una forma de acceder a los mapas subyacentes.
-	//TODO: Why would you want this having apply???.
-	//const std::map<unsigned int, T>& get_data() const {return data;}
-	//std::map<unsigned int, T>& get_data() {return data;}
-
 	size_t 				size() 	const {return data.size();}
+	void				clear() {data.clear();}
+	
+	void				resize(unsigned int pw, unsigned int ph)
+	{
+		if(pw=w && ph==h) return;
+	
+		//We need to remember the old values to perform index_to_coords.
+		unsigned int ow=w, oh=h;
+
+		//Reassign...
+		w=pw;
+		h=ph;
+
+		//This is the real final container.
+		std::map<unsigned int, T> 	new_data;
+
+		//Iterate and reinsert those whitin range.
+		for(const auto& p : data)
+		{
+			auto c=index_to_coords(p.first, ow, oh);
+			if(c.x < w && c.y < h)
+			{
+				new_data.insert(std::make_pair(coords_to_index(c.x, c.y), p.second));
+			}
+		}
+
+		//Swap.
+		std::swap(new_data, data);
+	}
 
 	matrix_2d<T> 			copy_and_resize(unsigned int pw, unsigned int ph) const
 	{
-		matrix_2d<T> result(pw, ph);	
+		matrix_2d<T> result(pw, ph);
 
 		for(const auto& p : data)
 		{
@@ -237,6 +261,13 @@ class matrix_2d
 	{
 		int y=index / w;
 		int x=index % w;
+		return coords(x, y);
+	}
+
+	coords 				index_to_coords(unsigned int index, unsigned int pw, unsigned int ph) const
+	{
+		int y=index / pw;
+		int x=index % pw;
 		return coords(x, y);
 	}
 };
