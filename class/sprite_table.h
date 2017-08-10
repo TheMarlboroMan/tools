@@ -36,8 +36,9 @@ comparten la misma hoja de sprites aunque representan cosas distintas.
 #include <vector>
 
 #include <tools/tools/tools.h>
-#include "text_reader.h"
+#include <video/rect/rect.h>
 
+#include "text_reader.h"
 
 namespace tools
 {
@@ -46,9 +47,11 @@ struct sprite_frame
 {
 	public:
 
-	int x, y;
-	unsigned int w, h;
-	int disp_x, disp_y;
+	int 			x, y;
+	unsigned int 		w, h;
+	int 			disp_x, disp_y;
+	ldv::rect		get_rect() const {return ldv::rect{x, y, w, h};}
+
 	explicit operator bool() const {return x || y || w || h || disp_x || disp_y;}
 
 	sprite_frame()
