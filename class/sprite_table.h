@@ -43,6 +43,8 @@ comparten la misma hoja de sprites aunque representan cosas distintas.
 namespace tools
 {
 
+//Be intelligent: use power of two textures, please.
+
 struct sprite_frame
 {
 	public:

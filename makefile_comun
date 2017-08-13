@@ -17,7 +17,8 @@ $(DIR_O)arg_manager.o\
 $(DIR_O)localization_base.o\
 $(DIR_O)pair_file_parser.o\
 $(DIR_O)file_utils.o\
-$(DIR_O)string_utils.o
+$(DIR_O)string_utils.o\
+$(DIR_O)chrono.o
 	@echo Objetos generados.
 
 clean:
@@ -103,5 +104,10 @@ $(DIR_O)file_utils.o :\
 $(DIR_SOURCE)file_utils.h \
 $(DIR_SOURCE)file_utils.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_SOURCE)file_utils.cpp -o $(DIR_O)file_utils.o
+
+$(DIR_O)chrono.o :\
+$(DIR_HERRAMIENTAS_PROYECTO)chrono.h \
+$(DIR_HERRAMIENTAS_PROYECTO)chrono.cpp
+	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)chrono.cpp -o $(DIR_O)chrono.o
 
 

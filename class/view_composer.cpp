@@ -271,7 +271,7 @@ view_composer::uptr_rep view_composer::create_ttf(const dnot_token& token)
 	uptr_rep res(new ldv::ttf_representation(*font_map[token[font_key]], rgba_from_list(token[rgba_key]), token[text_key].get_string()));
 
 	auto pos=position_from_list(token[location_key]);
-	res->go_to(pos.x, pos.y);
+	res->go_to({pos.x, pos.y});
 	return res;
 }
 
