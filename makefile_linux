@@ -1,5 +1,5 @@
 #OPTIMIZATION=-O2
-#DEBUG -g
+DEBUG= -g
 
 #These are either old or plain stupid :P.
 #OTHER_WARNING_FLAGS=-Wno-deprecated -Wfloat-equal
