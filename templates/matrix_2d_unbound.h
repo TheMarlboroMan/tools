@@ -57,7 +57,6 @@ class matrix_2d_unbound
 	public:
 
 	typedef int 			tscalar;
-	typedef std::pair<coords, T>	tpair;
 
 	//!Structure reprenting a coordinate pair, ordered first on the x axis.
 	struct coords{
@@ -69,6 +68,8 @@ class matrix_2d_unbound
 			else return y < o.y;
 		}
 	};
+
+	typedef std::pair<coords, T>	tpair;
 
 	//!Default constructor.
 					matrix_2d_unbound() {}
@@ -152,14 +153,14 @@ class matrix_2d_unbound
 	template <typename Tf> 
 	void 				apply(Tf& f) const
 	{
-		for(auto& p : data) f(p.second);
+		for(const auto& p : data) f(p.second);
 	}
 	
 	//!Executes the function or functor for each pair (std::pair<coords, T>) in the matrix, giving access to the coordinates object.
 	template <typename Tf> 
 	void 				apply_pair(Tf& f) const
 	{
-		for(auto& p : data) f(p);
+		for(const auto& p : data) f(p);
 	}
 
 	private:

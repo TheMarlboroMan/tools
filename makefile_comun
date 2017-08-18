@@ -18,7 +18,8 @@ $(DIR_O)localization_base.o\
 $(DIR_O)pair_file_parser.o\
 $(DIR_O)file_utils.o\
 $(DIR_O)string_utils.o\
-$(DIR_O)chrono.o
+$(DIR_O)chrono.o\
+$(DIR_O)dnot_config_file.o
 	@echo Objetos generados.
 
 clean:
@@ -109,5 +110,10 @@ $(DIR_O)chrono.o :\
 $(DIR_HERRAMIENTAS_PROYECTO)chrono.h \
 $(DIR_HERRAMIENTAS_PROYECTO)chrono.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)chrono.cpp -o $(DIR_O)chrono.o
+
+$(DIR_O)dnot_config_file.o :\
+$(DIR_HERRAMIENTAS_PROYECTO)dnot_config_file.h \
+$(DIR_HERRAMIENTAS_PROYECTO)dnot_config_file.cpp
+	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)dnot_config_file.cpp -o $(DIR_O)dnot_config_file.o
 
 
