@@ -14,21 +14,22 @@ namespace tools
 //!are called from a pointer to the base they will execute the base code.
 
 template<typename T>
-struct vector_2d_screen:public ldt::vector_2d<T>
+struct vector_2d_screen:
+	public ldt::vector_2d<T>
 {
 	//Thanks c++11.
-	using vector_2d::vector_2d;
+	using ldt::vector_2d<T>::vector_2d;
 
 	//!Gets angle in radians. It is not virtual, so do not call on pointers.
 	T 					angle_rad() const
 	{
-		return angle_for_vector_rad({x, -y});
+		return angle_for_vector_rad({this->x, -this->y});
 	}
 
 	//!Gets angle in degrees. It is not virtual, so do not call on pointers.
 	T 					angle_deg() const
 	{
-		return angle_for_vector_deg({x, -y});
+		return angle_for_vector_deg({this->x, -this->y});
 	}
 };
 
