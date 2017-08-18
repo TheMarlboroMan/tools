@@ -10,6 +10,8 @@
 namespace tools
 {
 
+//!Base exception for matrix_2d_unbound
+
 struct matrix_2d_unbound_exception:
 	public std::runtime_error
 {
@@ -21,6 +23,8 @@ struct matrix_2d_unbound_exception:
 	}
 };
 
+//!Exception for matrix_2d_unbound indicating that there is no value in the requested coordinates.
+
 struct matrix_2d_unbound_exception_missing:
 	public matrix_2d_unbound_exception 
 {
@@ -31,6 +35,7 @@ struct matrix_2d_unbound_exception_missing:
 		) {}
 };
 
+//!Exception for matrix_2d_unbound indicating that there is already a value in the coordinates where an insertion is attempted.
 
 struct matrix_2d_unbound_exception_conflict:
 	public matrix_2d_unbound_exception 
@@ -42,18 +47,9 @@ struct matrix_2d_unbound_exception_conflict:
 		) {}
 };
 
-template<typename T>
-struct matrix_2d_unbound_item
-{
-	int x, y;
-	T elem;
+//!2d matrix representing a cell set with no fixed size bounds.
 
-	matrix_2d_unbound_item(int px, int py, T e): x(px), y(py), elem(e) 
-	{}
-
-	matrix_2d_unbound_item(int px, int py, T&& e): x(px), y(py), elem(std::move(e))
-	{}
-};
+//!Both positive and negative coordinates can be used with it.
 
 template<typename T>
 class matrix_2d_unbound
@@ -63,6 +59,7 @@ class matrix_2d_unbound
 	typedef int 			tscalar;
 	typedef std::pair<coords, T>	tpair;
 
+	//!Structure reprenting a coordinate pair, ordered first on the x axis.
 	struct coords{
 		tscalar x, y;
 		bool operator<(const coords& o) const
@@ -73,17 +70,17 @@ class matrix_2d_unbound
 		}
 	};
 
-					matrix_2d_unbound()
-	{
+	//!Default constructor.
+					matrix_2d_unbound() {}
 
-	}
-
+	//!Creates a matrix_2d_unbound from another.
 					matrix_2d_unbound(const matrix_2d_unbound& o)
 		:data(o.data)
 	{
 
 	}
 
+	//!Inserts the value in the coordinates. Will throw if there is a value present.
 	void 				insert(tscalar x, tscalar y, T& val)
 	{
 		auto index=make_index(x, y);
@@ -91,6 +88,7 @@ class matrix_2d_unbound
 		data.insert(std::make_pair(index, val));
 	}
 
+	//!Inserts the value in the coordinates. Will throw if there is a value present.
 	void 				insert(tscalar x, tscalar y, T&& val)
 	{
 		auto index=make_index(x, y);
@@ -98,6 +96,7 @@ class matrix_2d_unbound
 		data.insert(std::make_pair(index, val));
 	}
 
+	//!Removes the value in the coordinates. Will throw if there is no value present.
 	void 				erase(tscalar x, tscalar y)
 	{
 		auto index=make_index(x, y);
@@ -105,7 +104,7 @@ class matrix_2d_unbound
 		data.erase(index);
 	}
 
-	//Se usa "at" para evitar la necesidad de constructores por defecto.
+	//!Gets the element at the given coordinates. Will throw if there is no value present.
 	const T& 			operator()(tscalar x, tscalar y) const
 	{
 		auto index=make_index(x, y);
@@ -113,6 +112,7 @@ class matrix_2d_unbound
 		return data.at(index);
 	}
 
+	//!Gets the element at the given coordinates. Will throw if there is no value present.
 	T& 				operator()(tscalar x, tscalar y)
 	{
 		auto index=make_index(x, y);
@@ -120,7 +120,7 @@ class matrix_2d_unbound
 		return data.at(index);
 	}
 
-	//Permite inserciones...
+	//!Inserts the value at the given coordinates. Will throw is there is a value present.
 	T& 				operator()(tscalar x, tscalar y, T& val)
 	{
 		auto index=make_index(x, y);
@@ -129,6 +129,7 @@ class matrix_2d_unbound
 		return data.at(index);
 	}
 
+	//!Inserts the value at the given coordinates. Will throw is there is a value present.
 	T& 				operator()(tscalar x, tscalar y, T&& val)
 	{
 		auto index=make_index(x, y);
@@ -138,22 +139,25 @@ class matrix_2d_unbound
 	}
 
 
-	//The very same...
-	bool 				count(tscalar x, tscalar y) const {return data.count(make_index(x, y));}
+	//!Checks if there is a value in the given coordinates.
 	bool 				check(tscalar x, tscalar y) const {return data.count(make_index(x, y));}
+
+	//!Returns the total amount of values in the matrix.
 	size_t 				size() 	const {return data.size();}
+
+	//!Clears the matrix.
 	void				clear() {data.clear();}
 	
-	//Absolutely anything that has an operator () or even a function can be used with this :).
-	template <typename TipoFunc> 
-	void 				apply(TipoFunc& f) const
+	//!Executes the function or functor for each value in the matrix.
+	template <typename Tf> 
+	void 				apply(Tf& f) const
 	{
 		for(auto& p : data) f(p.second);
 	}
 	
-	//The same as before, where f is executed in a std::pair<coord, t> or tpair.
-	template <typename TipoFunc> 
-	void 				apply_pair(TipoFunc& f) const
+	//!Executes the function or functor for each pair (std::pair<coords, T>) in the matrix, giving access to the coordinates object.
+	template <typename Tf> 
+	void 				apply_pair(Tf& f) const
 	{
 		for(auto& p : data) f(p);
 	}
@@ -162,10 +166,7 @@ class matrix_2d_unbound
 
 	std::map<coords, T> 	data;
 
-	coords				make_index(tscalar x, tscalar y) const
-	{
-		return {x, y};
-	}
+	coords				make_index(tscalar x, tscalar y) const {return {x, y};}
 };
 
 }
