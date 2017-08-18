@@ -20,7 +20,7 @@ $(DIR_O)file_utils.o\
 $(DIR_O)string_utils.o\
 $(DIR_O)chrono.o\
 $(DIR_O)dnot_config_file.o
-	@echo Objetos generados.
+	@echo All done.
 
 clean:
 	$(LIMPIAR)
