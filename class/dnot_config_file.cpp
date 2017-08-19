@@ -16,6 +16,31 @@ catch(std::runtime_error& e)
 	throw std::runtime_error(std::string("dnot_config_file: error starting configuration ")+ppath+" : "+e.what());
 }
 
+void dnot_config_file::load(const std::string& p)
+{
+	try
+	{
+		token=tools::dnot_parse(p);
+		path=p;
+	}
+	catch(std::runtime_error& e)
+	{
+		throw std::runtime_error(std::string("dnot_config_file: error loading configuration ")+p+" : "+e.what());
+	} 
+}
+
+void dnot_config_file::reload()
+{
+	try
+	{
+		token=tools::dnot_parse(path);
+	}
+	catch(std::runtime_error& e)
+	{
+		throw std::runtime_error(std::string("dnot_config_file: error reloading configuration ")+path+" : "+e.what());
+	} 
+}
+
 void dnot_config_file::save()
 {
 	dnot_token_serialize_options os;

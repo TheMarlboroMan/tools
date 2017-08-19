@@ -19,9 +19,11 @@ class dnot_config_file
 	bool bool_from_path(const std::string& ppath) const {return token_from_path(ppath).get_bool();}
 	std::string string_from_path(const std::string& ppath) const {return token_from_path(ppath).get_string();}
 
+	void reload();
+	void load(const std::string&);
 	void save();
 
-	dnot_config_file(const std::string& path);
+	dnot_config_file(const std::string&);
 
 	protected: 
 
@@ -39,7 +41,7 @@ class dnot_config_file
 	private:
 
 	tools::dnot_token				token;
-	const std::string				path;
+	std::string					path;
 };
 
 }
