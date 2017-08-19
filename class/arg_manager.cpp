@@ -35,26 +35,30 @@ const arg_manager::t_arg arg_manager::get_argument(unsigned int p_arg) const
 Busca un argumento. Devuelve -1 si no encuentra nada y el índice del argumento si la ha encontrado.
 */
 
-int arg_manager::find_index(const char * p_char) const {return find_index(t_arg(p_char));}
-int arg_manager::find_index(t_arg const& p_find_index) const
+int arg_manager::find_index(const t_arg& val) const
 {
-	//Manual del todo..
-	int result=-1;
 	int i=0;
 
-	t_arg_list::const_iterator 	ini=data.begin(),
-						fin=data.end();
-
-	for(;ini<fin; ini++, i++)
+	for(const auto& arg: data)
 	{
-		if( (*ini).compare(p_find_index)==0)
-		{
-			result=i;
-			break;
-		}
+		if(val==arg) return i;
+		else ++i;
 	}
 
-	return result;
+	return -1;
+}
+
+int arg_manager::find_index_value(const t_arg& val) const
+{
+	int i=0;
+
+	for(const auto& arg: data)
+	{
+		if(arg.substr(0, val.size())== val) return i;
+		else ++i;
+	}
+
+	return -1;
 }
 
 /*Devuelve el valor del argumento "argumento" si se localiza en la cadena. Se entiende 
@@ -63,13 +67,7 @@ a la izquierda del delimiter (en este caso =)
 Si no se localiza el argumento se lanza una excepción propia para indicarlo.
 */
 
-std::string arg_manager::get_value(const char *c, const char delimiter) const
-{
-	std::string cad=c;
-	return get_value(cad, delimiter);
-}
-
-std::string arg_manager::get_value(const std::string& argumento, const char delimiter) const
+std::string arg_manager::get_value(const t_arg& argumento, const char delimiter) const
 {
 	std::stringstream ss;
 	ss<<argumento<<delimiter;

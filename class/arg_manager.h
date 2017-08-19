@@ -24,17 +24,22 @@ class arg_manager
 				arg_manager() {}
 				arg_manager(int argc, char ** argv);
 
-	int 			find_index(const char * p_char) const;
-	int 			find_index(t_arg const& p_find_index) const;
 	void 			init(int argc, char ** argv);
 	size_t 			size() const {return data.size();}
-	const 			t_arg get_argument(unsigned int p_arg) const;
+
+	const 			t_arg get_argument(unsigned int) const;
 	const 			t_arg_list& get_data() const {return data;}
-	bool			exists(const char * p_char) const {return find_index(p_char)!=-1;}
+
+	int 			find_index(const t_arg&) const;
+	int 			find_index_value(const t_arg&) const;
+
+	//!Checks if a single argument in format ./executable.out arg1 arg2 arg3
+	bool			exists(const t_arg& v) const {return find_index(v)!=-1;}
+	//!Checks if a single argument in format ./executable.out arg1=val1 arg2=val2 arg3=val3
+	bool			value_exists_for(const t_arg& v) const {return find_index_value(v)!=-1;}
 
 	//TODO: Mejor, un método al que pasemos un callable.. Y que itere.
-	std::string 		get_value(const char *c, const char delimiter='=') const;
-	std::string 		get_value(const std::string& c, const char delimiter='=') const;
+	std::string 		get_value(const t_arg& c, const char delimiter='=') const;
 
 	private:
 
