@@ -15,47 +15,53 @@
 namespace tools
 {
 
+//!Base localization class.
+
+//!Implementing the three protected virtual methods will prepare the class.
+//!Files are expected to be plain text files. Commented lines begin with #.
+//!A localised string is in this format: <n#>String<#> where n is unique
+//!positive number identifying it.
+
 class localization_base
 {
 	public:
 
-	//typedef std::map<unsigned int, std::wstring> t_map;	//Tipo del mapa.
-	//typedef std::wstring t_string;				//Tipo de cadena que devuelve.
-	typedef std::map<unsigned int, std::string> t_map;	//Tipo del mapa.
-	typedef std::string t_string;				//Tipo de cadena que devuelve.
-	typedef std::string t_string_stream;				//Tipo de cadena que devuelve.
-	typedef char t_char_buffer;				//Tipo del buffer de lectura del archivo.
-	typedef std::ifstream t_stream_in;			//Tipo del archivo que abre.
-	typedef std::vector<t_string> t_filename;	//Tipo de dato que devuelve componer_nombre_archivo;
-
-	enum languages{lspanish=0, lenglish=1};
+	typedef std::map<unsigned int, std::string> t_map;	//!< Internal map type.
+	typedef std::string t_string;				//!< Returned type from "get".
+	typedef std::string t_string_stream;			//!< Internal stream type.
+	typedef char t_char_buffer;				//!< Internal buffer type.
+	typedef std::ifstream t_stream_in;			//!< Input file type.
+	typedef std::vector<t_string> t_filename;		//!< Returned value for "get_file_list".
 
 				localization_base(unsigned short int);
 	virtual 		~localization_base();
 
 	void 			set_language(unsigned short int);
 	t_string const& 	get(unsigned int) const;
+	void 			init();
 
-	virtual void 		init();
-	void 			reload() {init();}
+	//!When implemented must return a set of files to read.
+	virtual t_filename 	get_file_list()=0;
+	
+	//!When implemented, must return a string indicating that the localization is not initialised.
+	virtual t_string const& string_not_loaded()const=0;
 
-	//A implementar...
+	//!When implemented, must return a string indicating that the index does not exist.
+	virtual t_string const& string_not_found()const=0;
 
-	protected:
-
-	t_map 			data;
-	unsigned short int 	language;
+	private:
 
 	bool 			begin_delimiter(t_string const&, size_t&);
 	bool 			end_delimiter(t_string const&);
 	void 			clear();
 	void 			insert(unsigned int, t_string const&);
-	t_string 		get_filename(t_string const&);
+	t_string 		compose_filename(t_string const&);
 	void 			process_file(t_string const&);
 
-	virtual t_filename 	get_file_list()=0;
-	virtual t_string const& string_not_loaded()const=0;
-	virtual t_string const& string_not_found()const=0;
+	t_map 			data;
+	unsigned short int 	language;
+
+
 };
 
 }

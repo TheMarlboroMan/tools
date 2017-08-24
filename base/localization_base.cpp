@@ -4,61 +4,82 @@
 
 using namespace tools;
 
+//!Default constructor. 
+
+//!Initialises the object with the language identified by the parameter, which
+//!is application dependent.
+
 localization_base::localization_base(unsigned short int p_language)
+	:language(p_language)
 {
-	this->language=p_language;
+
 }
+
+//!Class destructor.
 
 localization_base::~localization_base()
 {
-	this->clear();
+	clear();
 }
+
+//!Removes all localization strings.
 
 void localization_base::clear()
 {
-	this->data.clear();
+	data.clear();
 }
+
+//!Sets the language.
+
+//!The language is identified by an integer in an application dependent manner.
+//!As a side effect, the set of localized strings for the language is loaded
+//!and the previous are removed.
 
 void localization_base::set_language(unsigned short int p_language)
 {
-	this->language=p_language;
-	this->init();
+	language=p_language;
+	init();
 }
+
+//!Inserts a localised string. Internal method.
 
 void localization_base::insert(unsigned int pindex, t_string const& pstring)
 {
-	this->data.insert(std::pair<unsigned int, t_string>(pindex, pstring));
+	data.insert(std::pair<unsigned int, t_string>(pindex, pstring));
 }
 
-localization_base::t_string localization_base::get_filename(t_string const& p_original)
+//!Composes the filename. Internal method.
+
+//!Filenames are expressed as "filename.#integerlanguage#.dat".
+
+localization_base::t_string localization_base::compose_filename(t_string const& p_original)
 {
 	t_string nombre_archivo(p_original);
 
 	nombre_archivo.append(".");
-	nombre_archivo.append(compat::to_string(this->language));
+	nombre_archivo.append(compat::to_string(language));
 	nombre_archivo.append(".dat");
 
 	return nombre_archivo;
 }
 
+//!Loads all strings.
+
+//!Needs to be called after the constructor.
+
 void localization_base::init()
 {
-	t_filename lista=this->get_file_list();
-	t_filename::iterator ini=lista.begin(), fin=lista.end();
-
-	//Limpiar mapa e ir asignando.
-	this->clear();
-
-	for(;ini<fin; ini++)
-	{
-		this->process_file(*ini);
-	}
-
+	clear();
+	for(const auto& f: get_file_list()) process_file(f);
 }
+
+//!Loads strings from a file. Internal method. 
+
+//!Will throw if the file cannot be found.
 
 void localization_base::process_file(t_string const& nombre_archivo)
 {
-	const std::string ruta=get_filename(nombre_archivo);
+	const std::string ruta=compose_filename(nombre_archivo);
 
 	t_stream_in archivo(ruta.c_str(), std::ios::in | std::ios::binary);
 	if(!archivo)
@@ -67,12 +88,12 @@ void localization_base::process_file(t_string const& nombre_archivo)
 	}
 	else
 	{
-		size_t indice=0; //, pos;
-		size_t indice_aux=0;
+		size_t index=0; //, pos;
+		size_t index_aux=0;
 		t_string_stream cadena, cadena_def;
-		bool leyendo=false;
+		bool reading=false;
 
-		//Leemos de línea en línea, 1024 como mucho. Por cada línea leida procesamos.
+		//Read and process the line.
 		while(true)
 		{
 			std::getline(archivo, cadena);
@@ -81,68 +102,61 @@ void localization_base::process_file(t_string const& nombre_archivo)
 				break;
 			}
 
-
-			//La cadena esta vacia?	Si no estamos leyendo saltar al siguiente con "continue".
-			if(!cadena.size() && !leyendo) 
+			//Empty string?. If not reading, just jump to the next.
+			if(!cadena.size() && !reading) 
 			{
 				continue;
 			}
+			//Did we find a comment?
 			else if(cadena[0]=='#') 
 			{
-				continue;	//Es un comentario????
+				continue;
 			}
 
-			//Delimitador de inicio encontrado?
-		
-			if(begin_delimiter(cadena, indice_aux))
+			//Did we find a "begin delimiter"
+			if(begin_delimiter(cadena, index_aux))
 			{
-				leyendo=true; //Marcar leyendo como true.
-				indice=indice_aux; //Obtener índice.
-				cadena=cadena.substr(3+int_digits(indice)); //Cortar delimitador inicio. + 3 por el < y el $>
+				reading=true;
+				index=index_aux;
+				cadena=cadena.substr(3+int_digits(index)); //Cut delimiter... +3 is because of <$>
 			}
 
-			//Delimitador de fin encontrado?
-			if(this->end_delimiter(cadena))
+			//Did we find an "end delimiter"?
+			if(end_delimiter(cadena))
 			{
-				leyendo=false; //Marcar leyendo como false.
-				cadena=cadena.substr(0, cadena.size()-3); //Cortar resto cadena. -3 es por <#>
+				reading=false;
+				cadena=cadena.substr(0, cadena.size()-3); //-3 es por <#>
 				cadena_def.append(cadena);
 
-				//Insertar en mapa.
-
-				this->insert(indice, cadena_def);
+				insert(index, cadena_def);
 				cadena_def.clear();
 				cadena.clear();
 			}		
 
-			//Estamos leyendo?
-			if(leyendo)
+			//Are we reading?
+			if(reading)
 			{
-				cadena.append("\n"); //Insertar nueva línea.
-				cadena_def.append(cadena); //Insertar en cadena actual.	
-				cadena.clear();	//Limpiar buffer.
+				cadena.append("\n"); //Add new line.
+				cadena_def.append(cadena); //Append to current.
+				cadena.clear();	//Clear.
 			}
 		}	
 	
 		archivo.close();
 	}
-
-//	delete [] buffer;
 }
 
-/*
-Busca <n#> al principio de la cadena donde n# es un número positivo. Si lo
-encuentra devuelve n#. Si no devolverá -1.
-*/
-bool localization_base::begin_delimiter(std::string const& pstring, size_t &indice)
+//!Locates the begin delimiter mark. Internal method.
+
+bool localization_base::begin_delimiter(std::string const& pstring, size_t &index)
 {
 	size_t pos=pstring.find("$>", 1);
-	std::string cad_indice("");
+	std::string cad_index("");
 
 	if(pos!=std::string::npos)
 	{
-		cad_indice.assign(pstring.substr(1, pos-1));
-		indice=std::atoi(cad_indice.c_str());
+		cad_index.assign(pstring.substr(1, pos-1));
+		index=std::atoi(cad_index.c_str());
 		return true;
 	}
 	else 
@@ -150,6 +164,8 @@ bool localization_base::begin_delimiter(std::string const& pstring, size_t &indi
 		return false;
 	}
 }
+
+//!Locates the end delimiter mark. Internal function.
 
 bool localization_base::end_delimiter(std::string const& pstring)
 {
@@ -165,23 +181,20 @@ bool localization_base::end_delimiter(std::string const& pstring)
 	return resultado;
 }
 
+//!Returns the localised string with the requested index.
+
+//!If the value is not found it will return a special, application dependent
+//!string.
+
 localization_base::t_string const& localization_base::get(unsigned int pindex) const
 {
-	if(!this->data.size())
+	if(!data.size())
 	{
-		return this->string_not_found();
+		return string_not_found();
 	}
 	else
 	{
-		const auto it=this->data.find(pindex);
-
-		if(it==this->data.end())
-		{
-			return this->string_not_found();
-		}
-		else
-		{
-			return it->second;
-		}
+		const auto it=data.find(pindex);
+		return it==data.end() ? string_not_found() : it->second;
 	}
 }
