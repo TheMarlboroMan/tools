@@ -82,6 +82,8 @@ class view_composer
 	static const std::string		ttf_key;
 	static const std::string		screen_key;
 	static const std::string		definition_key;
+	static const std::string		definition_key_key;
+	static const std::string		definition_key_value;
 	static const std::string		order_key;
 	static const std::string		alpha_key;
 	static const std::string		id_key;

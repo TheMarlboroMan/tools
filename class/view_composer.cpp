@@ -10,6 +10,8 @@ const std::string view_composer::bitmap_key="bitmap";
 const std::string view_composer::ttf_key="ttf";
 const std::string view_composer::screen_key="screen";
 const std::string view_composer::definition_key="define";
+const std::string view_composer::definition_key_key="key";
+const std::string view_composer::definition_key_value="value";
 const std::string view_composer::alpha_key="alpha";
 const std::string view_composer::order_key="order";
 const std::string view_composer::id_key="id";
@@ -255,8 +257,13 @@ view_composer::uptr_rep view_composer::create_bitmap(const dnot_token& token)
 	{
 		throw std::runtime_error("Unable to locate texture "+token[texture_key].get_string()+" for bitmap");
 	}
-	
+
 	uptr_rep res(new ldv::bitmap_representation(*texture_map[token[texture_key]], box_from_list(token[location_key]), box_from_list(token[clip_key])));
+
+	if(token.key_exists(brush_key))
+	{		
+		res.set_brush(token[brush_key][0], token[brush_key][1]);
+	}
 
 	return res;
 }
@@ -283,15 +290,13 @@ void view_composer::do_screen(const dnot_token& token)
 
 void view_composer::do_definition(const dnot_token& token)
 {
-	//TODO: Change these for constants...
-	const std::string& clave=token["key"].get_string();
+	const std::string& clave=token[definition_key_key].get_string();
 
 	if(int_definitions.count(clave)) throw std::runtime_error("Repeated definition for "+clave);
 
-	//TODO: Add constant for "value".
-	if(token["value"].is_int_value()) int_definitions[clave]=token["value"].get_int();
-	else if(token["value"].is_float_value()) float_definitions[clave]=token["value"].get_float();
-	else throw std::runtime_error("Invalid data type for definition.");	
+	if(token[definition_key_value].is_int_value()) int_definitions[clave]=token[definition_key_value].get_int();
+	else if(token[definition_key_value].is_float_value()) float_definitions[clave]=token[definition_key_value].get_float();
+	else throw std::runtime_error("Invalid data type for definition.");
 }
 
 ldv::rect view_composer::box_from_list(const dnot_token& tok)
@@ -329,6 +334,7 @@ void view_composer::clear_view()
 void view_composer::clear_definitions()
 {
 	int_definitions.clear();
+	float_definitions.clear();
 }
 
 int view_composer::get_int(const std::string& k) const
