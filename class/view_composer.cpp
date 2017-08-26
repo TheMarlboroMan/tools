@@ -283,7 +283,8 @@ void view_composer::do_screen(const dnot_token& token)
 
 void view_composer::do_definition(const dnot_token& token)
 {
-	const std::string& clave=token["clave"].get_string();
+	//TODO: Change these for constants...
+	const std::string& clave=token["key"].get_string();
 
 	if(int_definitions.count(clave)) throw std::runtime_error("Repeated definition for "+clave);
 

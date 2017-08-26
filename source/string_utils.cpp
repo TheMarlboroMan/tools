@@ -42,6 +42,34 @@ std::vector<std::string> tools::explode(const std::string & pstring, const char 
 	return result;
 }
 
+std::vector<std::string> tools::explode(const std::string & pstring, const std::string& delimiter, size_t max)
+{
+	size_t count=1, pos=0, prev_pos=0;
+
+	std::vector<std::string> result;
+	
+	do
+	{
+		pos=pstring.find(delimiter, prev_pos);
+
+		if(pos==std::string::npos)
+		{
+			result.push_back(pstring.substr(prev_pos));
+		}
+		else
+		{
+			result.push_back(pstring.substr(prev_pos, pos-prev_pos));
+			prev_pos=pos+delimiter.size();
+		}
+
+		++count;
+		if(max && count >= max) break;
+	}
+	while(pos!=std::string::npos);
+
+	return result;
+}
+
 /*
 * @param std::string file: nombre del file a abrir.
 * @param const char delimiter: cadena de separación entre claves y values.

@@ -17,6 +17,7 @@ namespace tools
 {
 
 std::vector<std::string> 		explode(const std::string &, const char, size_t max=0);
+std::vector<std::string> 		explode(const std::string &, const std::string&, size_t max=0);
 std::map<std::string, std::string> 	map_pair(const std::string&, const char, const char);
 size_t					int_digits(int);
 
