@@ -28,11 +28,15 @@ const std::string view_composer::external_key="external";
 const std::string view_composer::external_reference_key="ref";
 const std::string view_composer::rotation_key="rotate";
 
+//!Default constructor.
+
 view_composer::view_composer()
 	:with_screen(false), screen_color{0,0,0, 255}
 {
 
 }
+
+//!Draws the composition to the screen.
 
 void view_composer::draw(ldv::screen& p)
 {
@@ -47,6 +51,8 @@ void view_composer::draw(ldv::screen& p)
 	}
 }
 
+//!Draws the composition to the screen using a camera.
+
 void view_composer::draw(ldv::screen& p, const ldv::camera& cam)
 {
 	if(with_screen)
@@ -60,11 +66,11 @@ void view_composer::draw(ldv::screen& p, const ldv::camera& cam)
 	}
 }
 
-/**
-* Recibe una textura y la mapea a una clave para poder usarla en diversas 
-* data. No hace copia de la textura: en su lugar se requiere que la
-* textura exista mientras exista el compositor de vistas.
-*/
+//!Maps the texture to the given handle.
+
+//!Mapped textures can be referenced in the layout file by their handle. Textures
+//!are not copied, so it is required that they exist as long as the layout
+//!needs to be drawn. Will throw if the key is used more than once.
 
 void view_composer::map_texture(const std::string& clave, ldv::texture * tex)
 {
@@ -76,16 +82,14 @@ void view_composer::map_texture(const std::string& clave, ldv::texture * tex)
 	texture_map[clave]=tex;
 }
 
+//!Maps the texture.
+
 void view_composer::map_texture(const std::string& clave, ldv::texture& tex)
 {
 	map_texture(clave, &tex);
 }
 
-/**
-* Recibe una superficie y la mapea a una clave para poder usarla en diversas 
-* data. No hace copia de la superficie: en su lugar se requiere que 
-* exista mientras exista el compositor de vistas.
-*/
+//!Same as map textures, but with surfaces.
 
 void view_composer::map_surface(const std::string& clave, ldv::surface * sup)
 {
@@ -97,10 +101,14 @@ void view_composer::map_surface(const std::string& clave, ldv::surface * sup)
 	surface_map[clave]=sup;
 }
 
+//!Same as map textures, but with surfaces.
+
 void view_composer::map_surface(const std::string& clave, ldv::surface& sup)
 {
 	map_surface(clave, &sup);
 }
+
+//!Same as map textures, but with ttf_fonts.
 
 void view_composer::map_font(const std::string& clave, const ldv::ttf_font * fuente)
 {
@@ -112,10 +120,20 @@ void view_composer::map_font(const std::string& clave, const ldv::ttf_font * fue
 	font_map[clave]=fuente;
 }
 
+//!Same as map textures, but with ttf_fonts.
+
 void view_composer::map_font(const std::string& clave, const ldv::ttf_font& fuente)
 {
 	map_font(clave, &fuente);
 }
+
+//!Returns the representation with the given id.
+
+//!Will throw if there is no representation with that id. The representation
+//!is returned as a pointer to its most base type (ldv::representation *)
+//!so manipulation of specific characteristics (like textures or texts) need
+//!to be done by casting the pointer (static_cast<ldv::bitmap_representation *>)
+//!to the necessary type.
 
 ldv::representation * view_composer::get_by_id(const std::string& id)
 {
@@ -129,17 +147,17 @@ ldv::representation * view_composer::get_by_id(const std::string& id)
 	}
 }
 
+//!Checks if there exists a representation with the given id.
+
 bool view_composer::id_exists(const std::string& id) const
 {
 	return id_map.count(id);
 }
 
-/**
-* @param std::string ruta: ruta del fichero dnot a parse.
-* @param std::string nodo: nombre del nodo dnot que contiene la escena.
-*
-* Lanzará excepción si no es posible parse el fichero o si el nodo no existe.
-*/
+//!Parses the file and mounts the layout identified by the second parameter.
+
+//!Will throw if the file or node does not exists, or if there are malformations
+//!in the layout file.
 
 void view_composer::parse(const std::string& ruta, const std::string& nodo)
 {
@@ -234,6 +252,11 @@ void view_composer::parse(const std::string& ruta, const std::string& nodo)
 	std::sort(std::begin(data), std::end(data));
 }
 
+//!Registers the given representation with the handle.
+
+//!Registered representations can use the values expressed in the layout file.
+//!Will throw if the reference is repeated.
+
 void view_composer::register_as_external(const std::string& clave, ldv::representation& rep)
 {
 	if(external_map.count(clave))
@@ -244,6 +267,7 @@ void view_composer::register_as_external(const std::string& clave, ldv::represen
 	external_map[clave]=&rep;
 } 
 
+//!Creates a box from a token. Internal.
 view_composer::uptr_rep view_composer::create_box(const dnot_token& token)
 {
 	auto color=rgba_from_list(token[rgba_key]);
@@ -251,6 +275,8 @@ view_composer::uptr_rep view_composer::create_box(const dnot_token& token)
 	return res;
 }
 
+
+//!Creates a bitmap from a token. Internal.
 view_composer::uptr_rep view_composer::create_bitmap(const dnot_token& token)
 {
 	if(!texture_map.count(token[texture_key]))
@@ -262,12 +288,13 @@ view_composer::uptr_rep view_composer::create_bitmap(const dnot_token& token)
 
 	if(token.key_exists(brush_key))
 	{		
-		res.set_brush(token[brush_key][0], token[brush_key][1]);
+		static_cast<ldv::bitmap_representation *>(res.get())->set_brush(token[brush_key][0], token[brush_key][1]);
 	}
 
 	return res;
 }
 
+//!Creates a ttf representation from a token. Internal.
 view_composer::uptr_rep view_composer::create_ttf(const dnot_token& token)
 {
 	if(!font_map.count(token[font_key]))
@@ -282,12 +309,14 @@ view_composer::uptr_rep view_composer::create_ttf(const dnot_token& token)
 	return res;
 }
 
+//!Records screen color fill values. Internal.
 void view_composer::do_screen(const dnot_token& token)
 {
 	screen_color=rgba_from_list(token[rgba_key]);
 	with_screen=true;
 }
 
+//!Records a definition. Internal.
 void view_composer::do_definition(const dnot_token& token)
 {
 	const std::string& clave=token[definition_key_key].get_string();
@@ -299,12 +328,14 @@ void view_composer::do_definition(const dnot_token& token)
 	else throw std::runtime_error("Invalid data type for definition.");
 }
 
+//!Creates a box from a token. Internal.
 ldv::rect view_composer::box_from_list(const dnot_token& tok)
 {
 	int x=tok[0], y=tok[1], w=tok[2], h=tok[3];
 	return ldv::rect{x, y, (unsigned int)w, (unsigned int)h};
 }
 
+//!Creates a rgba from a token. Internal.
 ldv::rgba_color view_composer::rgba_from_list(const dnot_token& tok)
 {
 	try
@@ -318,12 +349,17 @@ ldv::rgba_color view_composer::rgba_from_list(const dnot_token& tok)
 	}
 }
 
+//!Creates a position box from a token. Internal.
 view_composer::position view_composer::position_from_list(const dnot_token& tok)
 {
 	int x=tok[0], y=tok[1];
 	return position{x, y};
 }
 
+//!Clears all view elements.
+
+//!Representations, id maps and external references are cleared. Definitions 
+//!are not.
 void view_composer::clear_view()
 {
 	data.clear();
@@ -331,17 +367,24 @@ void view_composer::clear_view()
 	external_map.clear();
 }
 
+//!Clears all definitions.
 void view_composer::clear_definitions()
 {
 	int_definitions.clear();
 	float_definitions.clear();
 }
 
+//!Gets a defined integer. 
+
+//!Will throw if the definition does not exist.
 int view_composer::get_int(const std::string& k) const
 {
 	return get_definition(k, int_definitions);
 }
 
+//!Gets a defined float. 
+
+//!Will throw if the definition does not exist.
 float view_composer::get_float(const std::string& k) const
 {
 	return get_definition(k, float_definitions);

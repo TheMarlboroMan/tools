@@ -6,27 +6,82 @@
 #include "dnot_parser.h"
 #include <def_video.h>
 
-/**
-* El compositor se creó para sacar pantallas sencillas (como intro o game over)
-* del código y meterlas en archivos de configuración donde podemos hacer ajustes
-* sin necesidad de compilar.
-*
-* En un principio se trata de un archivo de configuración (en Dnot) por un lado,
-* que define las data de las vistas en si. Por otro tenemos que
-* conectar esta vista con las fuentes, texturas y superficies del proyecto (esto
-* ahora mismo se hace manual... Podríamos hacer una función "mapear" para
-* mapear con texturas, superficies y fuentes usando los gestores de turno que
-* podríamos pasar por referencia.
-*
-* Cuando se conecta la vista con los recursos sólo hay que llamar a "parse"
-* pasando como primer parámetro el nombre del fichero y como segundo el nombre
-* del nodo de la vista.
-*
-* Una vez parseada la lista la podemos "draw" a una pantalla o podemos extraer
-* elementos internos que tengan un "id" para poder manipularlos.
-*
-* Un manual rápido del formato del fichero lo ponemos al final de este mismo
-* archivo.
+/**The view composer creates graphical presentations through configuration
+files with little coding and compiling.
+
+It works in two stages: a dnot configuration file which defines the elements
+to be drawn and a code snippet to connect textures and fonts to it. Once the 
+file is done and the resources are connected to the composer, a call to 
+"parse" with the filename and the view node (dnots can have many root nodes)
+will mount the view and the call to "draw" will draw it.
+
+Elements drawn can be internal or external. Internal elements have an id that
+can be used in code to manipulate them. External elements exist in code and 
+are made to correspond with a key in the file.
+
+The structure of the file goes like this:
+
+layout_id:[
+	{type:"#type_key#", #attribute#: #attribute_value#},
+	{type:"#type_key#", #attribute#: #attribute_value#},
+	{type:"#type_key#", #attribute#: #attribute_value#},
+	{type:"#type_key#", #attribute#: #attribute_value#}
+]
+
+other_layout_id:[
+	...
+]
+
+External features like textures or fonts need to be linked and given a string
+handle through the methods map_texture(handle, texture), map_surface(handle, surface)
+or map_font(handle, font). The handle will be used within the file to represent
+the resource.
+
+In the file, "type" corresponds either to a definition or a representation. 
+Definitions can be integer or float values that can be used outside the 
+composer (that is, in the code, through the get_int or get_float values) to
+avoid recompilation. So far, considering how the file is parsed as a regular
+dnot, there is no support for internal definitions.
+Definitions are expressed like this:
+
+	{type:"define", key:"my_key", value:32}
+
+As for representations, there are common attributes:
+
+	type: expresses the type as a string
+	id: string handle used to manipulate the representation from the code
+	alpha: integer alpha value
+	order: integer order value. Lower values are drawn sooner.
+	visible: boolean value, indicates whether the representation is drawn or not.
+	rotate: [30, 40, 40] integer list corresponding to degrees, rotation center x and y.
+
+Different representations and their parameters are
+
+screen:
+	rgba:[255,255,255,255] (Screen color fill)
+	does not accept the "order" attribute.
+
+ttf:
+	location:[16, 16] 	(position)
+	text:"this is the text",(text)
+	font:"font handle", 	(font handle)
+	rgba:[0, 0, 0, 255],	(font color)
+
+external:
+	ref:"menu"	(allows a code representation to be included in the view
+			and use its attributes, like "order". register_as_external
+			is used for this purpose).
+
+bitmap:
+	location:[140, 300, 546, 376], 	(position)
+	clip:[0, 0, 546, 376],		(texture clip)
+	brush:[20,20],			(draw brush size)
+	texture:"texture handle"	(texture handle)
+	surface:"surface handle"	(surface handle... untested).
+
+box:
+	location:[0, 0, 800, 600]		(position)
+	rgba:[255,255,255,255]		(color)
 */
 
 namespace tools
@@ -49,6 +104,8 @@ class view_composer
 	void			map_font(const std::string&, const ldv::ttf_font&);
 	void			clear_view();
 	void			clear_definitions();
+
+	//!Empties the representation, allowing for a new call to "parse".
 	void			clear()
 	{
 		clear_view();
@@ -62,6 +119,7 @@ class view_composer
 
 	private:
 
+	//!Internal template helper to get definitions.
 	template<typename T> 
 	T get_definition(const std::string k, const std::map<std::string, T>& map) const
 	{
@@ -101,7 +159,7 @@ class view_composer
 
 	struct position{int x, y;};
 
-	//TODO: Comentar...
+	//!Represents a singular drawable.
 
 	struct item
 	{
@@ -159,68 +217,5 @@ class view_composer
 	ldv::rgba_color					screen_color;
 };
 }
-
-/*
-* El fichero de configuración debe tener tantos nodos base como escenas 
-* configura.
-* En nuestro caso, el nodo base de la escena se llama "escena_prueba". El nodo 
-* base debe ser una lista de objetos, cada uno identificado por un "tipo". Todos
-* los objetos pueden tener la clave "order" y "alpha" para configurar el order
-* de aparición (menor a mayor) e "id" para sacar referencias al código.
-*
-* Los tipos posibles son:
-* - pantalla:
-*	rgba[r, g, b, a] : color con el que se coloreará la pantalla.
-* - caja:
-*	pos[x, y, w, h] : posición de la caja
-*	rgb[r, g, b] : color de la caja
-* - bitmap:
-*	pos[x, y, w, h] : posición de la caja
-*	rec[x, y, w, h] : recorte de la textura
-*	textura["cadena"] : cadena de mapeo de la textura
-* INIT DEPRECATED DEPRECATED DEPRECATED DEPRECATED DEPRECATED DEPRECATED DEPRECATED 
-* - patron:
-*	pos[x, y, w, h] : posición de la caja
-*	rec[x, y, w, h] : recorte de la textura
-*	textura["cadena"] : cadena de mapeo de la textura
-*	pincel:[x, y, w, h] : rectángulo de pincel que se usará para dibujar
-* - ttf:
-*	pos[x, y] : posición del texto
-*	fuente["cadena"] : cadena de mapeo de la fuente TTF
-*	texto["texto"] : Texto que se dibujará
-*	rgba[r, g, b, a] : color de la fuente
-*
-* El fichero viene a quedar así.
-*
-escena_prueba:
-[
-	{
-		tipo:"pantalla", 
-		rgba:[32, 32, 32, 255]
-	},
-	{
-		tipo:"caja", id:"mi_caja", 
-		pos:[20,20,80,80], rgb:[255, 0, 0],
-		order:1
-	},
-	{
-		tipo:"caja",
-		pos:[80, 16, 40, 40], rgb:[0, 0, 255],
-		order:2
-	},
-	{
-		tipo:"bitmap",
-		pos:[200, 200, 14, 30], rec:[0, 0, 14, 30],
-		textura:"sprites", alpha:192
-	},
-	{
-		tipo:"ttf",
-		pos:[20, 180],
-		fuente:"fuente",
-		texto:"Hola... Yo también salgo de un fichero",
-		rgba:[64, 64, 255, 128]
-	}
-]
-*/
 
 #endif
