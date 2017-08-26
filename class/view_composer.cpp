@@ -8,6 +8,7 @@ const std::string view_composer::type_key="type";
 const std::string view_composer::box_key="box";
 const std::string view_composer::bitmap_key="bitmap";
 const std::string view_composer::ttf_key="ttf";
+const std::string view_composer::polygon_key="polygon";
 const std::string view_composer::screen_key="screen";
 const std::string view_composer::definition_key="define";
 const std::string view_composer::definition_key_key="key";
@@ -18,6 +19,8 @@ const std::string view_composer::id_key="id";
 const std::string view_composer::rgba_key="rgba";
 const std::string view_composer::location_key="location";
 const std::string view_composer::clip_key="clip";
+const std::string view_composer::points_key="points";
+const std::string view_composer::polygon_fill_key="fill";
 const std::string view_composer::text_key="text";
 const std::string view_composer::surface_key="surface";
 const std::string view_composer::font_key="font";
@@ -173,6 +176,7 @@ void view_composer::parse(const std::string& ruta, const std::string& nodo)
 		if(tipo==box_key) ptr=std::move(create_box(token));
 		else if(tipo==bitmap_key) ptr=std::move(create_bitmap(token));
 		else if(tipo==ttf_key) ptr=std::move(create_ttf(token));
+		else if(tipo==polygon_key) ptr=std::move(create_polygon(token));
 		else if(tipo==external_key)
 		{
 			const std::string& ref=token[external_reference_key];
@@ -272,9 +276,28 @@ view_composer::uptr_rep view_composer::create_box(const dnot_token& token)
 {
 	auto color=rgba_from_list(token[rgba_key]);
 	uptr_rep res(new ldv::box_representation(ldv::polygon_representation::type::fill, box_from_list(token[location_key]), color));
+	res->set_blend(ldv::representation::blends::alpha);
 	return res;
 }
 
+//!Creates a polygon from a token. Internal.
+view_composer::uptr_rep view_composer::create_polygon(const dnot_token& token)
+{
+	auto color=rgba_from_list(token[rgba_key]);
+
+	ldv::polygon_representation::type t=ldv::polygon_representation::type::fill;
+	std::string sfill=token[polygon_fill_key];
+	if(sfill=="fill")		t=ldv::polygon_representation::type::fill;
+	else if(sfill=="line")		t=ldv::polygon_representation::type::line;
+	else throw std::runtime_error("Invalid fill type for polygon");
+	
+	std::vector<ldv::point>	vp;
+	for(const auto& l : token[points_key].get_vector()) vp.push_back({l[0], l[1]});
+
+	uptr_rep res(new ldv::polygon_representation(t, vp, color));
+	res->set_blend(ldv::representation::blends::alpha);
+	return res;
+}
 
 //!Creates a bitmap from a token. Internal.
 view_composer::uptr_rep view_composer::create_bitmap(const dnot_token& token)
@@ -303,6 +326,7 @@ view_composer::uptr_rep view_composer::create_ttf(const dnot_token& token)
 	}
 
 	uptr_rep res(new ldv::ttf_representation(*font_map[token[font_key]], rgba_from_list(token[rgba_key]), token[text_key].get_string()));
+	res->set_blend(ldv::representation::blends::alpha);
 
 	auto pos=position_from_list(token[location_key]);
 	res->go_to({pos.x, pos.y});

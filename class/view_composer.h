@@ -6,9 +6,12 @@
 #include "dnot_parser.h"
 #include <def_video.h>
 
-/**The view composer creates graphical presentations through configuration
-files with little coding and compiling.
 
+namespace tools
+{
+
+//!The view composer creates graphical presentations through configuration files with little coding and compiling.
+/**
 It works in two stages: a dnot configuration file which defines the elements
 to be drawn and a code snippet to connect textures and fonts to it. Once the 
 file is done and the resources are connected to the composer, a call to 
@@ -35,7 +38,7 @@ other_layout_id:[
 External features like textures or fonts need to be linked and given a string
 handle through the methods map_texture(handle, texture), map_surface(handle, surface)
 or map_font(handle, font). The handle will be used within the file to represent
-the resource.
+the resource. These links or "maps" need to be done before "parse" is called!.
 
 In the file, "type" corresponds either to a definition or a representation. 
 Definitions can be integer or float values that can be used outside the 
@@ -50,7 +53,7 @@ As for representations, there are common attributes:
 
 	type: expresses the type as a string
 	id: string handle used to manipulate the representation from the code
-	alpha: integer alpha value
+	alpha: integer alpha value. By default, all representations are set to blend_mode alpha.
 	order: integer order value. Lower values are drawn sooner.
 	visible: boolean value, indicates whether the representation is drawn or not.
 	rotate: [30, 40, 40] integer list corresponding to degrees, rotation center x and y.
@@ -82,10 +85,13 @@ bitmap:
 box:
 	location:[0, 0, 800, 600]		(position)
 	rgba:[255,255,255,255]		(color)
+
+polygon:
+	points:[[0,0], [10,10], [20,10]]	(points)
+	rgba:[255,255,255,255]			(color)
+	fill: "fill"|"line"				(type of fill)
 */
 
-namespace tools
-{
 class view_composer
 {
 	public:
@@ -138,6 +144,7 @@ class view_composer
 	static const std::string		bitmap_key;
 	static const std::string		text_key;
 	static const std::string		ttf_key;
+	static const std::string		polygon_key;
 	static const std::string		screen_key;
 	static const std::string		definition_key;
 	static const std::string		definition_key_key;
@@ -148,6 +155,8 @@ class view_composer
 	static const std::string		rgba_key;
 	static const std::string		location_key;
 	static const std::string		clip_key;
+	static const std::string		points_key;
+	static const std::string		polygon_fill_key;
 	static const std::string		texture_key;
 	static const std::string		surface_key;
 	static const std::string		font_key;
@@ -197,6 +206,7 @@ class view_composer
 	uptr_rep		create_box(const dnot_token&);
 	uptr_rep		create_bitmap(const dnot_token&);
 	uptr_rep		create_ttf(const dnot_token&);
+	uptr_rep		create_polygon(const dnot_token&);
 	void			do_screen(const dnot_token&);
 	void			do_definition(const dnot_token&);
 
