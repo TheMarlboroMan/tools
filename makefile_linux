@@ -5,7 +5,7 @@ DEBUG= -g
 #OTHER_WARNING_FLAGS=-Wno-deprecated -Wfloat-equal
 
 WARNING_FLAGS=-Wall -Wextra -Wundef -Wcast-align -Wwrite-strings -Wlogical-op -Wmissing-declarations -Wredundant-decls -Wshadow -Woverloaded-virtual
-FLAGS_BASE=-Wno-deprecated -ansi -pedantic -std=c++11
+FLAGS_BASE=-Wno-deprecated -ansi -pedantic -std=c++11 -fno-rtti
  
 CFLAGS=-c $(DEBUG) $(OPTIMIZATION) $(FLAGS_BASE) $(WARNING_FLAGS)
 CC=g++
