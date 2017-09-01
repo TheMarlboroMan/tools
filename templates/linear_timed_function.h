@@ -22,6 +22,8 @@ actual.
 
 - Se puede llamar a reset con los mismos parámetros que el constructor para
 asignar nuevos valores al objeto.
+
+Time is expressed in milliseconds.
 */
 
 namespace tools
@@ -43,13 +45,15 @@ class linear_timed_function
 		return linear_timed_function(v, dest, step);
 	}
 
-	//Same as before.
+	//Same as before. When time is zero, the function is completely set to zero.
 	static linear_timed_function	from_time(T v, T dest, T time)
 	{
+		if(!time) throw std::runtime_error("linear_timed_function cannot be constructed without time");
 		return linear_timed_function(v, dest, (dest-v) / time);
 	}
 
 	T 				operator()() const {return val;}
+					operator T() const {return val;}
 
 	void		reset(T a, T d, T s)
 	{
