@@ -74,6 +74,8 @@ class options_menu
 	public:
 
 	//!Translation structure that matches the typename key to a string that will be used to name it. Many of these are needed for a translation.
+
+	//!Basically means "when you find this Tkey, give it this string name".
 	struct translation_struct
 	{
 		Tkey 		search;
@@ -178,7 +180,6 @@ class options_menu
 					current_key=next->first;
 				}
 			}
-			else throw options_menu_exception("browse function cannot be invoked with zero value");
 		}
 
 		//!Sets the selection by its value. 
@@ -561,7 +562,8 @@ class options_menu
 
 	//!Gets a vector with the different keys used in options.
 	
-	//!Keys for selections are not returned.
+	//!Keys for selections are not returned. This is mostly used to draw the
+	//!menu: all keys are returned and then the options can be queried.
 	std::vector<Tkey>		get_keys() const 
 	{
 		std::vector<Tkey> res; //Cannot directly return "keys", as these contain the selections too.
@@ -580,9 +582,18 @@ class options_menu
 /**The first two parameters specify the dnot file and the root key name. The third
 is the menu and the fourth is an empty map that will be returned filled with
 an integer for each key. This integer is meant to represent the translation
-string used in, for example, the localization class. There is no way to set
-the names from the file, in fact, every option and names selection will be given
-placeholder names.
+string used in, for example, the localization class. 
+
+The translation_map parameter is only useful when external localization tools
+are used, as it will indicate a translation index for each key. If no use is
+to be found for it, it can be set to null.
+
+There is no way to set names for options and selections from the file, in fact, 
+every option and names selection will be given placeholder names and must
+be translated later.
+
+The tests/menu.cpp file includes an example of the menu loaded and working
+in text mode.
 
 The structure of the file must be rigid:
 
@@ -640,7 +651,7 @@ void mount_from_dnot(
 	const std::string& filename,
 	const std::string& root,
 	options_menu<Tkey>& data,
-	std::map<Tkey, int>& translation_map)
+	std::map<Tkey, int>* translation_map=nullptr)
 {
 	const auto parser=dnot_parse(filename);
 	const auto options=parser[root].get_vector();
@@ -648,7 +659,7 @@ void mount_from_dnot(
 	for(const auto& opt : options)
 	{
 		const /*std::string*/ Tkey k_opt=opt["k"];
-		translation_map[k_opt]=opt["t"]; //So here we write the key with its integer translation data.
+		if(translation_map!=nullptr) (*translation_map)[k_opt]=opt["t"]; //So here we write the key with its integer translation data.
 
 		const std::string menu_type=opt["m"];
 
@@ -658,16 +669,16 @@ void mount_from_dnot(
 			//que ayuda a saber que es un método templatizado y no una propiedad seguida de "menor que".
 
 			const std::string mt=opt["mt"];
-			if(mt=="string") data.template insert_templated<std::string>(k_opt, "-");
-			else if(mt=="int") data.template insert_templated<int>(k_opt, "-");
-			else if(mt=="bool") data.template insert_templated<bool>(k_opt, "-");
+			if(mt=="string") data.template insert_templated<std::string>(k_opt, "#string_templated_placeholder#");
+			else if(mt=="int") data.template insert_templated<int>(k_opt, "#int_templated_placeholder#");
+			else if(mt=="bool") data.template insert_templated<bool>(k_opt, "#bool_templated_placeholder#");
 			else throw std::runtime_error("unknown template type "+mt);
 
 			const auto& selections=opt["o"].get_vector();
 			for(const auto& sel : selections)
 			{
 				const std::string k_sel=sel["k"];
-				translation_map[k_sel]=sel["t"];
+				if(translation_map!=nullptr) (*translation_map)[k_sel]=sel["t"];
 
 				if(mt=="string") data.template insert_templated<std::string>(k_opt, k_sel, "#string_selection_placeholder#", sel["v"]);
 				else if(mt=="int") data.template insert_templated<int>(k_opt, k_sel, "#int_selection_placeholder", sel["v"]); 
@@ -694,56 +705,5 @@ void mount_from_dnot(
 }
 
 }
-
-/*
-
-Ejemplo de uso
-
-int main(int argc, char ** argv)
-{
-	using namespace tools;
-
-	options_menu<std::string, int> menu;
-
-	menu.insertar_opcion(1, "--OPCION_1");
-	menu.insert_en_opcion(1, 100, "--VALOR 1.1", "PRIMER VALOR 1");
-	menu.insert_en_opcion(1, 101, "--VALOR 1.2", "2 VALOR 1");
-	menu.insert_en_opcion(1, 102, "--VALOR 1.3", "3 VALOR 1");
-
-	menu.insertar_opcion(2, "--OPCION_2");
-	menu.insert_en_opcion(2, 103, "--VALOR 2.1", "1 VALOR 2");
-	menu.insert_en_opcion(2, 104, "--VALOR 2.2", "2 VALOR 2");
-
-	menu.insertar_opcion(3, "--OPCION_3");
-	menu.insert_en_opcion(3, 105, "--VALOR 3.1", "1 VALOR 3");
-	menu.insert_en_opcion(3, 106, "--VALOR 3.2", "2 VALOR 3");
-
-	std::vector<options_menu<std::string, int>::translation_struct > trad={ 
-		{1, "TAMAÑO PANTALLA"}, {2, "VOLUMEN SONIDO"}, {3, "IDIOMA"}, 
-		{100, "300x200"}, {101, "600x400"}, {102, "1200x800"},
-		{103, "Medio"}, {104, "Alto"}, 
-		{105, "Español"}, {106, "Inglés"} 
-	};
-	menu.translate(trad);
-
-	const auto& v=menu.get_keys();
-
-	int i=0;
-
-	while(i < 4)
-	{
-		for(auto c : v)
-		{
-			std::cout<<"C"<<c<<" : "<<menu.name_opcion(c)<<" : "<<menu.name_seleccion(c)<<" : '"<<menu.value_opcion(c)<<"'"<<std::endl;
-			menu.browse_opcion(c, 1);
-		}
-
-		std::cout<<" ------ "<<std::endl;
-		++i;
-	}
-
-	return 1;
-}
-*/
 
 #endif
