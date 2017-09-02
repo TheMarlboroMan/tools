@@ -579,10 +579,10 @@ class options_menu
 
 //!Mounts a previously created menu using a dnot file.
 
-/**The first two parameters specify the dnot file and the root key name. The third
-is the menu and the fourth is an empty map that will be returned filled with
-an integer for each key. This integer is meant to represent the translation
-string used in, for example, the localization class. 
+/**The first parameter is a dnot token, which is supposed to be of vector
+type. The second is the menu and the third is an empty map that will be returned 
+filled with an integer for each key. This integer is meant to represent the 
+translation string used in, for example, the localization class. 
 
 The translation_map parameter is only useful when external localization tools
 are used, as it will indicate a translation index for each key. If no use is
@@ -595,9 +595,9 @@ be translated later.
 The tests/menu.cpp file includes an example of the menu loaded and working
 in text mode.
 
-The structure of the file must be rigid:
+The structure of the dnot must be rigid:
 
-config_app:[			//This is the root key.
+root:[			//This is the root key, with a vector value.
 	{
 		m:"templated",	//A templated option
 		mt:"string",	//with the internal type string
@@ -648,15 +648,11 @@ config_app:[			//This is the root key.
 
 template<typename Tkey>
 void mount_from_dnot(
-	const std::string& filename,
-	const std::string& root,
+	const tools::dnot_token& root,
 	options_menu<Tkey>& data,
 	std::map<Tkey, int>* translation_map=nullptr)
 {
-	const auto parser=dnot_parse(filename);
-	const auto options=parser[root].get_vector();
-
-	for(const auto& opt : options)
+	for(const auto& opt : root.get_vector())
 	{
 		const /*std::string*/ Tkey k_opt=opt["k"];
 		if(translation_map!=nullptr) (*translation_map)[k_opt]=opt["t"]; //So here we write the key with its integer translation data.
