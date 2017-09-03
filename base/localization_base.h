@@ -38,7 +38,6 @@ class localization_base
 
 	void 			set_language(unsigned short int);
 	t_string const& 	get(unsigned int) const;
-	void 			init();
 
 	//!When implemented must return a set of files to read. The files must have a complete absolute or relative path but must not include any extension.
 	//!Filenames are expressed as "filename.#integerlanguage#.dat", thus .#integerlanguage#.dat must be ommited.

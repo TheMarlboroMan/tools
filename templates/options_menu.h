@@ -29,6 +29,7 @@ class options_menu_exception:
 	options_menu_exception(const std::string& s):std::runtime_error(s) {}
 };
 
+//!Data representation of a single depth menu.
 /**
 This class is built to represent a single depth menu with N options, each
 options with N selections, such as this one:
@@ -227,10 +228,10 @@ class options_menu
 
 		//!Selections are formed by a Tkey (menu template key), TValue
 		//!(option template key) and std::string (visible name).
-		void				insert(const Tkey& key, const Tvalue& value, const std::string& name)
+		void				insert(const Tkey& key, const Tvalue& v, const std::string& n)
 		{
 			if(!selections.size()) current_key=key;
-			selections[key]={value, name};
+			selections[key]={v, n};
 		}
 
 		//!Removes the selection identified by the template key.
@@ -268,7 +269,7 @@ class options_menu
 		//!Adds or substracts from the value.
 		virtual void			browse(int d){value+=d;}
 		//!Translates the value. Actually, it does nothing.
-		virtual void			translate(const translation_struct& t){}
+		virtual void			translate(const translation_struct&){}
 
 		//!Constructor of the option.
 		option_menu_int(const std::string& n, int min, int max, int a):base_selection(n), value(min, max, a) {} 
@@ -288,7 +289,7 @@ class options_menu
 		//!Ignores the parameter and just flips the value.
 		virtual void			browse(int){value=!value;}
 		//!Translates... does nothing.
-		virtual void			translate(const translation_struct& t){}
+		virtual void			translate(const translation_struct&){}
 
 		option_menu_bool(const std::string& n, bool v):base_selection(n), value(v) {} 
 	};
@@ -307,7 +308,7 @@ class options_menu
 		//!Has no effect. Values of this type are manually set.
 		virtual void			browse(int){}
 		//!Has no effect.
-		virtual void			translate(const translation_struct& t){}
+		virtual void			translate(const translation_struct&){}
 		//!Constructor.
 		option_menu_string(const std::string& n, const std::string& v):base_selection(n), value(v) {} 
 	};
@@ -324,7 +325,7 @@ class options_menu
 		//!Does nothing.
 		virtual void			browse(int ){}
 		//!Does nothing.
-		virtual void			translate(const translation_struct& t){}
+		virtual void			translate(const translation_struct&){}
 		//!Constructor.
 		option_menu_void(const std::string& n):base_selection(n) {} 
 	};
@@ -576,6 +577,26 @@ class options_menu
 	mutable std::vector<Tkey>				keys; //!< Stores all different Tkey keys for duplicate checking.
 	std::map<Tkey, std::unique_ptr<base_selection>>		options;
 };
+
+//!Convenience function to get all names of options from a menu separated by a newline.
+template<typename T>
+std::string	names_from_menu(const options_menu<T>& menu)
+{
+	std::string res;
+	for(const auto& k : menu.get_keys()) res+=menu.get_name(k)+"\n";
+	res.pop_back();
+	return res;
+}
+
+//!Convenience function to get all names of selections from a menu separated by a newline.
+template<typename T>
+std::string	titles_from_menu(const options_menu<T>& menu)
+{
+	std::string res;
+	for(const auto& k : menu.get_keys()) res+=menu.get_title(k)+"\n";
+	res.pop_back();
+	return res;
+}
 
 //!Mounts a previously created menu using a dnot file.
 

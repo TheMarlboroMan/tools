@@ -12,7 +12,7 @@ using namespace tools;
 localization_base::localization_base(unsigned short int p_language)
 	:language(p_language)
 {
-
+	for(const auto& f: get_file_list()) process_file(f);
 }
 
 //!Class destructor.
@@ -61,16 +61,6 @@ localization_base::t_string localization_base::compose_filename(t_string const& 
 	nombre_archivo.append(".dat");
 
 	return nombre_archivo;
-}
-
-//!Loads all strings.
-
-//!Needs to be called after the constructor.
-
-void localization_base::init()
-{
-	clear();
-	for(const auto& f: get_file_list()) process_file(f);
 }
 
 //!Loads strings from a file. Internal method. 
