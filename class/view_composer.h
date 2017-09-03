@@ -72,7 +72,7 @@ ttf:
 
 external:
 	ref:"menu"	(allows a code representation to be included in the view
-			and use its attributes, like "order". register_as_external
+			and use the "order" attribute. register_as_external
 			is used for this purpose).
 
 bitmap:
