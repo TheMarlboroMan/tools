@@ -12,7 +12,7 @@ using namespace tools;
 localization_base::localization_base(unsigned short int p_language)
 	:language(p_language)
 {
-	for(const auto& f: get_file_list()) process_file(f);
+
 }
 
 //!Class destructor.
@@ -20,6 +20,14 @@ localization_base::localization_base(unsigned short int p_language)
 localization_base::~localization_base()
 {
 	clear();
+}
+
+//!Needs to be called after constructor. A good idea is to put it in the constructor of the derived class.
+
+void localization_base::init()
+{
+	clear();
+	for(const auto& f: get_file_list()) process_file(f);
 }
 
 //!Removes all localization strings.
