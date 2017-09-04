@@ -34,7 +34,7 @@ const std::string view_composer::rotation_key="rotate";
 //!Default constructor.
 
 view_composer::view_composer()
-	:with_screen(false), screen_color{0,0,0, 255}
+	:with_screen(false), screen_color{0,0,0,255}
 {
 
 }
@@ -45,7 +45,7 @@ void view_composer::draw(ldv::screen& p)
 {
 	if(with_screen)
 	{
-		p.clear(ldv::rgba8(screen_color.r, screen_color.g, screen_color.b, screen_color.a));
+		p.clear(screen_color);
 	}
 	
 	for(auto& r : data)
@@ -60,7 +60,7 @@ void view_composer::draw(ldv::screen& p, const ldv::camera& cam)
 {
 	if(with_screen)
 	{
-		p.clear(ldv::rgba8(screen_color.r, screen_color.g, screen_color.b, screen_color.a));
+		p.clear(screen_color);
 	}
 	
 	for(auto& r : data)
@@ -182,7 +182,7 @@ void view_composer::parse(const std::string& ruta, const std::string& nodo)
 			const std::string& ref=token[external_reference_key];
 			if(!external_map.count(ref))
 			{
-				throw std::runtime_error("Key for '"+ref+"' has not been externally registered.");
+				throw std::runtime_error("Key for '"+ref+"' has not been externally registered before parsing the file.");
 			}
 
 			if(token.key_exists(order_key)) 
@@ -258,8 +258,9 @@ void view_composer::parse(const std::string& ruta, const std::string& nodo)
 
 //!Registers the given representation with the handle.
 
-//!Registered representations can use the values expressed in the layout file.
-//!Will throw if the reference is repeated.
+//!Registered representations can use the order expressed in the layout file. 
+//!They must be registered before parsing the file, lest a exception is thrown.
+//!Will throw if the reference is repeated. 
 
 void view_composer::register_as_external(const std::string& clave, ldv::representation& rep)
 {

@@ -73,7 +73,8 @@ ttf:
 external:
 	ref:"menu"	(allows a code representation to be included in the view
 			and use the "order" attribute. register_as_external
-			is used for this purpose).
+			is used for this purpose). These must be registered 
+			before loading the file.
 
 bitmap:
 	location:[140, 300, 546, 376], 	(position)
