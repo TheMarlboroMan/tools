@@ -54,7 +54,7 @@ typename. For the best flexibility, std::strings are recommended.
 There are different types of options, each can have N selections with different
 values. Values can be repeated within an option. The types of options are:
 
-	templated: used to represent any given type with a string.
+	templated: used to represent any given type (string, int, bool, usually) with a string.
 	int: used to represent integer values within a range.
 	bool: used to represent true or false
 	string: used to store strings.
