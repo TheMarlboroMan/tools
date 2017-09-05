@@ -283,7 +283,7 @@ class options_menu
 		//!Returns the value as a string.
 		virtual std::string		get_title() const {return compat::to_string(value);}
 		//!Returns the boolean value.
-		bool				get_value() const {return value;}
+		bool				get_value() const {return value ? "true" : "false";}
 		//!Returns its type. Internal use.
 		virtual types			get_type() const {return types::tbool;}
 		//!Ignores the parameter and just flips the value.
