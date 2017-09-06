@@ -13,7 +13,19 @@ bool dnot_token::is_value() const
 	type==types::tdouble;
 }
 
-void dnot_token::set(const std::string c)
+void dnot_token::set(const dnot_token& tok)
+{
+	type=tok.type;
+	tokens=tok.tokens;
+	vector=tok.vector;
+	string_value=tok.string_value;
+	int_value=tok.int_value;
+	float_value=tok.float_value;
+	double_value=tok.double_value;
+	bool_value=tok.bool_value;
+}
+
+void dnot_token::set(const std::string& c)
 {
 	string_value=c;
 	type=types::tstring;

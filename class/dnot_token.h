@@ -52,12 +52,13 @@ class dnot_token
 	bool 					is_map() const {return type==types::tmap;}
 	bool 					is_vector() const {return type==types::tvector;}
 
-	void 					set(const std::string c);
-	void 					set(const char * c);
-	void		 			set(int c);
-	void 					set(float c);
-	void 					set(double c);
-	void 					set(bool c);
+	void					set(const dnot_token&);
+	void 					set(const std::string&);
+	void 					set(const char *);
+	void		 			set(int);
+	void 					set(float);
+	void 					set(double);
+	void 					set(bool);
 	void 					set(const t_map& t);
 	void 					set(const t_vector& t);
 
@@ -115,6 +116,7 @@ class dnot_token
 	explicit 				dnot_token(bool v);
 	explicit 				dnot_token(const t_map& v);
 	explicit 				dnot_token(const t_vector& v);
+
 	private:
 
 	enum class types {
