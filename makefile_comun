@@ -6,6 +6,7 @@ DIR_O=./objects/
 all:\
 $(DIR_O)dummy\
 $(DIR_O)sprite_table.o\
+$(DIR_O)fps_counter.o\
 $(DIR_O)ttf_manager.o\
 $(DIR_O)animation_table.o\
 $(DIR_O)pager.o\
@@ -111,9 +112,12 @@ $(DIR_HERRAMIENTAS_PROYECTO)chrono.h \
 $(DIR_HERRAMIENTAS_PROYECTO)chrono.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)chrono.cpp -o $(DIR_O)chrono.o
 
+$(DIR_O)fps_counter.o :\
+$(DIR_HERRAMIENTAS_PROYECTO)fps_counter.h \
+$(DIR_HERRAMIENTAS_PROYECTO)fps_counter.cpp
+	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)fps_counter.cpp -o $(DIR_O)fps_counter.o
+
 $(DIR_O)dnot_config_file.o :\
 $(DIR_HERRAMIENTAS_PROYECTO)dnot_config_file.h \
 $(DIR_HERRAMIENTAS_PROYECTO)dnot_config_file.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)dnot_config_file.cpp -o $(DIR_O)dnot_config_file.o
-
-
