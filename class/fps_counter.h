@@ -18,24 +18,25 @@ class fps_counter
 			fps_counter();
 
 	unsigned int 	get_frame_count() const {return frame_count;}
-	tdelta		get_timestep() const {return timestep;}
 		
-	void		reset();
-	void 		end_loop_step();		//Esto lo llamamos justo después del render (o antes, lo que sea).
-
-	//Nueva interface...
-	void 		init_loop_step(tdelta=0);
-	bool 		consume_loop(tdelta);
-	void		fill_until(tdelta);
+	//!Must be called before drawing.
+	void		begin_time_produce();
+	//!Must be called when drawing is done.
+	tdelta		end_time_produce();
+	//!Also called after drawing is done, to count frames.
+	void 		loop_step();
+	//!Fills the first parameter with time until the second one is reached. A glorified "wait" or "sleep".
+	void		fill_until(tdelta&, tdelta);
 
 	private:
 
-	std::chrono::high_resolution_clock::time_point 	ticks_count,
-		 					ticks_begin;
+	typedef		std::chrono::high_resolution_clock t_clock;
+
+	t_clock::time_point 				ticks_count,
+		 					ticks_begin,
+							ticks_produce;
 
 	int 		frame_count, internal_count;
-
-	tdelta 		timestep;
 };
 
 }
