@@ -18,7 +18,7 @@ class text_reader
 	std::string 		read_line();
 	void 			open_file(const std::string&);
 
-	/*explicit*/ operator bool() const {return file;}
+	/*explicit*/ operator bool() const {return (bool)file;}
 
 	unsigned int 		get_line_number() const {return line_number;}
 	char 			get_comment() const {return comment;}
