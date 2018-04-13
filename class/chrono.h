@@ -10,6 +10,7 @@ namespace tools
 
 //!Returns the time elapsed since "start" was called as an integer. 
 //!There is not need to reset it: after stop, each call to start is valid.
+//!In this case, time is "real" or "user" time.
 
 struct chrono_data
 {
@@ -37,6 +38,9 @@ class chrono
 
 	//!Gets a full structure of hours, minutes, seconds and milliseconds.
 	chrono_data		get_full();
+
+	//!Returns true if started.
+	bool			is_running() const {return running;}
 
 	private:
 

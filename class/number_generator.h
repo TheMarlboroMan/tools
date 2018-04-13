@@ -8,9 +8,11 @@ namespace tools
 
 #ifdef WINCOMPIL
 
-class int_generator	
+class int_generator
 {
 	public:
+
+//TODO: Do these behave the same???
 
 	int_generator(int vmin, int vmax):vmin(vmin), vmax(vmax){}
 	int operator()() 
