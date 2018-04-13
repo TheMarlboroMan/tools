@@ -42,6 +42,11 @@ char * 					wstring_to_8b(const wchar_t *);
 
 std::string 				split_to_lines(const std::string&, unsigned int);
 
+std::string 				as_binary(char);
+std::string 				as_binary(const std::string&);
+//TODO: I don't think this belongs here.
+unsigned char 				twos_complement(char);
+
 }
 
 #endif

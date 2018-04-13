@@ -1,5 +1,6 @@
 #include "string_utils.h"
 
+#include <bitset>
 #include <iostream>
 #include <algorithm>
 
@@ -293,4 +294,28 @@ std::string tools::split_to_lines(std::string const &pstring, unsigned int pmax)
 	}
 
 	return result;
+}
+
+std::string tools::as_binary(char _c) {
+
+	std::string res;
+
+	std::bitset<8> bs(_c);
+	for(int i=bs.size()-1; i>=0; i--) {
+	res+=bs.test(i) ? "1" : "0";
+	}
+
+	return res;
+}
+
+std::string tools::as_binary(const std::string& _s) {
+	std::string res;
+	for(const char c : _s) res+=as_binary(c);
+	return res;
+}
+
+
+unsigned char tools::twos_complement(char _c) {
+
+	return reinterpret_cast<unsigned char&>(_c);
 }

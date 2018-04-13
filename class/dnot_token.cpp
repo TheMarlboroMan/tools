@@ -285,18 +285,18 @@ std::string dnot_token::serialize(const dnot_token_serialize_options& options, i
 	};
 
 
-	auto abre=[&result, &nl, &options](types type, int rec)
+	auto abre=[&result, &nl, &options](types _type, int rec)
 	{
 		if(rec < 1) return;
-		result+=type==types::tvector ? "[" : "{";
+		result+=_type==types::tvector ? "[" : "{";
 		if(options.tab_depth) nl(rec);
 	};
 
-	auto cierra=[&result, &nl, &options](types type, int rec)
+	auto cierra=[&result, &nl, &options](types _type, int rec)
 	{
 		if(rec < 1) return;
 		if(options.tab_depth) nl(rec-1);
-		result+=type==types::tvector ? "]" : "}";
+		result+=_type==types::tvector ? "]" : "}";
 	};
 
 	switch(type)
