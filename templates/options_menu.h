@@ -24,6 +24,7 @@ namespace tools
 class options_menu_exception:
 	public std::runtime_error {
 	public:
+	//!Class constructor.
 	options_menu_exception(const std::string& s):std::runtime_error(s) {}
 };
 
@@ -76,8 +77,8 @@ class options_menu
 
 	//!Basically means "when you find this Tkey, give it this string name".
 	struct translation_struct {
-		Tkey 		search;			//<! Key being searched.
-		std::string 	replace_value;		//<! Replacement for value.
+		Tkey 		search;			//!< Key being searched.
+		std::string 	replace_value;		//!< Replacement for value.
 
 		//!Receives a pair of key and value. If the key is the one
 		//!being searched (TKey search), its value is replaced by
@@ -124,29 +125,27 @@ class options_menu
 	template<typename Tvalue>
 	struct option_menu_templated:public base_selection {
 		//!Pair of value and name.
-		struct selection_menu_templated
-		{		
-			Tvalue			value;
-			std::string		name; 
+		struct selection_menu_templated {
+			Tvalue			value;	//!< Stored value.
+			std::string		name; 	//!< Display name.
 		};
 
-		std::map<Tkey, selection_menu_templated>	selections; 
-		Tkey				current_key;
+		std::map<Tkey, selection_menu_templated>	selections; //!< Internal option map.
+		Tkey				current_key;	//!< Currently selected key.
 
 		//!Returns the typename value for the current selection (0,1,2 in the example).
-		Tvalue				get_value() const 
-		{
+		Tvalue				get_value() const {
 			check_options("option with no selections for get_value");
 			return selections.at(current_key).value;
 		}
 
 		//!Returns the string that represents the current selection ("txt", "html" or "latex" in the example).
-		virtual std::string		get_title() const 
-		{
+		virtual std::string		get_title() const {
 			check_options("option with no selections for get_title");
 			return selections.at(current_key).name;
 		}
 
+		//!Returns the type of this class.
 		virtual types				get_type() const {return types::ttemplated;}
 
 		//!Changes the current selection. 

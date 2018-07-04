@@ -7,27 +7,25 @@
 
 #include "compatibility_patches.h"
 
-namespace tools
-{
+namespace tools {
 
 //!Base exception for matrix_2d_unbound
-
 struct matrix_2d_unbound_exception:
 	public std::runtime_error
 {
-	int 			x, 
-				y;
+	int 			x,	//!< X coordinate for the exception.
+				y;	//!< Y coordinate for the exception.
+	//!Class constructor.
 	matrix_2d_unbound_exception(int px, int py, const std::string& msg):
-		std::runtime_error("matrix_2d_unbound error: "+msg), x(px), y(py) 
-	{
+		std::runtime_error("matrix_2d_unbound error: "+msg), x(px), y(py) {
 	}
 };
 
 //!Exception for matrix_2d_unbound indicating that there is no value in the requested coordinates.
-
 struct matrix_2d_unbound_exception_missing:
 	public matrix_2d_unbound_exception 
 {
+	//!Class constructor.
 	matrix_2d_unbound_exception_missing(int px, int py)
 		:matrix_2d_unbound_exception(
 			px, py,
@@ -36,10 +34,10 @@ struct matrix_2d_unbound_exception_missing:
 };
 
 //!Exception for matrix_2d_unbound indicating that there is already a value in the coordinates where an insertion is attempted.
-
 struct matrix_2d_unbound_exception_conflict:
 	public matrix_2d_unbound_exception 
 {
+	//!Class constructor.
 	matrix_2d_unbound_exception_conflict(int px, int py)
 		:matrix_2d_unbound_exception(
 			px, py,
@@ -52,15 +50,18 @@ struct matrix_2d_unbound_exception_conflict:
 //!Both positive and negative coordinates can be used with it.
 
 template<typename T>
-class matrix_2d_unbound
-{
+class matrix_2d_unbound {
+
 	public:
 
-	typedef int 			tscalar;
+	typedef int 			tscalar;	//!< Typedef to the type used for the coordinates.
 
 	//!Structure reprenting a coordinate pair, ordered first on the x axis.
 	struct coords{
-		tscalar x, y;
+		tscalar x, 	//!< X coordinate.
+			y;	//!< Y coordinate.
+
+		//!Comparison operator, ordered first on the x axis, lesser to greater.
 		bool operator<(const coords& o) const
 		{
 			if(x < o.x) return true;
@@ -69,7 +70,7 @@ class matrix_2d_unbound
 		}
 	};
 
-	typedef std::pair<coords, T>	tpair;
+	typedef std::pair<coords, T>	tpair;	//!< Typedef to map a pair of coordinates to a T type.
 
 	//!Default constructor.
 					matrix_2d_unbound() {}
@@ -151,22 +152,21 @@ class matrix_2d_unbound
 	
 	//!Executes the function or functor for each value in the matrix.
 	template <typename Tf> 
-	void 				apply(Tf& f) const
-	{
+	void 				apply(Tf& f) const {
 		for(const auto& p : data) f(p.second);
 	}
 	
 	//!Executes the function or functor for each pair (std::pair<coords, T>) in the matrix, giving access to the coordinates object.
 	template <typename Tf> 
-	void 				apply_pair(Tf& f) const
-	{
+	void 				apply_pair(Tf& f) const {
 		for(const auto& p : data) f(p);
 	}
 
 	private:
 
-	std::map<coords, T> 	data;
+	std::map<coords, T> 	data;	//!< Internal representation of the stored data.
 
+	//!Creates a coords object from two scalars.
 	coords				make_index(tscalar x, tscalar y) const {return {x, y};}
 };
 
