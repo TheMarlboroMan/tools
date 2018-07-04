@@ -11,8 +11,9 @@ CFLAGS=-c $(DEBUG) $(OPTIMIZATION) $(FLAGS_BASE) $(WARNING_FLAGS)
 CC=g++
 DIR_HOME=~/devel/
 DIR_LIBDAN2=$(DIR_HOME)libdansdl2
+DIR_LOG=$(DIR_HOME)log/src
  
-INCLUDES=-I $(DIR_LIBDAN2)
+INCLUDES=-I $(DIR_LIBDAN2) -I $(DIR_LOG)
 MKDIR=mkdir -p
 LIMPIAR=rm objects/*; touch objects/dummy;
 
