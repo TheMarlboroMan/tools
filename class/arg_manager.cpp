@@ -76,10 +76,15 @@ const arg_manager::t_arg arg_manager::get_following(const t_arg& _v) const {
 
 	auto index=find_index(_v);
 	if(-1==index) {
-		throw arg_manager_exception("No argument follows "+_v+" / argument not found");
+		throw arg_manager_exception("Argument not found: "+_v);
 	}
 
-	return data[index+1];
+	try {
+		return data.at(index+1);
+	}
+	catch(...) {
+		throw arg_manager_exception("No argument follows "+_v);
+	}
 }
 
 bool arg_manager::arg_follows(const t_arg& _v) const {
@@ -89,5 +94,5 @@ bool arg_manager::arg_follows(const t_arg& _v) const {
 		return false;
 	}
 
-	return (unsigned)index+1 <= data.size();
+	return (unsigned)index+1 < data.size();
 }

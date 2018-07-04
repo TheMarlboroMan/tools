@@ -21,10 +21,8 @@ namespace tools
 {
 
 //!Exception thrown by the options_menu class.
-
 class options_menu_exception:
-	public std::runtime_error
-{
+	public std::runtime_error {
 	public:
 	options_menu_exception(const std::string& s):std::runtime_error(s) {}
 };
@@ -77,15 +75,15 @@ class options_menu
 	//!Translation structure that matches the typename key to a string that will be used to name it. Many of these are needed for a translation.
 
 	//!Basically means "when you find this Tkey, give it this string name".
-	struct translation_struct
-	{
-		Tkey 		search;
-		std::string 	replace_value;
+	struct translation_struct {
+		Tkey 		search;			//<! Key being searched.
+		std::string 	replace_value;		//<! Replacement for value.
 
-		void 		replace(const Tkey& key, std::string& cad) const
-		{
-			if(key==search) 
-			{
+		//!Receives a pair of key and value. If the key is the one
+		//!being searched (TKey search), its value is replaced by
+		//!replace_value.
+		void 		replace(const Tkey& key, std::string& cad) const {
+			if(key==search) {
 				cad=replace_value;
 			}
 		};
@@ -93,11 +91,12 @@ class options_menu
 
 	private:
 
+	//!Defines the different types of selections.
 	enum class types {ttemplated, tint, tbool, tstring, tvoid};
 
 	//!Base class for all selections.
-	struct base_selection
-	{
+	struct base_selection {
+
 		std::string 			name; //!< All selections have a name string.
 
 		//!Will return the name of the current selection (or its equivalent).
@@ -112,6 +111,7 @@ class options_menu
 						base_selection(const std::string& n):name(n){}
 	};
 
+	
 	typedef std::unique_ptr<base_selection>	uptr_base;
 
 	//!Widely used structure to represent any type with a string. 
@@ -122,8 +122,7 @@ class options_menu
 	//!terms of a std::map.
 
 	template<typename Tvalue>
-	struct option_menu_templated:public base_selection
-	{
+	struct option_menu_templated:public base_selection {
 		//!Pair of value and name.
 		struct selection_menu_templated
 		{		
