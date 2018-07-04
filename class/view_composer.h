@@ -103,7 +103,7 @@ class view_composer
 	typedef std::unique_ptr<ldv::representation> uptr_rep;
 
 				view_composer();
-	void			parse(const std::string&, const std::string&); //Puede tirar std::runtime_error.
+	void			parse(const std::string&, const std::string&);
 	void			draw(ldv::screen&);
 	void			draw(ldv::screen&, const ldv::camera&);
 	void			map_texture(const std::string&, ldv::texture *);
