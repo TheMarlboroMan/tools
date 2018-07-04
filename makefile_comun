@@ -33,6 +33,7 @@ $(DIR_O)dummy :
 	$(MKDIR) objects
 
 $(DIR_O)animation_table.o :\
+$(DIR_O)dummy\
 $(DIR_O)sprite_table.o\
 $(DIR_HERRAMIENTAS_PROYECTO)animation_table.h \
 $(DIR_HERRAMIENTAS_PROYECTO)animation_table.cpp
@@ -41,83 +42,98 @@ $(DIR_HERRAMIENTAS_PROYECTO)animation_table.cpp
 ## I HAVE TRANSLATED EVERYTHING BELOW THIS.
 
 $(DIR_O)view_composer.o :\
+$(DIR_O)dummy\
 $(DIR_O)dnot_parser.o \
 $(DIR_HERRAMIENTAS_PROYECTO)view_composer.h \
 $(DIR_HERRAMIENTAS_PROYECTO)view_composer.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)view_composer.cpp -o $(DIR_O)view_composer.o
 
 $(DIR_O)dnot_parser.o :\
+$(DIR_O)dummy\
 $(DIR_O)dnot_token.o \
 $(DIR_HERRAMIENTAS_PROYECTO)dnot_parser.h \
 $(DIR_HERRAMIENTAS_PROYECTO)dnot_parser.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)dnot_parser.cpp -o $(DIR_O)dnot_parser.o
 
 $(DIR_O)pair_file_parser.o :\
+$(DIR_O)dummy\
 $(DIR_O)string_utils.o \
 $(DIR_HERRAMIENTAS_PROYECTO)pair_file_parser.h \
 $(DIR_HERRAMIENTAS_PROYECTO)pair_file_parser.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)pair_file_parser.cpp -o $(DIR_O)pair_file_parser.o
 
 $(DIR_O)localization_base.o :\
+$(DIR_O)dummy\
 $(DIR_O)string_utils.o \
 $(DIR_BASE)localization_base.h \
 $(DIR_BASE)localization_base.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_BASE)localization_base.cpp -o $(DIR_O)localization_base.o
 
 $(DIR_O)arg_manager.o :\
+$(DIR_O)dummy\
 $(DIR_O)string_utils.o \
 $(DIR_HERRAMIENTAS_PROYECTO)arg_manager.h \
 $(DIR_HERRAMIENTAS_PROYECTO)arg_manager.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)arg_manager.cpp -o $(DIR_O)arg_manager.o
 
 $(DIR_O)ttf_manager.o :\
+$(DIR_O)dummy\
 $(DIR_HERRAMIENTAS_PROYECTO)ttf_manager.h \
 $(DIR_HERRAMIENTAS_PROYECTO)ttf_manager.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)ttf_manager.cpp -o $(DIR_O)ttf_manager.o
 
 $(DIR_O)sprite_table.o :\
+$(DIR_O)dummy\
 $(DIR_O)string_utils.o \
 $(DIR_HERRAMIENTAS_PROYECTO)sprite_table.h \
 $(DIR_HERRAMIENTAS_PROYECTO)sprite_table.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)sprite_table.cpp -o $(DIR_O)sprite_table.o
 
 $(DIR_O)dnot_token.o :\
+$(DIR_O)dummy\
 $(DIR_HERRAMIENTAS_PROYECTO)dnot_token.h \
 $(DIR_HERRAMIENTAS_PROYECTO)dnot_token.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)dnot_token.cpp -o $(DIR_O)dnot_token.o
 
 $(DIR_O)string_utils.o :\
+$(DIR_O)dummy\
 $(DIR_O)text_reader.o \
 $(DIR_SOURCE)string_utils.h \
 $(DIR_SOURCE)string_utils.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_SOURCE)string_utils.cpp -o $(DIR_O)string_utils.o
 
 $(DIR_O)text_reader.o :\
+$(DIR_O)dummy\
 $(DIR_HERRAMIENTAS_PROYECTO)text_reader.h \
 $(DIR_HERRAMIENTAS_PROYECTO)text_reader.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)text_reader.cpp -o $(DIR_O)text_reader.o
 
 $(DIR_O)pager.o :\
+$(DIR_O)dummy\
 $(DIR_HERRAMIENTAS_PROYECTO)pager.h \
 $(DIR_HERRAMIENTAS_PROYECTO)pager.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)pager.cpp -o $(DIR_O)pager.o
 
 $(DIR_O)file_utils.o :\
+$(DIR_O)dummy\
 $(DIR_SOURCE)file_utils.h \
 $(DIR_SOURCE)file_utils.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_SOURCE)file_utils.cpp -o $(DIR_O)file_utils.o
 
 $(DIR_O)chrono.o :\
+$(DIR_O)dummy\
 $(DIR_HERRAMIENTAS_PROYECTO)chrono.h \
 $(DIR_HERRAMIENTAS_PROYECTO)chrono.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)chrono.cpp -o $(DIR_O)chrono.o
 
 $(DIR_O)fps_counter.o :\
+$(DIR_O)dummy\
 $(DIR_HERRAMIENTAS_PROYECTO)fps_counter.h \
 $(DIR_HERRAMIENTAS_PROYECTO)fps_counter.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)fps_counter.cpp -o $(DIR_O)fps_counter.o
 
 $(DIR_O)dnot_config_file.o :\
+$(DIR_O)dummy\
 $(DIR_HERRAMIENTAS_PROYECTO)dnot_config_file.h \
 $(DIR_HERRAMIENTAS_PROYECTO)dnot_config_file.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)dnot_config_file.cpp -o $(DIR_O)dnot_config_file.o

@@ -10,24 +10,23 @@ arg_manager::arg_manager(int argc, char ** argv) {
 }
 
 void arg_manager::init(int argc, char ** argv) {
+
 	int i=0;
-	for(; i<argc; i++) {
+	while(i< argc) {
 		data.push_back(t_arg(argv[i]));
+		++i;
 	}
 }
 
 const arg_manager::t_arg arg_manager::get_argument(unsigned int p_arg) const {
+
 	try {
 		return data[p_arg];
 	}
 	catch (...) {
-		throw std::runtime_error("Invalid argument index");
+		throw arg_manager_exception("Invalid argument index");
 	}
 }
-
-/*
-Busca un argumento. Devuelve -1 si no encuentra nada y el índice del argumento si la ha encontrado.
-*/
 
 int arg_manager::find_index(const t_arg& val) const {
 	int i=0;
@@ -41,21 +40,15 @@ int arg_manager::find_index(const t_arg& val) const {
 }
 
 int arg_manager::find_index_value(const t_arg& val) const {
-	int i=0;
 
+	int i=0;
 	for(const auto& arg: data) {
-		if(arg.substr(0, val.size())== val) return i;
+		if(arg.substr(0, val.size())==val) return i;
 		else ++i;
 	}
 
 	return -1;
 }
-
-/*Devuelve el valor del argumento "argumento" si se localiza en la cadena. Se entiende 
-"argumento" cuando se especifica de la siguente forma: argumento=valor y argumento queda
-a la izquierda del delimiter (en este caso =)
-Si no se localiza el argumento se lanza una excepción propia para indicarlo.
-*/
 
 std::string arg_manager::get_value(const t_arg& argumento, const char delimiter) const {
 	std::stringstream ss;
@@ -66,12 +59,12 @@ std::string arg_manager::get_value(const t_arg& argumento, const char delimiter)
 		{return arg.find(f_index)!=std::string::npos;});
 
 	if(it==data.end()) {
-		throw std::runtime_error("Unable to locate argument "+argumento);
+		throw arg_manager_exception("Unable to locate argument "+argumento);
 	}
 	else {
 		auto ex=explode(*it, delimiter);
 		if(ex.size()!=2) {
-			throw std::runtime_error("Invalid delimiter for argument "+argumento);
+			throw arg_manager_exception("Invalid delimiter for argument "+argumento);
 		}
 		else {
 			return ex[1];
@@ -83,7 +76,7 @@ const arg_manager::t_arg arg_manager::get_following(const t_arg& _v) const {
 
 	auto index=find_index(_v);
 	if(-1==index) {
-		throw std::runtime_error("No argument follows "+_v+" / argument not found");
+		throw arg_manager_exception("No argument follows "+_v+" / argument not found");
 	}
 
 	return data[index+1];
