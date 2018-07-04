@@ -156,6 +156,7 @@ class matrix_2d
 		return data.at(index);
 	}
 
+	//!Returns the element at the given coordinates Throws if no item is present.
 	T& 				operator()(unsigned int x, unsigned int y)
 	{
 		unsigned int index=coords_to_index(x, y);
@@ -180,26 +181,40 @@ class matrix_2d
 		return data.at(index);
 	}
 
-	//Para check rápidamente si hay algo en unas coordenadas... Ojo, puede lanzar una excepción si nos vamos fuera de los límites.
-	bool 				count(unsigned int x, unsigned int y) const {return data.count(coords_to_index(x, y));}
+	//!Returns true if there is something in the given coordinates. Does
+	//!not do bound checking, so it might throw.
+	bool 				count(unsigned int x, unsigned int y) const {
+		return data.count(coords_to_index(x, y));
+	}
 
-	bool 				check(unsigned int x, unsigned int y) const
-	{
-		if(x >= w || y >= h) return false;
-		else 
-		{
-			unsigned int index=coords_to_index(x, y);
-			return data.count(index);
+	//!Checks existence of a T in the given coordinates and returns true if
+	//!something can be found. False is returned when there's nothing or when
+	//!the coordinates are out of bounds.
+	bool 				check(unsigned int x, unsigned int y) const {
+		if(x >= w || y >= h) {
+			return false; 
+		}
+		else {
+			return this->count(x, y);
 		}
 	}
 
+	//!Returns the count of T items.
 	size_t 				size() 	const {return data.size();}
+
+	//!Clears all T items from the matrix.
 	void				clear() {data.clear();}
+
+	//!Returns the width of the matrix.
 	unsigned int			get_w() const {return w;}
+
+	//!Returns the height of the matrix.
 	unsigned int			get_h() const {return h;}
 	
-	void				resize(unsigned int pw, unsigned int ph)
-	{
+	//!Resizes the matrix to pw x ph. Items outside the range of the new
+	//!size (if smaller) are removed.
+	void				resize(unsigned int pw, unsigned int ph) {
+
 		if(pw==w && ph==h) return;
 
 		//We need to remember the old values to perform index_to_coords.
@@ -216,11 +231,9 @@ class matrix_2d
 		std::map<unsigned int, T> 	new_data;
 
 		//Iterate and reinsert those whitin range.
-		for(const auto& p : data)
-		{
+		for(const auto& p : data) {
 			auto c=index_to_coords(p.first, ow, oh);
-			if(c.x < w && c.y < h)
-			{
+			if(c.x < w && c.y < h) {
 				new_data.insert(std::make_pair(coords_to_index(c.x, c.y), p.second));
 			}
 		}
@@ -229,12 +242,13 @@ class matrix_2d
 		std::swap(new_data, data);
 	}
 
+	//!Returns a new matrix from the current one, resized to pw x ph. 
+	//!Particularities of "resize" apply.
 	matrix_2d<T> 			copy_and_resize(unsigned int pw, unsigned int ph) const
 	{
 		matrix_2d<T> result(pw, ph);
 
-		for(const auto& p : data)
-		{
+		for(const auto& p : data) {
 			auto c=index_to_coords(p.first);
 			auto copia=p.second;
 			if(c.x < result.w && c.y < result.h) result(c.x, c.y, copia);
@@ -242,48 +256,47 @@ class matrix_2d
 		return result;
 	}
 
-	//Absolutely anything that has an operator () or even a function can be used with this :).
+	//!Applies the function/functor f to every item in the matrix.
 	template <typename TipoFunc> 
-	void 				apply(TipoFunc& f) const
-	{
-		for(auto& p : data) f(p.second);
+	void 				apply(TipoFunc& f) const {
+		for(auto& p : data) {
+			f(p.second);
+		}
 	}
 
 	///////////////////////////
 	// Propiedades.
 	private:
 
-	struct coords
-	{
-		unsigned int 		x,
-					y;
-		coords(unsigned int px, unsigned int py): x(px), y(py) {}
+	//!Defines a pair of coordinates.
+	struct coords {
+		unsigned int 		x,	//!< Coordinate x.
+					y;	//!< Coordinate y.
+		coords(unsigned int px, unsigned int py): x(px), y(py) {} //!< Class constructor.
 	};
 
-	std::map<unsigned int, T> 	data;
+	std::map<unsigned int, T> 	data;	//!< Internal storage.
 
-	unsigned int 			w, 
-					h;
+	unsigned int 			w, 	//!< Matrix width.
+					h;	//!< Matrix height.
 
-	///////////////////////////
-	// Métodos internos.
 	private:
 
-	unsigned int 			coords_to_index(unsigned int x, unsigned int y) const
-	{
+	//!Converts the coordinates to a map index.
+	unsigned int 			coords_to_index(unsigned int x, unsigned int y) const {
 		if(x >= w || y >= h) throw matrix_2d_exception_bounds(x, y);
 		return (y * w) + x;
 	}
 
-	coords 				index_to_coords(unsigned int index) const
-	{
+	//Converts a map index to coordinates.
+	coords 				index_to_coords(unsigned int index) const {
 		int y=index / w;
 		int x=index % w;
 		return coords(x, y);
 	}
 
-	coords 				index_to_coords(unsigned int index, unsigned int pw, unsigned int ph) const
-	{
+	//!Converts a map index to coordinates, considering pw and ph as width and height of the matrix.
+	coords 				index_to_coords(unsigned int index, unsigned int pw, unsigned int ph) const {
 		int y=index / ph;
 		int x=index % pw;
 		return coords(x, y);
