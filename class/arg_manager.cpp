@@ -89,5 +89,5 @@ bool arg_manager::arg_follows(const t_arg& _v) const {
 		return false;
 	}
 
-	return (unsigned)index-1 <= data.size();
+	return (unsigned)index+1 <= data.size();
 }
