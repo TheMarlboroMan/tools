@@ -7,110 +7,80 @@
 
 #include "compatibility_patches.h"
 
-/*Una data 2D implementada en términos de un std::map. Se crea a t_pairtir de
-unas dimensiones que le damos y contiene sólo los elementos que le damos.
-En caso de intentar acceder a un elemento inexistente se lanzará una
-excepción.
-Sólo sirve t_paira rangos positivos. Una implementación extendida (con cuatro mapas
-internos) serviría t_paira representar una data que se extiende tanto en
-positivo como en negativo.
-Requisitos:
-- Sólo sirve t_paira rangos positivos en x e y.
-- Es obligatorio especificar ancho y alto.
-- El elemento debe ser copiable.
-Viene acompañado de una estructura matrix_2d_item, que la podemos usar t_paira
-guardar elementos y conservar la información de la posición X e Y de las mismas.
-Los métodos:
-- Para insertar un item.
-	void insert(unsigned int x, unsigned int y, T& val)
-	void insert(unsigned int x, unsigned int y, T&& val)
-- Para recuperar un item...
-	const T& operator()(unsigned int x, unsigned int y) const
-	T& operator()(unsigned int x, unsigned int y)
-- Para insertar un item y recuperarlo...
-	T& operator()(unsigned int x, unsigned int y, T& val)
-	T& operator()(unsigned int x, unsigned int y, T&& val)
-- Para check rápidamente si hay algo en unas coordenadas... Ojo, puede lanzar una excepción si nos vamos fuera de los límites.
-	bool count(unsigned int x, unsigned int y)
-- Comprobar, con seguridad de excepciones...
-	bool check(unsigned int x, unsigned int y)
--Una forma de acceder a los mapas subyacentes.
-	const std::map<unsigned int, T>& get_data() const;
-	std::map<unsigned int, T>& get_data();
--Obtener el total de elementos existentes.
-	size_t size() const;
-Los tipos de excepción en uso:
-	matrix_2d_exception : cualquier cosa que falle.
-	matrix_2d_exception_bounds : se indican x o y que quedan fuera del rango.
-	matrix_2d_exception_missing : se intenta obtener un valor en coordenadas donde no hay nada.
-	matrix_2d_exception_conflict	 : se intenta insertar un valor en coordenadas donde ya hay algo.
-*/
-
 namespace tools
 {
 
+//!Base exception for all exceptions thrown by the matrix_2d.
 struct matrix_2d_exception:
-	public std::runtime_error
+	public std::runtime_error 
 {
-	int 			x, 
-				y;
-	matrix_2d_exception(int px, int py, const std::string& msg):
+	int 			x, 	//!< X coordinate where the problemm originated.
+				y;	//!< Y coordinate where the problemm originated.
+	matrix_2d_exception(int px, int py, const std::string& msg):	//!< Class constructor.
 		std::runtime_error("matrix_2d error: "+msg), x(px), y(py) 
 	{
 	}
 };
 
+//!Thrown when trying to access, insert, erase or check an element out of the 
+//!matrix bounds.
 struct matrix_2d_exception_bounds:
 	public matrix_2d_exception 
 {
-	matrix_2d_exception_bounds(int px, int py)
+	matrix_2d_exception_bounds(int px, int py)	//!< Class constructor.
 		:matrix_2d_exception(
 			px, py, 
 			std::string("out of bounds ")+compat::to_string(px)+","+compat::to_string(py)
 	) {}
 };
 
+//!Thrown when trying to erase or access a non existing element.
 struct matrix_2d_exception_missing:
 	public matrix_2d_exception 
 {
-	matrix_2d_exception_missing(int px, int py)
+	matrix_2d_exception_missing(int px, int py)	//!< Class constructor.
 		:matrix_2d_exception(
 			px, py,
 			std::string("no value ")+compat::to_string(px)+","+compat::to_string(py)
 		) {}
 };
 
-
+//!Thrown when trying to insert an item in a position already occupied.
 struct matrix_2d_exception_conflict:
 	public matrix_2d_exception 
 {
-	matrix_2d_exception_conflict(int px, int py)
+	matrix_2d_exception_conflict(int px, int py) //!< Class constructor.
 		:matrix_2d_exception(
 			px, py,
 			std::string("insertion conflict ")+compat::to_string(px)+","+compat::to_string(py)
 		) {}
 };
 
+//!Struct to encapsulate a pair of coordinates and an element of type T. This
+//!type is only a userland complement to the matrix and it is never returned
+//!from its methods.
 template<typename T>
-struct matrix_2d_item
-{
-	unsigned int x, y;
-	T elem;
+struct matrix_2d_item {
+	unsigned int 		x, 		//!< X coordinate.
+				y;		//!< Y coordinate.
+	T 			elem;		//!< Stored element.
 
-	matrix_2d_item(unsigned int px, unsigned int py, T e): x(px), y(py), elem(e) 
-	{}
+	//!Class constructor.
+				matrix_2d_item(unsigned int px, unsigned int py, T e): x(px), y(py), elem(e) {
+	}
 
-	matrix_2d_item(unsigned int px, unsigned int py, T&& e): x(px), y(py), elem(std::move(e))
-	{}
-
-	//TODO: Estos estarían aquí para operaciones futuras, como redimensionar y cosas así.
-//		Item(const Item& o):x(o.x), y(o.y), elem(e.elem) {}
-//		Item(const Item&& o):x(o.x), y(o.y), elem(std::move(e.elem)) {}
+	//!Class constructor.
+				matrix_2d_item(unsigned int px, unsigned int py, T&& e): x(px), y(py), elem(std::move(e)) {
+	}
 };
 
+//!Implements a 2d matrix with fixed dimensions in terms of a std::map, so 
+//!storage is used only for the inserted items. Its implementation only
+//!allows for positive indexes.
+
 template<typename T>
-class matrix_2d
-{
+class matrix_2d {
+
 	public:
 
 	typedef std::pair<unsigned int, T> t_pair;
