@@ -16,9 +16,9 @@ struct matrix_2d_exception:
 {
 	int 			x, 	//!< X coordinate where the problemm originated.
 				y;	//!< Y coordinate where the problemm originated.
-	matrix_2d_exception(int px, int py, const std::string& msg):	//!< Class constructor.
-		std::runtime_error("matrix_2d error: "+msg), x(px), y(py) 
-	{
+	//!Class constructor.
+	matrix_2d_exception(int px, int py, const std::string& msg):
+		std::runtime_error("matrix_2d error: "+msg), x(px), y(py) {
 	}
 };
 
@@ -27,33 +27,36 @@ struct matrix_2d_exception:
 struct matrix_2d_exception_bounds:
 	public matrix_2d_exception 
 {
-	matrix_2d_exception_bounds(int px, int py)	//!< Class constructor.
+	//!Class constructor.
+	matrix_2d_exception_bounds(int px, int py)
 		:matrix_2d_exception(
 			px, py, 
-			std::string("out of bounds ")+compat::to_string(px)+","+compat::to_string(py)
-	) {}
+			std::string("out of bounds ")+compat::to_string(px)+","+compat::to_string(py)) {
+	}
 };
 
 //!Thrown when trying to erase or access a non existing element.
 struct matrix_2d_exception_missing:
 	public matrix_2d_exception 
 {
-	matrix_2d_exception_missing(int px, int py)	//!< Class constructor.
+	//!Class constructor.
+	matrix_2d_exception_missing(int px, int py)
 		:matrix_2d_exception(
 			px, py,
-			std::string("no value ")+compat::to_string(px)+","+compat::to_string(py)
-		) {}
+			std::string("no value ")+compat::to_string(px)+","+compat::to_string(py)) {
+	}
 };
 
 //!Thrown when trying to insert an item in a position already occupied.
 struct matrix_2d_exception_conflict:
 	public matrix_2d_exception 
 {
-	matrix_2d_exception_conflict(int px, int py) //!< Class constructor.
+	//! Class constructor.
+	matrix_2d_exception_conflict(int px, int py)
 		:matrix_2d_exception(
 			px, py,
-			std::string("insertion conflict ")+compat::to_string(px)+","+compat::to_string(py)
-		) {}
+			std::string("insertion conflict ")+compat::to_string(px)+","+compat::to_string(py)) {
+	}
 };
 
 //!Struct to encapsulate a pair of coordinates and an element of type T. This
@@ -83,68 +86,66 @@ class matrix_2d {
 
 	public:
 
-	typedef std::pair<unsigned int, T> t_pair;
-
+	//!Constructs a matrix with the given dimensions.
 					matrix_2d(unsigned int pw, unsigned int ph)
-		:w(pw), h(ph)
-	{
+		:w(pw), h(ph) {
 
 	}
 
+	//!Copy-constructs a matrix,
 					matrix_2d(const matrix_2d& o)
-		:data(o.data), w(o.w), h(o.h)
-	{
+		:data(o.data), w(o.w), h(o.h) {
 
 	}
 
-	void 				insert(unsigned int x, unsigned int y, T& val)
-	{
+	//!Inserts val into the x, y position. Might throw if already occupied.
+	void 				insert(unsigned int x, unsigned int y, T& val) {
 		unsigned int index=coords_to_index(x, y);
 		if(data.count(index)) throw matrix_2d_exception_conflict(x, y);
 		data.insert(std::make_pair(index, val));
 	}
 
-	void 				insert(unsigned int x, unsigned int y, T&& val)
-	{
+	//!Inserts val into the x, y position. Might throw if already occupied.
+	void 				insert(unsigned int x, unsigned int y, T&& val) {
 		unsigned int index=coords_to_index(x, y);
 		if(data.count(index)) throw matrix_2d_exception_conflict(x, y);
 		data.insert(std::make_pair(index, val));
 	}
 
-	void 				erase(unsigned int x, unsigned int y)
-	{
+	//!Removes the element at x, y. Might throw if there's nothing there.
+	void 				erase(unsigned int x, unsigned int y) {
 		unsigned int index=coords_to_index(x, y);
 		if(!data.count(index)) throw matrix_2d_exception_missing(x, y);
 		data.erase(index);
 	}
 
-	//Se usa "at" para evitar la necesidad de constructores por defecto.
-	const T& 			operator()(unsigned int x, unsigned int y) const
-	{
+	//TODO: Provide a "replace" operator.
+	//TODO: Provide swap capabilities.
+
+	//!Returns the element at x, y. Might throw. 
+	const T& 			operator()(unsigned int x, unsigned int y) const {
 		unsigned int index=coords_to_index(x, y);
 		if(!data.count(index)) throw matrix_2d_exception_missing(x, y);
 		return data.at(index);
 	}
 
 	//!Returns the element at the given coordinates Throws if no item is present.
-	T& 				operator()(unsigned int x, unsigned int y)
-	{
+	T& 				operator()(unsigned int x, unsigned int y) {
 		unsigned int index=coords_to_index(x, y);
 		if(!data.count(index)) throw matrix_2d_exception_missing(x, y);
 		return data.at(index);
 	}
 
-	//Permite inserciones...
-	T& 				operator()(unsigned int x, unsigned int y, T& val)
-	{
+	//!Inserts val into x, y. Will throw if the position is occupied.
+	T& 				operator()(unsigned int x, unsigned int y, T& val) {
 		unsigned int index=coords_to_index(x, y);
 		if(data.count(index)) throw matrix_2d_exception_conflict(x, y);
 		data.insert(std::make_pair(index, val));
 		return data.at(index);
 	}
 
-	T& 				operator()(unsigned int x, unsigned int y, T&& val)
-	{
+	//!Inserts val into x, y. Will throw if the position is already occupied.
+	T& 				operator()(unsigned int x, unsigned int y, T&& val) {
 		unsigned int index=coords_to_index(x, y);
 		if(data.count(index)) throw matrix_2d_exception_conflict(x, y);
 		data.insert(std::make_pair(index, val));
@@ -234,8 +235,6 @@ class matrix_2d {
 		}
 	}
 
-	///////////////////////////
-	// Propiedades.
 	private:
 
 	//!Defines a pair of coordinates.
