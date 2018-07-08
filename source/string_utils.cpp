@@ -71,57 +71,6 @@ std::vector<std::string> tools::explode(const std::string & pstring, const std::
 	return result;
 }
 
-/*
-* @param std::string file: nombre del file a abrir.
-* @param const char delimiter: cadena de separación entre claves y values.
-* @return std::map<std::string, std::string>
-* @throw std::runtime error : cuando no se puede abrir el file.
-*
-* Abre el archivo y lee todas las líneas, explotándolas por el carácter de
-* separación. De delimiter a izquierda se considera "clave" y de delimiter
-* a derecha se considera "valor". Devuelve un mapa de claves y values.
-* Las líneas sin longitud y las que comienzan por "comment" se ignoran. 
-* Cuando la línea tiene más de un delimiter se usa sólo el primero y el 
-* resto pasa a formar parte del "valor".
-* En caso de claves repetidas se usará el último valor presente en el 
-* archivo.
-* En caso de producirse un error a la hora de leer el archivo (por ejemplo,
-* el file no existe) se lanzará una excepción del tipo std::runtime_error.
-*/
-
-std::map<std::string, std::string> tools::map_pair(const std::string& file, const char delimiter, const char comment)
-{
-	text_reader L(file.c_str(), comment);
-
-	if(!L)
-	{
-		throw std::runtime_error("tools::map_pair could not open "+file);
-	}
-
-	std::map<std::string, std::string> res;
-	std::string line;
-
-	while(true)
-	{
-		line=L.read_line();
-
-		if(L.is_eof()) 
-		{	
-			break;
-		}
-		//Localizar delimiter... 
-		else if(line.find(delimiter)==line.npos)
-		{	
-			throw std::runtime_error("tools::map_pair malformed line "+compat::to_string(L.get_line_number())+" '"+line+"' en "+file);
-		}
-
-		std::vector<std::string> values=explode(line, delimiter, 2);
-		res[values[0]]=values[1];
-	}
-
-	return res;
-}
-
 size_t tools::int_digits(int pint)
 {
 	if(pint==0) return 1;

@@ -45,6 +45,8 @@ class text_reader {
 	//!Sets the file pointer back at the first line.
 	void 			rewind(){file.seekg(0, file.beg);}
 
+	//TODO: ADD A FOREACH FUNCTION THAT GETS THE CALLBACK AS A PARAMETER.
+
 	private:
 
 	unsigned int 		line_number;		//!< Current line number.
