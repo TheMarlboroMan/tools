@@ -28,10 +28,10 @@ are made to correspond with a key in the file.
 The structure of the file goes like this:
 
 layout_id:[
-	{type:"#type_key#", #attribute#: #attribute_value#},
-	{type:"#type_key#", #attribute#: #attribute_value#},
-	{type:"#type_key#", #attribute#: #attribute_value#},
-	{type:"#type_key#", #attribute#: #attribute_value#}
+	{type:"type_key", attribute: attribute_value},
+	{type:"type_key", attribute: attribute_value},
+	{type:"type_key", attribute: attribute_value},
+	{type:"type_key", attribute: attribute_value}
 ]
 
 other_layout_id:[
@@ -100,7 +100,7 @@ class view_composer
 {
 	public:
 
-	typedef std::unique_ptr<ldv::representation> uptr_rep;
+	typedef std::unique_ptr<ldv::representation> uptr_rep;	//!< Typedef to the internal Reprensetation type.
 
 				view_composer();
 	void			parse(const std::string&, const std::string&);
@@ -174,8 +174,7 @@ class view_composer
 
 	//!Represents a singular drawable.
 
-	struct item
-	{
+	struct item {
 		uptr_rep			rep;
 		ldv::representation *		ptr;
 		int 				order;

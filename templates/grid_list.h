@@ -32,7 +32,7 @@ class grid_list:
 	}
 
 
-	//TODO: WHAT DOES THIS DO?.
+	//!Seems that it returns the currently selected item. TODO: Where is this used? What does it do?.
 	const Item				current_line() const {
 
 		size_t	index=this->pager.get_current_index(),
@@ -94,7 +94,7 @@ class grid_list:
 		return false;
 	}	
 
-	//TODO: What does this do????
+	//!Seems to return true if the current page contains the item v. TODO: I really don't know what this does.
 	bool					set_row(int v) {
 		bool result=false;
 		for(size_t i=0; i < reg_row ; ++i) {
