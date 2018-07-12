@@ -5,6 +5,7 @@
 using namespace tools;
 
 bool dnot_token::is_value() const {
+
 	return type==types::tstring||
 	type==types::tint ||
 	type==types::tfloat||
@@ -13,6 +14,7 @@ bool dnot_token::is_value() const {
 }
 
 void dnot_token::set(const dnot_token& tok) {
+
 	type=tok.type;
 	tokens=tok.tokens;
 	vector=tok.vector;
@@ -24,41 +26,49 @@ void dnot_token::set(const dnot_token& tok) {
 }
 
 void dnot_token::set(const std::string& c) {
+
 	string_value=c;
 	type=types::tstring;
 }
 
 void dnot_token::set(const char * c) {
+
 	string_value=c;
 	type=types::tstring;
 }
 
 void dnot_token::set(int c) {
+
 	int_value=c;
 	type=types::tint;
 }
 
 void dnot_token::set(float c) {
+
 	float_value=c;
 	type=types::tfloat;
 }
 
 void dnot_token::set(double c) {
+
 	double_value=c;
 	type=types::tdouble;
 }
 
 void dnot_token::set(bool c) {
+
 	bool_value=c;
 	type=types::tbool;
 }
 
 void dnot_token::set(const t_map& t) {
+
 	tokens=t;
 	type=types::tmap;
 }
 
 void dnot_token::set(const t_vector& t) {
+
 	vector=t;
 	type=types::tvector;
 }
@@ -124,6 +134,7 @@ dnot_token::dnot_token(const t_vector& v)
 }
 
 const dnot_token::t_map& dnot_token::get_map() const {
+
 	if(type!=types::tmap) {
 		throw std::runtime_error("Not a map type ["+translate_type(type)+" - "+to_string()+"]");
 	}
@@ -131,6 +142,7 @@ const dnot_token::t_map& dnot_token::get_map() const {
 }
 
 dnot_token::t_map& dnot_token::get_map() {
+
 	if(type!=types::tmap) {
 		throw std::runtime_error("Not a map type ["+translate_type(type)+" - "+to_string()+"]");
 	}
@@ -138,6 +150,7 @@ dnot_token::t_map& dnot_token::get_map() {
 }
 
 const dnot_token::t_vector& dnot_token::get_vector() const {
+
 	if(type!=types::tvector) {
 		throw std::runtime_error("Not a vector type ["+translate_type(type)+" - "+to_string()+"]");
 	}
@@ -145,6 +158,7 @@ const dnot_token::t_vector& dnot_token::get_vector() const {
 }
 
 dnot_token::t_vector& dnot_token::get_vector() {
+
 	if(type!=types::tvector) {
 		throw std::runtime_error("Not a vector type ["+translate_type(type)+" - "+to_string()+"]");
 	}
@@ -152,6 +166,7 @@ dnot_token::t_vector& dnot_token::get_vector() {
 }
 
 const std::string& dnot_token::get_string() const {
+
 	if(type!=types::tstring) {
 		throw std::runtime_error("Not a string type ["+translate_type(type)+" - "+to_string()+"]");
 	}
@@ -159,6 +174,7 @@ const std::string& dnot_token::get_string() const {
 }
 
 int dnot_token::get_int() const {
+
 	if(type!=types::tint) {
 		throw std::runtime_error("Not an int type ["+translate_type(type)+" - "+to_string()+"]");
 	}
@@ -166,6 +182,7 @@ int dnot_token::get_int() const {
 }
 
 float dnot_token::get_float() const {
+
 	if(type!=types::tfloat) {
 		throw std::runtime_error("Not a float type ["+translate_type(type)+" - "+to_string()+"]");
 	}
@@ -173,6 +190,7 @@ float dnot_token::get_float() const {
 }
 
 double dnot_token::get_double() const {
+
 	if(type!=types::tdouble) {
 		throw std::runtime_error("Not a double type ["+translate_type(type)+" - "+to_string()+"]");
 	}
@@ -180,6 +198,7 @@ double dnot_token::get_double() const {
 }
 
 bool dnot_token::get_bool() const {
+
 	if(type!=types::tbool) {
 		throw std::runtime_error("Not a bool type ["+translate_type(type)+" - "+to_string()+"]");
 	}
@@ -187,6 +206,7 @@ bool dnot_token::get_bool() const {
 }
 
 const dnot_token& dnot_token::operator[](const std::string& k) const {
+
 	if(type!=types::tmap) {
 		throw std::runtime_error("Not a map type ["+translate_type(type)+" - "+to_string()+"]");
 	}
@@ -199,6 +219,7 @@ const dnot_token& dnot_token::operator[](const std::string& k) const {
 }
 
 dnot_token& dnot_token::operator[](const std::string& k) {
+
 	if(type!=types::tmap) {
 		throw std::runtime_error("Not a map type ["+translate_type(type)+" - "+to_string()+"]");
 	}
@@ -211,14 +232,17 @@ dnot_token& dnot_token::operator[](const std::string& k) {
 }
 
 const dnot_token& dnot_token::operator[](const char * k) const {
+
 	return this->operator[](std::string(k));
 }
 
 dnot_token& dnot_token::operator[](const char * k) {
+
 	return this->operator[](std::string(k));
 }
 
 const dnot_token& dnot_token::operator[](size_t l) const {
+
 	if(type!=types::tvector) {
 		throw std::runtime_error("Not a vector type ["+translate_type(type)+" - "+to_string()+"]");
 	}
@@ -231,6 +255,7 @@ const dnot_token& dnot_token::operator[](size_t l) const {
 }
 
 dnot_token& dnot_token::operator[](size_t l) {
+
 	if(type!=types::tvector) {
 		throw std::runtime_error("Not a vector type ["+translate_type(type)+" - "+to_string()+"]");
 	}
@@ -243,14 +268,17 @@ dnot_token& dnot_token::operator[](size_t l) {
 }
 
 const dnot_token& dnot_token::operator[](int l) const {
+
 	return this->operator[]((size_t)l);
 }
 
 dnot_token& dnot_token::operator[](int l) {
+
 	return this->operator[]((size_t)l);
 }
 
 std::ostream& tools::operator<<(std::ostream& os, const tools::dnot_token& t) {
+
 	using namespace tools;
 
 	switch(t.type) {
@@ -267,6 +295,7 @@ std::ostream& tools::operator<<(std::ostream& os, const tools::dnot_token& t) {
 }
 
 bool dnot_token::key_exists(const std::string& k) const {
+
 	if(type!=types::tmap) {
 		throw std::runtime_error("Not a map type ["+translate_type(type)+" - "+to_string()+"]");
 	}
@@ -276,6 +305,7 @@ bool dnot_token::key_exists(const std::string& k) const {
 }
 
 std::string dnot_token::serialize(const dnot_token_serialize_options& options, int recursive) const {
+
 	std::string result;
 
 	size_t tot=0, cur=0;
@@ -344,6 +374,7 @@ std::string dnot_token::serialize(const dnot_token_serialize_options& options, i
 }
 
 std::string dnot_token::translate_type(dnot_token::types t) const {
+
 	switch(t) {
 		case types::tmap: return "tmap"; break;
 		case types::tstring: return "string"; break;
@@ -359,6 +390,7 @@ std::string dnot_token::translate_type(dnot_token::types t) const {
 }
 
 std::string dnot_token::to_string() const {
+
 	switch(type) {
 		case types::tmap: return "tmap ("+compat::to_string(tokens.size())+")"; break;
 		case types::tstring: return string_value; break;
