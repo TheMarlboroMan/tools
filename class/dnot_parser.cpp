@@ -9,18 +9,17 @@ dnot_parser::dnot_parser(std::istream& pstream, int l, int c)
 	:state(tstates::reading), 
 	read_quotes(false), done(false), root(true),
 	type(types::tundefined),
-	stream(pstream), line(l), column(c)
-{
+	stream(pstream), line(l), column(c) {
+
 	buffer.reserve(1024);
 	//TODO: What about the type... this is failing like hell... Where do we control this???.
 }
 
-void dnot_parser::operator()()
-{
-	while(true)
-	{	
-		if(state==tstates::exiting) 
-		{
+void dnot_parser::operator()() {
+
+	while(true) {
+
+		if(state==tstates::exiting) {
 			break;
 		}
 
@@ -29,8 +28,7 @@ void dnot_parser::operator()()
 
 		char cb=read_stream(read_quotes);
 
-		if(stream.eof())
-		{
+		if(stream.eof()) {
 			//TODO: Es posible que esté malformado si estamos reading quotes;
 			if(state==tstates::reading) assign_tobject();
 			state=tstates::exiting;
@@ -43,27 +41,19 @@ void dnot_parser::operator()()
 	}
 }
 
-/**
-* Reads stream, ignoring whitespace if we are not quoting
-*/
-
-char dnot_parser::read_stream(bool reading_quotes)
-{
+char dnot_parser::read_stream(bool reading_quotes) {
 	char cb;
 
 	stream.get(cb);
 
 	++column;
-	if(cb=='\n')
-	{
+	if(cb=='\n') {
 		++line;
 		column=0;
 	}
 	
-	if(!reading_quotes)
-	{
-		if(isspace(cb))
-		{
+	if(!reading_quotes) {
+		if(isspace(cb)) {
 			return read_stream(reading_quotes);
 		}
 	}
@@ -72,29 +62,22 @@ char dnot_parser::read_stream(bool reading_quotes)
 }
 
 /*
-* Procesa el carácter leido en modo string. Se guarda lo que sea que tenga a 
-* no ser que encuentre unas quotes, que finaliza el modo de lectura
-* entrecomillada.
 * TODO: No es posible escapar quotes dentro de una secuencia de quotes.
 * Podríamos usar una secuencia de escape para leer, simplemente si encontramos
 * el carácter \ lo siguiente entraría en el buffer tal cual, o lo mismo, 
 * saltaríamos ese paso.
 */
 
-void dnot_parser::process_string(char cb)
-{
-	if(cb=='"') quotes();
+void dnot_parser::process_string(char cb) {
+
+	if(cb=='"') {
+		quotes();
+	}
 }
 
-/*
-* Procesa el carácter leido en modo stream, lo que indica que si lee algún
-* carácter de control le assigná su significado.
-*/
+void dnot_parser::process_stream(char cb) {
 
-void dnot_parser::process_stream(char cb)
-{
-	switch(cb)
-	{
+	switch(cb) {
 		case ',': comma(); break;
 		case '"': quotes(); break;
 		case '{': open_brace(); break;
@@ -104,31 +87,22 @@ void dnot_parser::process_stream(char cb)
 	}
 }
 
-/**
-* Indica que ha leido el carácter de control ", que abre o cierra una secuencia
-* de quotes.
-*/
+void dnot_parser::quotes() {
 
-void dnot_parser::quotes()
-{
 	read_quotes=!read_quotes;
 }
 
 /**
-* La comma indica que se ha llegado al final de una enumeración. En función de
-* si el parser es de tobject o tarray llamaremos a la función de turno.
 * Se contempla el caso que encontremos una comma tras ] o }, que indicaría el
 * fin de un subparser. Dado que el state de [ o { contempla la inserción
 * no haríamos nada.
 */
 
-void dnot_parser::comma()
-{
-	switch(state)
-	{	
+void dnot_parser::comma() {
+
+	switch(state) {	
 		case tstates::reading:
-			switch(type)
-			{
+			switch(type) {
 				case types::tmap: 	assign_tobject(); break;
 				case types::tvector: 	assign_tarray(); break;
 				case types::tundefined: error("comma reached with no type assigned"); break;
@@ -146,16 +120,9 @@ void dnot_parser::comma()
 	clear_buffer();
 }
 
-/**
-* Crea un subparser en modo tobject y asigna los tokens leidos del mismo. El
-* state final es "exiting_subparser", que indica que la siguiente comma debe 
-* ignorarse con respecto a la inserción.
-*/
+void dnot_parser::open_brace() {
 
-void dnot_parser::open_brace()
-{
-	if(state!=tstates::reading)
-	{
+	if(state!=tstates::reading) {
 		error("found open brace in incorrect state : ");
 	}
 
@@ -171,24 +138,16 @@ void dnot_parser::open_brace()
 	column=p.column;
 }
 
-/*
-* Eso se hará desde dentro de un subparser y assigná el último valor, como
-* si fuera una comma. Luego marcará el subparser como "done".
-*/
+void dnot_parser::close_brace() {
 
-void dnot_parser::close_brace()
-{
-	switch(state)
-	{
+	switch(state) {
 		case tstates::reading:
 
 			//Protection against empty objects...
-			if(str_trim(buffer)!="}")
-			{
+			if(str_trim(buffer)!="}") {
 				assign_tobject();
 			}
-			else
-			{
+			else {
 				clear_buffer();
 			}
 		break;
@@ -204,14 +163,9 @@ void dnot_parser::close_brace()
 	clear_buffer();
 }
 
-/**
-* Idem que abre llave.
-*/
+void dnot_parser::open_bracket() {
 
-void dnot_parser::open_bracket()
-{
-	if(state!=tstates::reading)
-	{
+	if(state!=tstates::reading) {
 		error("found open bracket in incorrect state : ");
 	}
 
@@ -229,22 +183,15 @@ void dnot_parser::open_bracket()
 	column=p.column;
 }
 
-/**
-* Idem que "cierra llave.
-*/
+void dnot_parser::close_bracket() {
 
-void dnot_parser::close_bracket()
-{
-	switch(state)
-	{
+	switch(state) {
 		case tstates::reading:
 			//Protection against empty lists.
-			if(str_trim(buffer)!= "]")
-			{
+			if(str_trim(buffer)!= "]") {
 				assign_tarray();
 			}
-			else
-			{
+			else {
 				clear_buffer();
 			}
 		break;
@@ -260,25 +207,18 @@ void dnot_parser::close_bracket()
 	clear_buffer();
 }
 
-/**
-* Se asigna un valor textual a un token, ya sea por encontrar una comma o por
-* llegarse al fin del fichero. Se partirá el buffer en dos para separar la
-* clave del valor.
-*/
 
-void dnot_parser::assign_tobject()
-{
+void dnot_parser::assign_tobject() {
+
 	size_t pos=buffer.find(":");
-	if(pos==std::string::npos)
-	{
+	if(pos==std::string::npos) {
 		error("no colon for object found with buffer '"+buffer+"'");
 	}
 
 	std::string clave=buffer.substr(0, pos);
 	std::string valor=buffer.substr(pos+1, buffer.size()-clave.size()-2);
 
-	if(token.tokens.count(clave))
-	{
+	if(token.tokens.count(clave)) {
 		error("repeated key "+clave+" for object");
 	}
 
@@ -294,39 +234,33 @@ void dnot_parser::assign_tobject()
 * type de dato exacto.
 */ 
 
-dnot_token dnot_parser::generate_token(const std::string& v)
-{
+dnot_token dnot_parser::generate_token(const std::string& v) {
+
 	dnot_token t;
 
 	//Comprobar bool
-	if(v=="true" || v=="false")
-	{			
+	if(v=="true" || v=="false") {
 		t.set(v=="true");
 	}
 	//String...
-	else if(v.front()=='"' && v.back()=='"')
-	{
+	else if(v.front()=='"' && v.back()=='"') {
 		t.set(v.substr(1, v.size()-2));
 	}
 	//Float y double...
-	else if(v.find(".") != std::string::npos)
-	{
-		if(v.back()=='f')
-		{
+	else if(v.find(".") != std::string::npos) {
+
+		if(v.back()=='f') {
 			t.set((float)std::atof(v.c_str()));
 		}
-		else
-		{
+		else {
 			t.set(std::atof(v.c_str()));
 		}
 	}
 	//Entero...
-	else if(std::all_of(std::begin(v), std::end(v), [](const char c) {return isdigit(c) || c=='-';}))
-	{
+	else if(std::all_of(std::begin(v), std::end(v), [](const char c) {return isdigit(c) || c=='-';})) {
 		t.set(std::atoi(v.c_str()));
 	}
-	else
-	{
+	else {
 		error("unable to infer value");
 	}
 
@@ -339,11 +273,10 @@ dnot_token dnot_parser::generate_token(const std::string& v)
 * encontrar una comma en un parser de tarray.
 */
 
-void dnot_parser::assign_tarray()
-{
+void dnot_parser::assign_tarray() {
+
 	size_t pos=buffer.find(":");
-	if(pos!=std::string::npos)
-	{
+	if(pos!=std::string::npos) {
 		error("colon found in array");
 	}
 
@@ -359,26 +292,23 @@ void dnot_parser::assign_tarray()
 * tarray.
 */
 
-void dnot_parser::assign_tobject_subparser(const std::map<std::string, dnot_token>& aux)
-{
+void dnot_parser::assign_tobject_subparser(const std::map<std::string, dnot_token>& aux) {
+
 	dnot_token T;
 	T.set(aux);
 	size_t pos=buffer.find(":");
 
-	if(pos==std::string::npos)
-	{
-		if(root)
-		{
+	if(pos==std::string::npos) {
+
+		if(root) {
 			token.type=dnot_token::types::tmap;
 			token.tokens=std::move(aux);
 		}
-		else
-		{
+		else {
 			token.vector.push_back(T);
 		}
 	}
-	else
-	{
+	else {
 		token.type=dnot_token::types::tmap;
 		token.tokens[buffer.substr(0, pos)]=T;
 	}
@@ -390,8 +320,8 @@ void dnot_parser::assign_tobject_subparser(const std::map<std::string, dnot_toke
 * anterior, el token puede o no ser anónimo.
 */
 
-void dnot_parser::assign_tarray_subparser(const std::vector<dnot_token>& aux)
-{
+void dnot_parser::assign_tarray_subparser(const std::vector<dnot_token>& aux) {
+
 	//TODO: Esto falla: no podemos assign tarrays. El buffer sigue lleno
 	//cuando llegamos a este punto. se asigna la tarray del token pero
 	//el token no tiene nombre!!!. No tenemos una estructura capaz de 
@@ -401,35 +331,30 @@ void dnot_parser::assign_tarray_subparser(const std::vector<dnot_token>& aux)
 	T.set(aux);
 
 	size_t pos=buffer.find(":");
-	if(pos==std::string::npos)
-	{
-		if(root)
-		{
+	if(pos==std::string::npos) {
+		if(root) {
 			token.type=dnot_token::types::tvector;
 			token.vector=std::move(aux);
 		}
-		else
-		{
+		else {
 			token.vector.push_back(T);
 		}
 	}
-	else
-	{
+	else {
 		//This is correct: a colon is found, thus this is a map.
 		token.type=dnot_token::types::tmap;
 		token.tokens[buffer.substr(0, pos)]=T;
 	}
 }
 
-void dnot_parser::error(const std::string& msj)
-{
+void dnot_parser::error(const std::string& msj){
+
 	throw std::runtime_error("dnot_parser error: "+msj+"\nstate:"+get_state()+"\nbuffer:"+buffer+"\nline:"+compat::to_string(line)+"\ncolumn:"+compat::to_string(column));
 }
 
-std::string dnot_parser::get_state()
-{
-	switch(state)
-	{
+std::string dnot_parser::get_state() {
+
+	switch(state) {
 		case tstates::reading: return "reading"; break;
 		case tstates::exiting_subparser: return "exit subparser"; break;
 		case tstates::exiting: return "exit"; break;
@@ -439,18 +364,17 @@ std::string dnot_parser::get_state()
 	return std::string();
 }
 
-void dnot_parser::clear_buffer()
-{
+void dnot_parser::clear_buffer() {
+
 	buffer.clear();
 }
 
 /******************************************************************************/
 
-dnot_token tools::dnot_parse(const std::string& c)
-{
+dnot_token tools::dnot_parse(const std::string& c) {
+
 	std::ifstream f(c.c_str());
-	if(!f.is_open()) 
-	{
+	if(!f.is_open()) {
 		throw std::runtime_error("unable to open file for parsing "+c);
 	}
 
@@ -459,10 +383,13 @@ dnot_token tools::dnot_parse(const std::string& c)
 	return p.get_token();
 }
 
-dnot_token tools::dnot_parse_file(const std::string& c) {return dnot_parse(c);}
+dnot_token tools::dnot_parse_file(const std::string& c) {
 
-dnot_token tools::dnot_parse_string(const std::string& c)
-{
+	return dnot_parse(c);
+}
+
+dnot_token tools::dnot_parse_string(const std::string& c) {
+
 	std::stringstream ss(c);
 	dnot_parser p(ss);
 	p();
