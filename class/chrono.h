@@ -6,22 +6,25 @@
 namespace tools
 {
 
+//!Structure to be returned from the chrono class containing an ordered measure
+//!of time.
+
+struct chrono_data {
+	int	hours,		//!< Hours elapsed.
+		minutes,	//!< Minutes elapsed.
+		seconds,	//!< Seconds elapsed.
+		milliseconds;	//!< Milliseconds elapsed.
+};
+
 //!Simple chronometer.
 
 //!Returns the time elapsed since "start" was called as an integer. 
 //!There is not need to reset it: after stop, each call to start is valid.
 //!In this case, time is "real" or "user" time.
 
-struct chrono_data
-{
-	int	hours;
-	int	minutes;
-	int	seconds;
-	int	milliseconds;
-};
 
-class chrono
-{
+class chrono {
+
 	public:
 	
 	//!Starts the count.
@@ -44,9 +47,9 @@ class chrono
 
 	private:
 
-	std::chrono::high_resolution_clock::time_point 	begin,
-							end;
-	bool						running=false;
+	std::chrono::high_resolution_clock::time_point 	begin,		//!< Internal starting time point.
+							end;		//!< Internal end time point.
+	bool						running=false;	//!< State flag.
 };
 
 }

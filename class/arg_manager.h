@@ -13,6 +13,7 @@ namespace tools
 //!Exception thrown by the arg_manager.
 class arg_manager_exception:
 	public std::runtime_error {
+	//!Class constructor.
 	public:
 	arg_manager_exception(const std::string& _m)
 		:std::runtime_error(_m) {}
@@ -27,12 +28,10 @@ class arg_manager {
 	
 	public:
 
-				arg_manager() {}
+	//!Class constructor mimicking the main() entrypoint.
 				arg_manager(int argc, char ** argv);
 
-	void 			init(int argc, char ** argv);
 	//!Returns the count of program arguments (program name included).
-
 	size_t 			size() const {return data.size();}
 
 	//!Returns the argument in the given index. Will throw if the index is invalid.
@@ -71,6 +70,8 @@ class arg_manager {
 	//!any use except as a helper to value_exists_for.
 	int 			find_index_value(const t_arg&) const;
 
+	//!Fills the internal data structures of the class. 
+	void 			init(int argc, char ** argv);
 
 	t_arg_list 		data;
 };

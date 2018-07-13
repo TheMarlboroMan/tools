@@ -2,32 +2,27 @@
 
 using namespace tools;
 
-void chrono::start()
-{
+void chrono::start() {
 	begin=std::chrono::high_resolution_clock::now();
 	running=true;
 }
 
-void chrono::stop()
-{
+void chrono::stop() {
 	end=std::chrono::high_resolution_clock::now();
 	running=false;
 }
 
-int chrono::get_milliseconds()
-{
+int chrono::get_milliseconds() {
 	if(running) return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - begin).count();
 	else return std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
 }
 
-int chrono::get_seconds()
-{
+int chrono::get_seconds() {
 	if(running) return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - begin).count();
 	else return std::chrono::duration_cast<std::chrono::seconds>(end - begin).count();
 }
 
-chrono_data chrono::get_full()
-{
+chrono_data chrono::get_full() {
 	auto t=get_milliseconds();
 
 	//Hyper lazy.
