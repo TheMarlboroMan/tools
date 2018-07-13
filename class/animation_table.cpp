@@ -24,9 +24,7 @@ const animation_line& animation::get_for_time(float t) const {
 }
 
 
-//TODO: 
-const animation_line& animation::get_for_time(float t, float total) const
-{
+const animation_line& animation::get_for_time(float t, float total) const {
 	if(data.size()==1) return data.at(0);
 	else {
 		float mult=total / duration;
@@ -71,7 +69,7 @@ void animation_table::load(const std::string& ruta) {
 		try {
 			while(true) {
 				linea=L.read_line();
-				if(L.is_eof()) {	
+				if(L.is_eof()) {
 					//Insertar la última animación...
 					if(animacion) {
 						insertar_anim(animacion, id);
