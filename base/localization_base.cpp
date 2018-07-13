@@ -1,6 +1,9 @@
 #include "localization_base.h"
 #include <cstdlib>
 #include "../templates/compatibility_patches.h"
+#include "localization_base.h"
+#include "../source/number_utils.h"
+
 
 using namespace tools;
 
@@ -116,7 +119,7 @@ void localization_base::process_file(t_string const& nombre_archivo)
 			{
 				reading=true;
 				index=index_aux;
-				cadena=cadena.substr(3+int_digits(index)); //Cut delimiter... +3 is because of <$>
+				cadena=cadena.substr(3+count_digits(index)); //Cut delimiter... +3 is because of <$>
 			}
 
 			//Did we find an "end delimiter"?

@@ -10,8 +10,6 @@
 #include <vector>
 #include <stdexcept>
 
-#include "../source/string_utils.h"
-
 namespace tools
 {
 
