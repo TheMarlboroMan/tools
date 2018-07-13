@@ -55,6 +55,7 @@ class text_reader {
 	std::ifstream 		file;			//!< File data.
 };
 
+//!Returns a vector of strings resulting of extracting the contents of a file separated by newlines.
 std::vector<std::string> explode_lines_from_file(const std::string&);
 }
 

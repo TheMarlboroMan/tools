@@ -5,6 +5,9 @@
 
 #include "ranged_value.h"
 
+namespace tools
+{
+
 //!A generic solution for ranged values that evolve in time in a linear way: useful
 //!for linear transparencies, animations and such.
 
@@ -22,9 +25,6 @@ To use the class:
 	the constructor.
 - Time is expressed in milliseconds.
 */
-
-namespace tools
-{
 
 template <typename T>
 class linear_timed_function {
