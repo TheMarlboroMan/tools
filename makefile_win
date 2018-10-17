@@ -1,12 +1,14 @@
 #SIMBOLOS_DEBUG=-g
-UNIDAD_DISCO=C
-MINGW32_INCLUDE=/mingw/include
-MINGW32_LIB=/mingw/lib
-DIR_HOME=$(UNIDAD_DISCO):/Devel/
-DIR_LIBDAN2=$(DIR_HOME)libdansdl2-master
-DIR_SDL2=$(UNIDAD_DISCO):/SDLDev/include
+DISK_DRIVE=C
+MINGW32_INCLUDE=$(DISK_DRIVE):/MinGw64/Mingw32/include/
+MINGW32_LIB=$(DISK_DRIVE):/mingw64/Mingw32/lib/
+DIR_HOME=$(DISK_DRIVE):/devel/repos/
+DIR_LIBDAN2=$(DISK_DRIVE):/devel/repos/libdansdl2/
+DIR_SDL2=$(DISK_DRIVE):/devel/include/
+DIR_LOG=$(DISK_DRIVE):/devel/repos/log/src/
+INCLUDES=-I$(MINGW32_INCLUDE) -I$(DIR_LIBDAN2) -I$(DIR_SDL2) -I$(MINGW32_LIB)  -I$(DIR_LOG)
 
-FLAGS_BASE=-DWINCOMPIL=1 -D__NO_INLINE__ -Wno-deprecated -fno-rtti -Wall -ansi -pedantic -std=c++11 -I$(UNIDAD_DISCO):$(MINGW32_INCLUDE) -I$(DIR_LIBDAN2) -I$(DIR_SDL2) -L$(UNIDAD_DISCO):$(MINGW32_LIB)
+FLAGS_BASE=-DWINCOMPIL=1 -D__NO_INLINE__ -Wno-deprecated -fno-rtti -Wall -ansi -pedantic -std=c++11 $(INCLUDES)
 
 CFLAGS= -c $(SIMBOLOS_DEBUG) $(OPTIMIZACION)  $(FLAGS_BASE)
 
