@@ -20,6 +20,9 @@ class int_generator {
 	
 	//!Gets the next number in the sequence.
 	int 		operator()() {
+		if(vmax==vmin) {
+			return vmax;
+		}
 		int res=rand() % (vmax-vmin);
 		return res+vmin;
 	}
