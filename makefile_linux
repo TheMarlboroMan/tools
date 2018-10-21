@@ -1,20 +1,26 @@
-#OPTIMIZATION=-O2
-DEBUG= -g
-
-#These are either old or plain stupid :P.
-#OTHER_WARNING_FLAGS=-Wno-deprecated -Wfloat-equal
-
-WARNING_FLAGS=-Wall -Wextra -Wundef -Wcast-align -Wwrite-strings -Wlogical-op -Wmissing-declarations -Wredundant-decls -Wshadow -Woverloaded-virtual
-FLAGS_BASE=-Wno-deprecated -ansi -pedantic -std=c++11 -fno-rtti
- 
-CFLAGS=-c $(DEBUG) $(OPTIMIZATION) $(FLAGS_BASE) $(WARNING_FLAGS)
-CC=g++
+#Machine specifics.
 DIR_HOME=~/devel/
 DIR_LIBDAN2=$(DIR_HOME)libdansdl2
-DIR_LOG=$(DIR_HOME)log/src
- 
+DIR_LOG=$(DIR_HOME)log/
+MINGW32_INCLUDE=
+MINGW32_LIB=
+DIR_SDL2=
+DIR_OBJ=objects
+SYSTEM_FLAGS=
+
+#Commands.
+CLEAN=rm -rf $(DIR_OBJ)
+CREATE_OBJ_DIR=mkdir -p $(DIR_OBJ)
+
+#Build specifics.
+#OPTIMIZATION=-O2
+DEBUG=-g
+
+#Fixed compiler definitions.
+CC=g++
+WARNING_FLAGS=-Wall -Wextra -Wundef -Wcast-align -Wwrite-strings -Wlogical-op -Wmissing-declarations -Wredundant-decls -Wshadow -Woverloaded-virtual
+FLAGS_BASE=-Wno-deprecated -ansi -pedantic -std=c++11 -fno-rtti $(SYSTEM_FLAGS)
+CFLAGS=-c $(DEBUG) $(OPTIMIZATION) $(FLAGS_BASE) $(WARNING_FLAGS)
 INCLUDES=-I $(DIR_LIBDAN2) -I $(DIR_LOG)
-MKDIR=mkdir -p
-LIMPIAR=rm objects/*; touch objects/dummy;
 
 include makefile_comun
