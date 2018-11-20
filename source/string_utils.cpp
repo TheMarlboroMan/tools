@@ -2,6 +2,8 @@
 
 #include <bitset>
 #include <iostream>
+#include <sstream>
+#include <iterator>
 #include <algorithm>
 
 #include "../class/text_reader.h"
