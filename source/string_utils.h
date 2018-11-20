@@ -8,6 +8,12 @@
 namespace tools
 {
 
+//!Creates a string from the vector, separated by the second parameter.
+std::string					implode(const std::vector<std::string>&, const char);
+
+//!Creates a string from the vector, separated by the second parameter.
+std::string					implode(const std::vector<std::string>&, const std::string&);
+
 //!Splits a string by a given char and returns it in a vector of size as large
 //!as the "max" parameter. If max is zero the length is unbound.
 std::vector<std::string> 		explode(const std::string &, const char, size_t max=0);

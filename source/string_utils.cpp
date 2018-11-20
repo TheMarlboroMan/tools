@@ -10,6 +10,24 @@
 
 using namespace tools;
 
+std::string	tools::implode(const std::vector<std::string>& _v, const char _s) {
+
+	std::string separator;
+	separator.append(1, _s);
+	return implode(_v, separator);
+}
+
+std::string	tools::implode(const std::vector<std::string>& _v, const std::string& _s) {
+
+	std::ostringstream ss;
+	std::copy(std::begin(_v), std::end(_v),
+		std::ostream_iterator<std::string>(ss, _s.c_str()));
+
+	auto result=ss.str();
+	result.pop_back(); //Remove last.
+	return result;
+}
+
 std::vector<std::string> tools::explode(const std::string & pstring, const char pdelimiter, size_t max) {
 
 	size_t count=1;
@@ -31,7 +49,7 @@ std::vector<std::string> tools::explode(const std::string & pstring, const char 
 		else {
 			temp+=*ini;
 		}
-		
+
 		++ini;
 	}
 
@@ -44,7 +62,7 @@ std::vector<std::string> tools::explode(const std::string & pstring, const std::
 	size_t count=1, pos=0, prev_pos=0;
 
 	std::vector<std::string> result;
-	
+
 	do {
 		pos=pstring.find(delimiter, prev_pos);
 
@@ -66,7 +84,7 @@ std::vector<std::string> tools::explode(const std::string & pstring, const std::
 
 std::string& tools::ltrim(std::string &s) {
 
-	s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));	
+	s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
 	return s;
 }
 
@@ -185,7 +203,7 @@ std::string tools::split_to_lines(std::string const &pstring, unsigned int pmax)
 	unsigned int read=0;
 	std::string result;
 	auto it=std::begin(pstring), fin=std::end(pstring);
-	
+
 	while(it != fin) {
 
 		++read;
@@ -199,8 +217,8 @@ std::string tools::split_to_lines(std::string const &pstring, unsigned int pmax)
 		}
 		else if(read % pmax==0) {
 			//TODO
-			//Aquí cabe un poco más de rollo... 
-			//Por ejemplo, si lo que hemos leido es un 
+			//Aquí cabe un poco más de rollo...
+			//Por ejemplo, si lo que hemos leido es un
 			//espacio lo podemos quitar. Si vamos a partir
 			//una cadena en dos podemos directamente cortar
 			//hacia atrás (siempre que haya un espacio cerca)
