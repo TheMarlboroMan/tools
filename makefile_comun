@@ -2,9 +2,7 @@ DIR_HERRAMIENTAS_PROYECTO=./class/
 DIR_BASE=./base/
 DIR_SOURCE=./source/
 DIR_O=./$(DIR_OBJ)/
-all:\
-create_obj\
-$(DIR_O)sprite_table.o\
+ALL_OBJECTS=$(DIR_O)sprite_table.o\
 $(DIR_O)fps_counter.o\
 $(DIR_O)ttf_manager.o\
 $(DIR_O)animation_table.o\
@@ -21,7 +19,9 @@ $(DIR_O)string_utils.o\
 $(DIR_O)number_utils.o\
 $(DIR_O)chrono.o\
 $(DIR_O)dnot_config_file.o
-	@echo All done.
+
+all: create_obj $(ALL_OBJECTS)
+	ar rcs libtools.a $(ALL_OBJECTS)
 
 clean:
 	$(CLEAN)
@@ -30,7 +30,7 @@ clean:
 #Herramientas...
 
 create_obj:
-	$(CREATE_OBJ_DIR)	
+	$(CREATE_OBJ_DIR)
 
 $(DIR_O)animation_table.o :\
 create_obj\

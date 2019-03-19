@@ -5,7 +5,6 @@
 #include <map>
 #include <vector>
 
-#include <tools/tools/tools.h>
 #include <video/rect/rect.h>
 
 #include "text_reader.h"
@@ -13,7 +12,7 @@
 namespace tools
 {
 
-//!A frame for the sprite table consisting of the size and position of the 
+//!A frame for the sprite table consisting of the size and position of the
 //!sprite plus a possible displacement pair.
 
 struct sprite_frame {
@@ -49,7 +48,7 @@ struct sprite_frame {
 class sprite_table {
 	public:
 
-	//!Initializes the table with the file at the given path. Will throw 
+	//!Initializes the table with the file at the given path. Will throw
 	//!std::runtime error if the file cannot be found or has an invalid
 	//!format.
 							sprite_table(const std::string&);

@@ -28,7 +28,7 @@ void sprite_table::load(const std::string& path) {
 	else {
 		std::string line;
 		const char delimiter='\t';
-		
+
 		while(true) {
 			line=L.read_line();
 			if(L.is_eof()) {

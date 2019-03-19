@@ -1,5 +1,5 @@
 #Machine specifics.
-DIR_HOME=~/devel/
+DIR_HOME=~/devel/other/
 DIR_LIBDAN2=$(DIR_HOME)libdansdl2
 DIR_LOG=$(DIR_HOME)log/
 MINGW32_INCLUDE=
@@ -9,7 +9,7 @@ DIR_OBJ=objects
 SYSTEM_FLAGS=
 
 #Commands.
-CLEAN=rm -rf $(DIR_OBJ)
+CLEAN=if [ -d $(DIR_OBJ) ]; then rm -rf $(DIR_OBJ); fi; if [ -f libtools.a ]; then rm libtools.a; fi;
 CREATE_OBJ_DIR=mkdir -p $(DIR_OBJ)
 
 #Build specifics.

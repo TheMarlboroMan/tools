@@ -9,7 +9,7 @@ DIR_OBJ=objects
 SYSTEM_FLAGS=-DWINCOMPIL=1 -D__NO_INLINE__
 
 #Commands.
-CLEAN=if exist $(DIR_OBJ) rmdir $(DIR_OBJ) /S /Q
+CLEAN=if exist $(DIR_OBJ) rmdir $(DIR_OBJ) /S /Q && if exist libtools.a rm libtools.a
 CREATE_OBJ_DIR=	if not exist "$(DIR_OBJ)" mkdir $(DIR_OBJ)
 
 #Build specifics.
@@ -18,7 +18,7 @@ DEBUG=-g
 
 #Fixed compiler definitions.
 CC=g++
-WARNING_FLAGS=-Wno-deprecated -Wall 
+WARNING_FLAGS=-Wno-deprecated -Wall
 FLAGS_BASE= -fno-rtti -ansi -pedantic -std=c++11 $(SYSTEM_FLAGS)
 CFLAGS=-c $(DEBUG) $(OPTIMIZATION) $(FLAGS_BASE)
 INCLUDES=-I$(MINGW32_INCLUDE) -I$(DIR_LIBDAN2) -I$(DIR_SDL2) -I$(MINGW32_LIB)  -I$(DIR_LOG)
