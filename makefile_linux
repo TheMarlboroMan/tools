@@ -1,12 +1,15 @@
-#Machine specifics.
+#Local specifics.
 DIR_HOME=~/devel/other/
-DIR_LIBDAN2=$(DIR_HOME)libdansdl2
-DIR_LOG=$(DIR_HOME)log/
 MINGW32_INCLUDE=
 MINGW32_LIB=
 DIR_SDL2=
 DIR_OBJ=objects
 SYSTEM_FLAGS=
+
+#Dependency specifics
+DIR_HOME=~/devel/other/
+DIR_LIBDAN2=$(DIR_HOME)libdansdl2
+DIR_LOG=$(DIR_HOME)log/
 
 #Commands.
 CLEAN=if [ -d $(DIR_OBJ) ]; then rm -rf $(DIR_OBJ); fi; if [ -f libtools.a ]; then rm libtools.a; fi;
