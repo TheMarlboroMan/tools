@@ -2,12 +2,10 @@
 DIR_HOME=c:/devel/repos/
 DIR_OBJ=objects
 
-MINGWPATH=c:/devel/deps/mingw-w64/mingw32/
-SDL2PATH=c:/devel/deps/sdl2-plus-libs/
 SYSTEM_FLAGS=-DWINCOMPIL=1 -D__NO_INLINE__
 
 #Commands.
-CLEAN=if exist $(DIR_OBJ) rmdir $(DIR_OBJ) /S /Q && if exist libtools.a rm libtools.a
+CLEAN=if exist "$(DIR_OBJ)" rmdir $(DIR_OBJ) /S /Q && if exist libtools.a del libtools.a
 CREATE_OBJ_DIR=	if not exist $(DIR_OBJ) mkdir $(DIR_OBJ)
 
 #Build specifics.
@@ -16,10 +14,9 @@ DEBUG=-g
 
 #Fixed compiler definitions.
 CC=g++
-INCLUDES=-I$ (MINGWPATH) -I$(SDL2PATH)
+INCLUDES=
 WARNING_FLAGS=-Wno-deprecated -Wall
 FLAGS_BASE= -fno-rtti -ansi -pedantic -std=c++11 $(SYSTEM_FLAGS)
 CFLAGS=-c $(DEBUG) $(OPTIMIZATION) $(FLAGS_BASE) $(WARNING_FLAGS) $(INCLUDES) 
-
 
 include make/core
