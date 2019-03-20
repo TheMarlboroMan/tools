@@ -2,3 +2,4 @@ objects/*
 *.out
 html/
 libtools.a
+makefile_linux
