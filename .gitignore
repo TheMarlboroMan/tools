@@ -3,3 +3,4 @@ objects/*
 html/
 libtools.a
 makefile_linux
+makefile
