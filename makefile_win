@@ -1,7 +1,5 @@
-#Machine specifics.
+#Local specifics.
 DIR_HOME=c:/devel/repos/
-DIR_LIBDAN2=$(DIR_HOME)libdansdl2/
-DIR_LOG=$(DIR_HOME)log/
 MINGW32_INCLUDE=$(DIR_HOME)../deps/mingw-w64-8-1/mingw32/include/
 MINGW32_LIB=$(DIR_HOME)../deps/mingw-w64-8-1/mingw32/lib/
 DIR_SDL2=$(DIR_HOME)../deps/sdl2-plus-libs/include/
@@ -9,7 +7,7 @@ DIR_OBJ=objects
 SYSTEM_FLAGS=-DWINCOMPIL=1 -D__NO_INLINE__
 
 #Commands.
-CLEAN=if exist $(DIR_OBJ) rmdir $(DIR_OBJ) /S /Q
+CLEAN=if exist $(DIR_OBJ) rmdir $(DIR_OBJ) /S /Q && if exist libtools.a rm libtools.a
 CREATE_OBJ_DIR=	if not exist "$(DIR_OBJ)" mkdir $(DIR_OBJ)
 
 #Build specifics.
@@ -18,9 +16,9 @@ DEBUG=-g
 
 #Fixed compiler definitions.
 CC=g++
-WARNING_FLAGS=-Wno-deprecated -Wall 
+WARNING_FLAGS=-Wno-deprecated -Wall
 FLAGS_BASE= -fno-rtti -ansi -pedantic -std=c++11 $(SYSTEM_FLAGS)
-CFLAGS=-c $(DEBUG) $(OPTIMIZATION) $(FLAGS_BASE)
-INCLUDES=-I$(MINGW32_INCLUDE) -I$(DIR_LIBDAN2) -I$(DIR_SDL2) -I$(MINGW32_LIB)  -I$(DIR_LOG)
+CFLAGS=-c $(DEBUG) $(OPTIMIZATION) $(FLAGS_BASE) $(WARNING_FLAGS)
+INCLUDES=-I$(MINGW32_INCLUDE) -I$(MINGW32_LIB)  -I$(DIR_LOG)
 
-include makefile_comun
+include make/core

@@ -1,7 +1,5 @@
-#Machine specifics.
-DIR_HOME=~/devel/
-DIR_LIBDAN2=$(DIR_HOME)libdansdl2
-DIR_LOG=$(DIR_HOME)log/
+#Local specifics.
+DIR_HOME=~/devel/other/
 MINGW32_INCLUDE=
 MINGW32_LIB=
 DIR_SDL2=
@@ -9,7 +7,7 @@ DIR_OBJ=objects
 SYSTEM_FLAGS=
 
 #Commands.
-CLEAN=rm -rf $(DIR_OBJ)
+CLEAN=if [ -d $(DIR_OBJ) ]; then rm -rf $(DIR_OBJ); fi; if [ -f libtools.a ]; then rm libtools.a; fi;
 CREATE_OBJ_DIR=mkdir -p $(DIR_OBJ)
 
 #Build specifics.
@@ -20,7 +18,6 @@ DEBUG=-g
 CC=g++
 WARNING_FLAGS=-Wall -Wextra -Wundef -Wcast-align -Wwrite-strings -Wlogical-op -Wmissing-declarations -Wredundant-decls -Wshadow -Woverloaded-virtual
 FLAGS_BASE=-Wno-deprecated -ansi -pedantic -std=c++11 -fno-rtti $(SYSTEM_FLAGS)
-CFLAGS=-c $(DEBUG) $(OPTIMIZATION) $(FLAGS_BASE) $(WARNING_FLAGS)
-INCLUDES=-I $(DIR_LIBDAN2) -I $(DIR_LOG)
+INCLUDES=
 
-include makefile_comun
+include make/core
