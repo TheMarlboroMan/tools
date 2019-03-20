@@ -37,16 +37,16 @@ done;
 makefile_name='makefile';
 cp make/linux.template ./$makefile_name;
 
-sed -i -e "s^__TEMPLATE_DIR_HOME__^DIR_HOME=$home_dir^g" ./makefile_name;
-sed -i -e "s/__TEMPLATE_OPTIMIZATION__/$optimizations/g" ./makefile_name;
-sed -i -e "s/__TEMPLATE_DEBUG__/$debug/g" ./makefile_name;
+sed -i -e "s^__TEMPLATE_DIR_HOME__^DIR_HOME=$home_dir^g" ./$makefile_name;
+sed -i -e "s/__TEMPLATE_OPTIMIZATION__/$optimizations/g" ./$makefile_name;
+sed -i -e "s/__TEMPLATE_DEBUG__/$debug/g" ./$makefile_name;
 
 while true; do
 	echo -n "Begin compilation (y/n)?: "
 	read begin_compilation
-	case begin_compilation in
-		[y]* ) make clean; make all; break;;
-		[n]* ) break;;
+	case $begin_compilation in
+		"y") make clean; make all; break;;
+		"n") break;;
 	esac;
 done;
 
