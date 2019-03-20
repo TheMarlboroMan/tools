@@ -1,0 +1,61 @@
+#key::text
+#==variable==
+
+textkey::Whatever is before the colon pair would be the key name. Whatever follows 
+the colon is the text that the app will display. We could use variable 
+substitution in some easy to parse way, ==varname== and we should denote the
+end of the string with something easy too, like ::
+
+#Whatever goes here should be a comment.
+
+	whitespace::whitespace is ignored when reading a key.::
+
+This would be a syntax error.
+
+anothertextkey::This is another thing ==varname==, ==varname2==. We should be
+wary of having text after the end:: This would be discarded
+
+yetanother::This is another.::
+
+#The colon symbol should be customizable, a string of equal symbols of N 
+#length. Same goes for the equal sign.
+#
+#The same key should not be repeated.
+#
+#The parser would be easy, with three modes: "Outside", "key" and "value".
+#Outside mode
+#
+#	this is the default mode.
+#	any line beginning with # is a comment.
+#	any empty (trimmed) line is ignored.
+#	any whitespace is ignored.
+#	end of file ends the parsing.
+#	anything else begins reading a key.
+#Key mode:
+#	
+#	end of file is a syntax error
+#	anything we read is a key character.
+#	is we reach a whitespace character reading a key, we get a syntax error.
+#	a delimiter saves the key and enters value mode.
+#
+#Value mode.
+#
+#	end of file is a syntax error
+#	The delimiter exits to outside mode, saving the value.
+#	After exiting to outside mode, the rest of the string is discarded
+#	Anything else is added to the string.
+#
+#To add a file... we could use add("filelocation"), add({"file1", "file2"}).
+#
+#Now, the public interface would go like get("yetanother"), which would return
+#the string "This is another.".
+#
+#We could do something like set("varname", "myvar") to permanently 
+#translate ==varname== to "myvar". 
+#
+#The other part would be something like get("anothertextkey", { {"varname", mystr}, {"varname2", mystr2} })
+#which would return anothertextkey's value with the ==varname== and ==varname2== 
+#replaced with these two strings. This would override the "varname" set 
+#with the "set".
+#method.
+
