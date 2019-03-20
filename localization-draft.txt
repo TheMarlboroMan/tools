@@ -4,7 +4,7 @@
 textkey::Whatever is before the colon pair would be the key name. Whatever follows 
 the colon is the text that the app will display. We could use variable 
 substitution in some easy to parse way, ==varname== and we should denote the
-end of the string with something easy too, like ::
+end of the string with something easy too, like the separator.::
 
 #Whatever goes here should be a comment.
 
@@ -12,8 +12,8 @@ end of the string with something easy too, like ::
 
 This would be a syntax error.
 
-anothertextkey::This is another thing ==varname==, ==varname2==. We should be
-wary of having text after the end:: This would be discarded
+anothertextkey::This is another thing ==varname==, ==varname2==. Text after the
+separator is discarded:: This would be discarded
 
 yetanother::This is another.::
 
@@ -28,22 +28,27 @@ yetanother::This is another.::
 #	this is the default mode.
 #	any line beginning with # is a comment.
 #	any empty (trimmed) line is ignored.
-#	any whitespace is ignored.
 #	end of file ends the parsing.
-#	anything else begins reading a key.
+#	read into the buffer:
+#		any whitespace is ignored.
+#		anything else begins reading a key.
 #Key mode:
 #	
 #	end of file is a syntax error
-#	anything we read is a key character.
-#	is we reach a whitespace character reading a key, we get a syntax error.
-#	a delimiter saves the key and enters value mode.
+#	read into the buffer:
+#		anything we read is a key character.
+#		is we reach a whitespace character we get a syntax error.
+#		a delimiter saves the key and enters value mode (just remove the last
+#		N chars from the buffer and voilá).
 #
 #Value mode.
 #
 #	end of file is a syntax error
-#	The delimiter exits to outside mode, saving the value.
-#	After exiting to outside mode, the rest of the string is discarded
-#	Anything else is added to the string.
+#	read into the buffer:
+#		The delimiter exits to outside mode, saving the value.
+#		After exiting to outside mode, the rest of the string is discarded
+#		Anything else is added to the string (remove the first N chars
+#		from the buffer.
 #
 #To add a file... we could use add("filelocation"), add({"file1", "file2"}).
 #
