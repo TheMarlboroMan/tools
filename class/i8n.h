@@ -41,37 +41,68 @@ class i8n_exception_no_data
 //!Thrown when a file cannot be added.
 class i8n_exception_file_error
 	:public i8n_exception {
+	public:
 					i8n_exception_file_error(const std::string&);
 };
 
 //!Thrown when trying to add a file with an already existing key.
 class i8n_exception_repeated_key
 	:public i8n_exception {
+	public:
 					i8n_exception_repeated_key(const std::string&);
 }
+
+//!Thrown when a syntax error is found parsing a file.
+class i8n_exception_parse_syntax_error
+	:public i8n_exception {
+	public:
+					i8n_exception_parse_syntax_error(const std::string&, const std::string&, const std::string&, int);
+	}
+
+	const std::string		error,
+					file,
+					line;
+	const int			linenum;
+};
+
+//!Generic, contextless parse error.
+class i8n_exception_parse_error
+	:public i8n_exception {
+	public:
+					i8n_exception_parse_error(const std::string&);
+};
+
 
 class i8n {
 
 	public:
 
-	typedef t_filekey		std::string; //!<Key for a file.
-	typedef t_entrykey		std::string; //<!Key for an entry.
+	//!Fed to the class, indicates a file and a key with which to identify it.
+	struct 				i8n_input{
+		const std::string	key,
+					path;
+	};
 
+	//!Fed to "get" methods, to substitute variables.
 	struct substitution {
 		std::string		key,
 					value;
 	};
 
-	//!Class constructor.
-				i8n();
+	//!Fet to "get" methods to indicate key and entry.
+	struct i8n_get {
+		const std::string	key, 
+					entry;
+	};
 
-	//!Class constructor with path and default language.
-				i8n(const std::string&, const std::string&);
+	//!Class constructor with path, default language and list of files.
+				i8n(const std::string&, const std::string&, const std::vector<i8n_input>&);
 
 	//!Adds a key to the database, associated to the given file.
 	//!Will throw on failure to open the file,  if the key is used
-	//!or if no path/language have been set.
-	void			add(const t_filekey&, const std::string&);
+	//!or if no path/language have been set. This will trigger a recompilation
+	//!of all texts.
+	void			add(const i8n_input&);
 
 	//!Adds a permanent substitution.
 	void			set(const std::string&, const std::string&);
@@ -79,30 +110,46 @@ class i8n {
 	//!Sets the root of the files in the filesystem. Will reload the database of texts.
 	void			set_root(const std::string&);
 
-	//!S.ets the current language key. Will reload the database of texts.
+	//!Sets the current language key. Will reload the database of texts
+	//!and trigger a recompilation.
 	void			set_language(const std::string&);
 	
 	//!Retrieves - from the key database - the given text.
 	//!Returns a fail string if not found.
-	std::string		get(const t_filekey&, const t_entrykey&) const;
+	std::string		get(const i8n_get&) const;
 
 	//!Retrieves - from the key database - the given text performing the
 	//!substitions passed. Returns a fail string if not found.
-	std::string		get(const t_filekey&, const t_entrykey&, const std::vector<substitution>&) const;
+	std::string		get(const i8n_get&, const std::vector<substitution>&) const;
 
 	private:
 
-	class parser {
+	//!Reloads all entries.
+	void					reload_codex();
+	//!Internally adds a file, does not trigger recompilation.
+	void					add_private(const i8n_input&);
+	//!Builds the codex entries, resolving their relationships.
+	void					build_entries();
+
+	std::string				file_path,	//<!File path where files are located.
+						language;	//<!Language string, must be a subdirectory of the file_path.
+
+	std::vector<substitution>		substitutions;	//<!Permanent substitutions.
+	std::map<std::string, codex_page>	codex;	//<!All data.
+
+	//!Internal file parser.
+	class file_parser {
 
 		public:
 
 		//!Class constructor.
-					parser(codex_entry&, std::ofstream&);
+					file_parser(codex_page&, std::ofstream&);
 		//!Parses the file into the entry.
 		void			parse();
 
 		private:
 
+		//Delimiters...
 		const std::string	open_entry="[:",
 					close_entry="]:",
 					open_var="(:",
@@ -113,35 +160,43 @@ class i8n {
 		const char 		comment='#';
 
 		void			parse_scan(const char, std::string&);
-		void			parse_key(const char);
-		void			parse_value(const char);
+		void			parse_key(const char, const std::string&);
+		void			parse_value(const char, std::string&);
 		void			control(const char);
 
-		codex_entry&		entry;
+		//TODO: Not really: the parser should keep a list of keys to values
+		//and then compile them into a page.
+		codex_page&		page;
 		std::ofstream&		file;
-		std::array<char, 2>	control_buffer;
-		std::string		buffer;
+		std::string		buffer,
+					control_buffer,
+					key;
 
 		enum class modes	{scan, key, value} mode=scan;
 	};
 
-	struct codex_entry {
+	//!Each file is compiled into a codex_page, which maps a key to a 
+	//!an entry, itself a sequence of static texts and variables (called
+	//!a segment).
+	struct codex_page {
 
-							codex_entry(const std::string);
+							codex_page(const std::string);
 		std::string 				path;		//<!Name of a file.
-		std::map<t_entrykey, std::string> 	entries;	//<!Entries.
+		std::map<std::string, codex_entry> 	entries;	//<!Entries.
 		//!Removes entries.
 		void					clear();
 	};
 
-	//!Reloads all entries.
-	void			reload_codex();
+	//Sequence of variables and static strings.
+	struct codex_entry {
+		std::vector<entry_segment>		segments;
+	}
 
-	std::string			file_path,	//<!File path where files are located.
-					language;	//<!Language string, must be a subdirectory of the file_path.
-
-	std::vector<substitution>	substitutions;	//<!Permanent substitutions.
-	std::map<t_filekey, codex_entry>		codex;	//<!All data.
+	//!Represents a fixed test or a variable to be resolved.
+	struct entry_segment {
+		enum class type {static, variable}	type;
+		std::string				value;
+	}
 };
 
 }
