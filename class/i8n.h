@@ -72,6 +72,11 @@ class i8n_exception_parse_error
 					i8n_exception_parse_error(const std::string&);
 };
 
+//!Base exception for the lexer to be thrown from within
+class i8n_lexer_generic_exception {
+	:public i8n_exception {
+		public:			i8n_lexer_generic_exception(const std::string&);
+};
 
 class i8n {
 
@@ -137,6 +142,39 @@ class i8n {
 	std::vector<substitution>		substitutions;	//<!Permanent substitutions.
 	std::map<std::string, codex_page>	codex;	//<!All data.
 
+	//!Internal lexer.
+	class file_lexer {
+		public:
+
+		struct token {
+			tokentypes	type;
+			std::string	val;
+		};
+
+		//!Processes the file of the given filename.
+		std::vector<token>	process(const std::string&);
+
+		private:
+
+		enum class tokentypes {openlabel, closelabel, openvalue, closevalue,
+			openvar, closevar, openembed, closeembed, nothing, literal};
+
+		tokentypes		scan_buffer(const std::string&);
+
+
+		//Delimiters...
+		const std::string	open_label="[/",
+					close_label="/]",
+					open_value="{/",
+					close_label="/}",
+					open_var="(/",
+					close_var"/)", //<-- TODO: This looks like a smiley... DANGER
+					open_embed="</",
+					close_embed="/>";
+
+		const char 		comment='#';
+	};
+
 	//!Internal file parser.
 	class file_parser {
 
@@ -149,6 +187,7 @@ class i8n {
 
 		private:
 
+		//TODO: These will be useless once the lexer enters.
 		//Delimiters...
 		const std::string	open_entry="[:",
 					close_entry="]:",
