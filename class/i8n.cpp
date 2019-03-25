@@ -297,8 +297,8 @@ std::string tools::i8n::lexer::typetostring(tokentypes _type) {
 //TODO TODO TODO
 tools::i8n::parser::parser(const std::map<std::string, std::vector<lexer::token>>& _lexer_tokens) {
 
+		//TODO: I hate this in the constructor...
 	for(const auto& pair : _lexer_tokens) {
-
 		try {
 			parse_file(pair.second);
 		}
@@ -306,6 +306,50 @@ tools::i8n::parser::parser(const std::map<std::string, std::vector<lexer::token>
 			throw i8n_parser_error(pair.first+" : "+e.what());
 		}
 	}
+
+	for(const auto& pair : entries) {
+		std::cout<<" >>> "<<pair.first<<std::endl;
+		debug_entry(pair.second, std::cout);
+	}
+
+	//Compile them so every embed dissapears and only literals and variables remain.
+	std::map<std::string, codex_entry> solved;
+	int last_solved=0;
+	while(true) {
+
+		//Move solvable entries around...
+		for(auto it=std::begin(entries); it != std::end(entries);) {
+
+			if(is_entry_solved(it->second, solved)) {
+				solved[it->first]=it->second;
+				it=entries.erase(it);
+			}
+			else if(solve_entry(it->second, solved)) {
+				solved[it->first]=it->second;
+				it=entries.erase(it);
+			}
+			else {
+				it++;
+			}
+		}
+
+		std::cout<<"PASS----------------------------"<<std::endl;
+		for(const auto& p : solved) {
+			std::cout<<"solved "<<p.first<<std::endl;
+		}
+
+		//Nothing was solved in this pass: circular references!!!
+		if(last_solved==solved.size()) {
+
+			//TODO: Add list of unsolvable to the error...
+
+			throw i8n_parser_error("circular references found in data");
+		}
+
+		last_solved=solved.size();
+	}
+
+	//TODO: Compact consecutive literals into one.
 }
 
 void tools::i8n::parser::debug_tokens(const std::vector<lexer::token>& _tokens, std::ostream& _stream) {
@@ -359,39 +403,6 @@ void tools::i8n::parser::parse_file(const std::vector<lexer::token>& _tokens) {
 		}
 		value_phase(_tokens, curtoken, size);
 	}
-
-	for(const auto& pair : entries) {
-		std::cout<<" >>> "<<pair.first<<std::endl;
-		debug_entry(pair.second, std::cout);
-	}
-
-	//Compile them so every embed dissapears and only literals and variables remain.
-	std::map<std::string, codex_entry> solved;
-	int last_solved=0;
-	while(true) {
-
-		//Move solvable entries around...
-		for(auto it=std::begin(entries); it != std::end(entries); it++) {
-
-			if(is_entry_solved(it->second, solved)) {
-				solved[it->first]=it->second;
-				it=entries.erase(it);
-			}
-			else if(solve_entry(it->second, solved)) {
-				solved[it->first]=it->second;
-				it=entries.erase(it);
-			}
-		}
-
-		//Nothing was solved in this pass: circular references!!!
-		if(last_solved==solved.size()) {
-			throw i8n_parser_error("circular references found in data");
-		}
-
-		last_solved=solved.size();
-	}
-
-	//TODO: Compact consecutive literals into one.
 }
 
 bool tools::i8n::parser::is_entry_solved(const codex_entry& _entry, const std::map<std::string, codex_entry>& _solved) const {
@@ -428,7 +439,6 @@ bool tools::i8n::parser::solve_entry(codex_entry& _entry, const std::map<std::st
 			it=std::begin(_entry.segments);
 		}
 	}
-
 
 	return true;
 }
