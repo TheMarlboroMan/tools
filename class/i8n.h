@@ -225,8 +225,12 @@ class i8n {
 		void			add_embed(const lexer::token&);
 		//!Callback to add a new variable element to the current codex_entry.
 		void			add_var(const lexer::token&);
+		//!In compile mode, returns true if a codex entry has no embed dependencies left.
+		bool 			is_entry_solved(const codex_entry& _entry, const std::map<std::string, codex_entry>& _solved) const;
+		//!In compile mode, tries to replace all embed entries with their resulting static or variable segments.
+		bool 			solve_entry(codex_entry& _entry, const std::map<std::string, codex_entry>& _solved);
 
-		std::map<std::string, codex_entry>		entries;		//<!Entries that have been resolved.
+		std::map<std::string, codex_entry>		entries;		//<!Entries that have been added, yet unsolved.
 		std::string								current_label;	//<!Label that is currently in process.
 	};
 };

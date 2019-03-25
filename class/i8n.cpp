@@ -343,7 +343,7 @@ void tools::i8n::parser::debug_segment(const entry_segment& _segment, std::ostre
 	switch(_segment.type) {
 		case entry_segment::types::literal: 	_stream<<"[LIT] "<<_segment.value<<std::endl; break;
 		case entry_segment::types::variable:	_stream<<"[VAR] "<<_segment.value<<std::endl; break;
-		case entry_segment::types::embed: 		_stream<<"[EMB] "<<_segment.value<<std::endl; break;		
+		case entry_segment::types::embed: 		_stream<<"[EMB] "<<_segment.value<<std::endl; break;
 	}
 }
 
@@ -352,6 +352,7 @@ void tools::i8n::parser::parse_file(const std::vector<lexer::token>& _tokens) {
 	int curtoken=0,
 		size=size=_tokens.size()-1;
 
+	//Parse the tokens...
 	while(true) {
 		if(!label_phase(_tokens, curtoken, size)) {
 			break;
@@ -364,7 +365,72 @@ void tools::i8n::parser::parse_file(const std::vector<lexer::token>& _tokens) {
 		debug_entry(pair.second, std::cout);
 	}
 
-	//TODO: Now do passes to compile the embeds to strings...
+	//Compile them so every embed dissapears and only literals and variables remain.
+	std::map<std::string, codex_entry> solved;
+	int last_solved=0;
+	while(true) {
+
+		//Move solvable entries around...
+		for(auto it=std::begin(entries); it != std::end(entries); it++) {
+
+			if(is_entry_solved(it->second, solved)) {
+				solved[it->first]=it->second;
+				it=entries.erase(it);
+			}
+			else if(solve_entry(it->second, solved)) {
+				solved[it->first]=it->second;
+				it=entries.erase(it);
+			}
+		}
+
+		//Nothing was solved in this pass: circular references!!!
+		if(last_solved==solved.size()) {
+			throw i8n_parser_error("circular references found in data");
+		}
+
+		last_solved=solved.size();
+	}
+
+	//TODO: Compact consecutive literals into one.
+}
+
+bool tools::i8n::parser::is_entry_solved(const codex_entry& _entry, const std::map<std::string, codex_entry>& _solved) const {
+
+	//No embeds equals instantly solvable. Unsolved embeds must be left for now...
+	for(const auto& segment : _entry.segments) {
+		if(entry_segment::types::embed==segment.type && !_solved.count(segment.value)) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool tools::i8n::parser::solve_entry(codex_entry& _entry, const std::map<std::string, codex_entry>& _solved) {
+
+	for(auto it=std::begin(_entry.segments); it != std::end(_entry.segments); it++) {
+
+		auto& segment=*it;
+		if(entry_segment::types::embed==segment.type) {
+			if(!_solved.count(segment.value)) {
+				return false;
+			}
+
+			//Remove the embed entry. Step back to insert the new stuff...
+			it=_entry.segments.erase(it);
+			if(std::begin(_entry.segments)!=it) {
+				--it;
+			}
+
+			//Add the new ones... Reset: the new segments may include embeds too!
+			const auto& new_segments=_solved.at(segment.value).segments;
+			_entry.segments.insert(it, std::begin(new_segments), std::end(new_segments));
+			it=std::begin(_entry.segments);
+		}
+	}
+
+
+	return true;
 }
 
 bool tools::i8n::parser::label_phase(const std::vector<lexer::token>& _tokens, int& _curtoken, const int _size) {
