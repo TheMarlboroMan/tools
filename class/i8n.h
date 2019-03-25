@@ -13,7 +13,7 @@ namespace tools {
 //!Base exception for the module.
 class i8n_exception
 	:public std::runtime_error {
-	public: 
+	public:
 					i8n_exception(const std::string&);
 };
 
@@ -50,192 +50,162 @@ class i8n_exception_repeated_key
 	:public i8n_exception {
 	public:
 					i8n_exception_repeated_key(const std::string&);
-}
-
-//!Thrown when a syntax error is found parsing a file.
-class i8n_exception_parse_syntax_error
-	:public i8n_exception {
-	public:
-					i8n_exception_parse_syntax_error(const std::string&, const std::string&, const std::string&, int);
-	}
-
-	const std::string		error,
-					file,
-					line;
-	const int			linenum;
 };
 
-//!Generic, contextless parse error.
-class i8n_exception_parse_error
+//!Visible lexer exception, with path, line, error and line number.
+class i8n_lexer_error
 	:public i8n_exception {
 	public:
-					i8n_exception_parse_error(const std::string&);
+					i8n_lexer_error(const std::string&, const std::string&, const std::string&, int);
 };
 
-//!Base exception for the lexer to be thrown from within
-class i8n_lexer_generic_exception {
+//!Minimal lexer exception, to be thrown from within
+class i8n_lexer_generic_error
+	:public std::runtime_error {
+	public:
+					i8n_lexer_generic_error(const std::string&);
+};
+
+//!Unexpected tokens when parsing
+class i8n_parser_token_error
 	:public i8n_exception {
-		public:			i8n_lexer_generic_exception(const std::string&);
+	public:
+					i8n_parser_token_error(const std::string, int, int);
 };
 
 class i8n {
 
 	public:
 
-	//!Fed to the class, indicates a file and a key with which to identify it.
-	struct 				i8n_input{
-		const std::string	key,
-					path;
-	};
-
 	//!Fed to "get" methods, to substitute variables.
 	struct substitution {
 		std::string		key,
-					value;
+						value;
 	};
 
 	//!Fet to "get" methods to indicate key and entry.
 	struct i8n_get {
-		const std::string	key, 
+		const std::string	key,
 					entry;
 	};
 
 	//!Class constructor with path, default language and list of files.
-				i8n(const std::string&, const std::string&, const std::vector<i8n_input>&);
+							i8n(const std::string&, const std::string&, const std::vector<std::string>&);
 
 	//!Adds a key to the database, associated to the given file.
 	//!Will throw on failure to open the file,  if the key is used
 	//!or if no path/language have been set. This will trigger a recompilation
 	//!of all texts.
-	void			add(const i8n_input&);
+	void					add(const std::string&);
 
 	//!Adds a permanent substitution.
-	void			set(const std::string&, const std::string&);
+	void					set(const substitution&);
 
 	//!Sets the root of the files in the filesystem. Will reload the database of texts.
-	void			set_root(const std::string&);
+	void					set_root(const std::string&);
 
 	//!Sets the current language key. Will reload the database of texts
 	//!and trigger a recompilation.
-	void			set_language(const std::string&);
-	
+	void					set_language(const std::string&);
+
 	//!Retrieves - from the key database - the given text.
 	//!Returns a fail string if not found.
-	std::string		get(const i8n_get&) const;
+	std::string				get(const i8n_get&) const;
 
 	//!Retrieves - from the key database - the given text performing the
 	//!substitions passed. Returns a fail string if not found.
-	std::string		get(const i8n_get&, const std::vector<substitution>&) const;
+	std::string				get(const i8n_get&, const std::vector<substitution>&) const;
 
 	private:
 
 	//!Reloads all entries.
 	void					reload_codex();
 	//!Internally adds a file, does not trigger recompilation.
-	void					add_private(const i8n_input&);
-	//!Builds the codex entries, resolving their relationships.
+	void					add_private(const std::string&);
+	//!Compiles the lexer tokens into the codex entries.
 	void					build_entries();
 
 	std::string				file_path,	//<!File path where files are located.
-						language;	//<!Language string, must be a subdirectory of the file_path.
+							language;	//<!Language string, must be a subdirectory of the file_path.
 
-	std::vector<substitution>		substitutions;	//<!Permanent substitutions.
-	std::map<std::string, codex_page>	codex;	//<!All data.
+	std::map<std::string, std::string>		substitutions;	//<!Permanent substitutions.
 
-	//!Internal lexer.
-	class file_lexer {
+	//!Files are resolved to entries (one entry per data item). Each entry is
+	//!composed by segments, which represent a fixed test or a variable to be resolved.
+	struct entry_segment {
+		enum class type {literal, variable, embed}	type;	//!<These are the different entry types. Embed should only exist when compiling.
+		std::string									value;
+	};
+
+	//!Entry in the i8n dictionary.
+	struct codex_entry {
+		std::vector<entry_segment>		segments;
+	};
+
+	std::map<std::string, codex_entry>		codex;	//<!All data.
+
+	//!Internal lexer: converts files into streams of tokens.
+	class lexer {
 		public:
 
+		//!The different ytpes
+		enum class tokentypes {openlabel, closelabel, openvalue, closevalue,
+			openvar, closevar, openembed, closeembed, nothing, literal};
+
+		//!Represents a single lexer token (linguistic token or literal).
 		struct token {
 			tokentypes	type;
 			std::string	val;
+			int			line, charnum;
 		};
 
-		//!Processes the file of the given filename.
+		static std::string	typetostring(tokentypes);
+
+		//!Processes the file of the given filename. Returns a list of
+		//!lexer tokens.
 		std::vector<token>	process(const std::string&);
 
 		private:
 
-		enum class tokentypes {openlabel, closelabel, openvalue, closevalue,
-			openvar, closevar, openembed, closeembed, nothing, literal};
-
+		//!Scans two characters to see if they correspond with delimiters,
+		//!returning the token type (nothing if none detected).
 		tokentypes		scan_buffer(const std::string&);
-
 
 		//Delimiters...
 		const std::string	open_label="[/",
-					close_label="/]",
-					open_value="{/",
-					close_label="/}",
-					open_var="(/",
-					close_var"/)", //<-- TODO: This looks like a smiley... DANGER
-					open_embed="</",
-					close_embed="/>";
+							close_label="/]",
+							open_value="{/",
+							close_value="/}",
+							open_var="(/",
+							close_var="/)",
+							open_embed="</",
+							close_embed="/>";
 
-		const char 		comment='#';
+		const char 			comment='#';
 	};
 
-	//!Internal file parser.
-	class file_parser {
+	std::map<std::string, std::vector<lexer::token>>		lexer_tokens;	//<!Temporary map of file to a vector of tokens.
+
+	//!Internal parser, converts tokens into codex entries. Given that codex
+	//!entries can have dependencies between them, this also solves then in
+	//!as many passes as needed. Circular dependencies cause it to throw.
+	class parser {
 
 		public:
-
-		//!Class constructor.
-					file_parser(codex_page&, std::ofstream&);
-		//!Parses the file into the entry.
-		void			parse();
+		//!Class constructor. Created from a map of file names to lexer tokens.
+						parser(const std::map<std::string, std::vector<lexer::token>>&);
 
 		private:
 
-		//TODO: These will be useless once the lexer enters.
-		//Delimiters...
-		const std::string	open_entry="[:",
-					close_entry="]:",
-					open_var="(:",
-					close_var":)",
-					open_embed="<:",
-					close_embed=":>";
+		//!Prints out the tokens to the given stream, for debug purposes.
+		void			debug_tokens(const std::vector<lexer::token>&, std::ostream&);
+		//!Parsers all the tokens from a file.
+		void			parse_file(const std::vector<lexer::token>&);
+		//!Returns the index of the next token that maches type, skipping whitespace literals, from _curtoken.
+		int				find_next_of(const std::vector<lexer::token>& _tokens, lexer::tokentypes _type, int _curtoken);
 
-		const char 		comment='#';
-
-		void			parse_scan(const char, std::string&);
-		void			parse_key(const char, const std::string&);
-		void			parse_value(const char, std::string&);
-		void			control(const char);
-
-		//TODO: Not really: the parser should keep a list of keys to values
-		//and then compile them into a page.
-		codex_page&		page;
-		std::ofstream&		file;
-		std::string		buffer,
-					control_buffer,
-					key;
-
-		enum class modes	{scan, key, value} mode=scan;
+		std::map<std::string, codex_entry>		entries;	//<!Entries that have been resolved.
 	};
-
-	//!Each file is compiled into a codex_page, which maps a key to a 
-	//!an entry, itself a sequence of static texts and variables (called
-	//!a segment).
-	struct codex_page {
-
-							codex_page(const std::string);
-		std::string 				path;		//<!Name of a file.
-		std::map<std::string, codex_entry> 	entries;	//<!Entries.
-		//!Removes entries.
-		void					clear();
-	};
-
-	//Sequence of variables and static strings.
-	struct codex_entry {
-		std::vector<entry_segment>		segments;
-	}
-
-	//!Represents a fixed test or a variable to be resolved.
-	struct entry_segment {
-		enum class type {static, variable}	type;
-		std::string				value;
-	}
 };
 
 }

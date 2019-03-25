@@ -1,0 +1,13 @@
+#		const std::string	open_label="[/",
+#							close_label="/]",
+#							open_value="{/",
+#							close_value="/}",
+#							open_var="(/",
+#							close_var="/)",
+#							open_embed="</",
+#							close_embed="/>";
+#
+#		const char 			comment='#';
+[/label-1/]{/This is my value/}
+[/label-2/]{/This is another
+value with two lines/}

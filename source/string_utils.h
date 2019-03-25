@@ -8,6 +8,16 @@
 namespace tools
 {
 
+#ifdef WINCOMPIL
+
+const std::string			newline="\r\n";
+
+#else
+
+const std::string			newline="\n";
+
+#endif
+
 //!Creates a string from the vector, separated by the second parameter.
 std::string					implode(const std::vector<std::string>&, const char);
 
