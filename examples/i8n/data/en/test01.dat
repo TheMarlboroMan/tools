@@ -5,3 +5,15 @@ value with two lines/}
 
 [/label-embed/]{/I will embed a value yet to be defined </label-4/> and enjoy life/}
 [/label-embed-complex/]{/I will embed a value yet to be defined </complex/> and enjoy life/}
+[/embedhere/]{/This is here/}
+[/embedthere/]{/This is there/}
+#Dependencies
+#	label-1
+#	label-2
+#	label-embed 
+#		label-4
+#			embedhere <- These do not exist!.
+#			embedthere
+#	label-embed-complex
+#		complex
+#			label-3

@@ -1,8 +1,10 @@
 #include "i8n.h"
 
+#include <algorithm>
 #include <ctype.h>
 
 #include "../source/string_utils.h"
+#include "../templates/algorithm.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Exceptions
@@ -297,7 +299,7 @@ std::string tools::i8n::lexer::typetostring(tokentypes _type) {
 //TODO TODO TODO
 tools::i8n::parser::parser(const std::map<std::string, std::vector<lexer::token>>& _lexer_tokens) {
 
-		//TODO: I hate this in the constructor...
+	//TODO: I hate this in the constructor...
 	for(const auto& pair : _lexer_tokens) {
 		try {
 			parse_file(pair.second);
@@ -311,6 +313,9 @@ tools::i8n::parser::parser(const std::map<std::string, std::vector<lexer::token>
 		std::cout<<" >>> "<<pair.first<<std::endl;
 		debug_entry(pair.second, std::cout);
 	}
+
+	//Scan every embed, see if we have incomplete definitions..
+	check_integrity();
 
 	//Compile them so every embed dissapears and only literals and variables remain.
 	std::map<std::string, codex_entry> solved;
@@ -405,7 +410,35 @@ void tools::i8n::parser::parse_file(const std::vector<lexer::token>& _tokens) {
 	}
 }
 
+void tools::i8n::parser::check_integrity(){
+
+	typedef const std::pair<std::string, codex_entry> tpair;
+
+	size_t total=tools::reduce(std::begin(entries), std::end(entries), [](tpair _pair) {return _pair.second.segments.size();}, 0);
+	std::vector<entry_segment> embeds(total);
+
+	for(const auto& pair : entries) {
+		std::copy_if(std::begin(pair.second.segments), std::end(pair.second.segments), std::begin(embeds), [this](const entry_segment& _seg) {
+			return entry_segment::types::embed==_seg.type
+				&& !entries.count(_seg.value);
+		});
+	}
+	
+	if(embeds.size()) {
+		std::string list;
+		std::for_each(std::begin(embeds), std::end(embeds), [&list](const entry_segment& _seg) {
+			list+=_seg.value+",";
+		});
+		
+		list.pop_back();
+		throw i8n_parser_error("undefined references found in data : "+list);
+	}
+}
+
+
 bool tools::i8n::parser::is_entry_solved(const codex_entry& _entry, const std::map<std::string, codex_entry>& _solved) const {
+
+	//TODO: 
 
 	//No embeds equals instantly solvable. Unsolved embeds must be left for now...
 	for(const auto& segment : _entry.segments) {
