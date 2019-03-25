@@ -66,11 +66,18 @@ class i8n_lexer_generic_error
 					i8n_lexer_generic_error(const std::string&);
 };
 
-//!Unexpected tokens when parsing
+//!Unexpected tokens when parsing, inner use.
 class i8n_parser_token_error
 	:public i8n_exception {
 	public:
 					i8n_parser_token_error(const std::string, int, int);
+};
+
+//!Failure to parse, visible from the outside.
+class i8n_parser_error
+	:public i8n_exception {
+	public:
+					i8n_parser_error(const std::string);
 };
 
 class i8n {
@@ -133,7 +140,7 @@ class i8n {
 	//!Files are resolved to entries (one entry per data item). Each entry is
 	//!composed by segments, which represent a fixed test or a variable to be resolved.
 	struct entry_segment {
-		enum class type {literal, variable, embed}	type;	//!<These are the different entry types. Embed should only exist when compiling.
+		enum class types {literal, variable, embed}	type;	//!<These are the different entry types. Embed should only exist when compiling.
 		std::string									value;
 	};
 
@@ -199,12 +206,28 @@ class i8n {
 
 		//!Prints out the tokens to the given stream, for debug purposes.
 		void			debug_tokens(const std::vector<lexer::token>&, std::ostream&);
+		void			debug_token(const lexer::token&, std::ostream&);
+		void			debug_entry(const codex_entry&, std::ostream&);
+		void			debug_segment(const entry_segment&, std::ostream&);
 		//!Parsers all the tokens from a file.
 		void			parse_file(const std::vector<lexer::token>&);
-		//!Returns the index of the next token that maches type, skipping whitespace literals, from _curtoken.
+		//!Starts the label phase: skip all whitespace until a label is reached, store the label. Returns false if there is no error and the tokens ended.
+		bool 			label_phase(const std::vector<lexer::token>& _tokens, int& _curtoken, const int _size);
+		//!Parse the value contents until a "close value" is found.
+		void 			value_phase(const std::vector<lexer::token>& _tokens, int& _curtoken, const int _size);
+		//!Returns the index of the next token that maches type, skipping whitespace literals, from _curtoken. Any other type than whitespace literals will throw!.
 		int				find_next_of(const std::vector<lexer::token>& _tokens, lexer::tokentypes _type, int _curtoken);
+		//!Parses the inner component open+identifier+close from _curtoken, call the callback with the middle token after checking it is a literal.
+		void			parse_open_close(const std::vector<lexer::token>& _tokens, lexer::tokentypes _closetype, int _curtoken, void(parser::*)(const lexer::token&));
+		//!Callback that will add a new entry to "entries" and set current_label.
+		void			create_entry(const lexer::token&);
+		//!Callback to add a new embed element to the current codex_entry.
+		void			add_embed(const lexer::token&);
+		//!Callback to add a new variable element to the current codex_entry.
+		void			add_var(const lexer::token&);
 
-		std::map<std::string, codex_entry>		entries;	//<!Entries that have been resolved.
+		std::map<std::string, codex_entry>		entries;		//<!Entries that have been resolved.
+		std::string								current_label;	//<!Label that is currently in process.
 	};
 };
 

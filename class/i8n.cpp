@@ -59,8 +59,13 @@ tools::i8n_parser_token_error::i8n_parser_token_error(const std::string _err, in
 	:i8n_exception(_err
 		+" in line "
 		+std::to_string(_line)
-		+" at char "
+		+" ending at char "
 		+std::to_string(_char)) {
+
+}
+
+tools::i8n_parser_error::i8n_parser_error(const std::string _err)
+	:i8n_exception("parser error in "+_err) {
 
 }
 
@@ -292,81 +297,182 @@ std::string tools::i8n::lexer::typetostring(tokentypes _type) {
 //TODO TODO TODO
 tools::i8n::parser::parser(const std::map<std::string, std::vector<lexer::token>>& _lexer_tokens) {
 
-	//TODO: handle exceptions..
-
 	for(const auto& pair : _lexer_tokens) {
 
-		debug_tokens(pair.second, std::cout);
-
-		//TODO.
-		//const std::string filename=pair.first;
-		parse_file(pair.second);
+		try {
+			parse_file(pair.second);
+		}
+		catch(i8n_parser_token_error& e) {
+			throw i8n_parser_error(pair.first+" : "+e.what());
+		}
 	}
 }
 
 void tools::i8n::parser::debug_tokens(const std::vector<lexer::token>& _tokens, std::ostream& _stream) {
 
 	for(const auto& token : _tokens) {
-		switch(token.type) {
-			case lexer::tokentypes::openlabel: 	_stream<<"[OPENLAB]"<<std::endl; break;
-			case lexer::tokentypes::closelabel: _stream<<"[CLSELAB]"<<std::endl; break;
-			case lexer::tokentypes::openvalue: 	_stream<<"[OPENVAL]"<<std::endl; break;
-			case lexer::tokentypes::closevalue:	_stream<<"[CLSEVAL]"<<std::endl; break;
-			case lexer::tokentypes::openvar:	_stream<<"[OPENVAR]"<<std::endl; break;
-			case lexer::tokentypes::closevar:	_stream<<"[CLSEVAR]"<<std::endl; break;
-			case lexer::tokentypes::openembed:	_stream<<"[OPENEMB]"<<std::endl; break;
-			case lexer::tokentypes::closeembed:	_stream<<"[CLSEEMB]"<<std::endl; break;
-			case lexer::tokentypes::nothing:	_stream<<"[NOTHING]"<<std::endl; break;
-			case lexer::tokentypes::literal:	_stream<<"[LITERAL]"<<token.val<<std::endl; break;
-		}
+		debug_token(token, _stream);
+	}
+}
+
+void tools::i8n::parser::debug_token(const lexer::token& _token, std::ostream& _stream) {
+
+	switch(_token.type) {
+		case lexer::tokentypes::openlabel: 	_stream<<"[OPENLAB] "<<_token.line<<":"<<_token.charnum<<std::endl; break;
+		case lexer::tokentypes::closelabel: _stream<<"[CLSELAB] "<<_token.line<<":"<<_token.charnum<<std::endl; break;
+		case lexer::tokentypes::openvalue: 	_stream<<"[OPENVAL] "<<_token.line<<":"<<_token.charnum<<std::endl; break;
+		case lexer::tokentypes::closevalue:	_stream<<"[CLSEVAL] "<<_token.line<<":"<<_token.charnum<<std::endl; break;
+		case lexer::tokentypes::openvar:	_stream<<"[OPENVAR] "<<_token.line<<":"<<_token.charnum<<std::endl; break;
+		case lexer::tokentypes::closevar:	_stream<<"[CLSEVAR] "<<_token.line<<":"<<_token.charnum<<std::endl; break;
+		case lexer::tokentypes::openembed:	_stream<<"[OPENEMB] "<<_token.line<<":"<<_token.charnum<<std::endl; break;
+		case lexer::tokentypes::closeembed:	_stream<<"[CLSEEMB] "<<_token.line<<":"<<_token.charnum<<std::endl; break;
+		case lexer::tokentypes::nothing:	_stream<<"[NOTHING] "<<_token.line<<":"<<_token.charnum<<std::endl; break;
+		case lexer::tokentypes::literal:	_stream<<"[LITERAL] "<<_token.line<<":"<<_token.charnum<<" '"<<_token.val<<"'"<<std::endl; break;
+	}
+}
+
+void tools::i8n::parser::debug_entry(const codex_entry& _entry, std::ostream& _stream) {
+
+	for(const auto& s : _entry.segments) {
+		debug_segment(s, _stream);
+	}
+}
+
+void tools::i8n::parser::debug_segment(const entry_segment& _segment, std::ostream& _stream) {
+
+	switch(_segment.type) {
+		case entry_segment::types::literal: 	_stream<<"[LIT] "<<_segment.value<<std::endl; break;
+		case entry_segment::types::variable:	_stream<<"[VAR] "<<_segment.value<<std::endl; break;
+		case entry_segment::types::embed: 		_stream<<"[EMB] "<<_segment.value<<std::endl; break;		
 	}
 }
 
 void tools::i8n::parser::parse_file(const std::vector<lexer::token>& _tokens) {
 
-	//Trim all whitespace tokens before the first opening...
 	int curtoken=0,
 		size=size=_tokens.size()-1;
 
-	curtoken=find_next_of(_tokens, lexer::tokentypes::openlabel, curtoken);
+	while(true) {
+		if(!label_phase(_tokens, curtoken, size)) {
+			break;
+		}
+		value_phase(_tokens, curtoken, size);
+	}
+
+	for(const auto& pair : entries) {
+		std::cout<<" >>> "<<pair.first<<std::endl;
+		debug_entry(pair.second, std::cout);
+	}
+
+	//TODO: Now do passes to compile the embeds to strings...
+}
+
+bool tools::i8n::parser::label_phase(const std::vector<lexer::token>& _tokens, int& _curtoken, const int _size) {
+
+	//Trim all whitespace tokens before the first opening...
+	_curtoken=find_next_of(_tokens, lexer::tokentypes::openlabel, _curtoken);
 
 	//Either there are not tokens or there's only whitespace.
-	if(curtoken >= size) {
-		return;
+	if(_curtoken > _size) {
+		return false;
 	}
 
-	//Skip the opening...
-	++curtoken;
-	if(lexer::tokentypes::literal!=_tokens[curtoken].type) {
-		throw i8n_parser_token_error("unexpected token, expecting literal after label open", _tokens[curtoken].line, _tokens[curtoken].charnum);
-	}
+	parse_open_close(_tokens, lexer::tokentypes::closelabel, _curtoken, &parser::create_entry);
+	_curtoken+=3;
 
-	//Check we have an unique id.
-	if(entries.count(_tokens[curtoken].val)) {
-		throw i8n_parser_token_error("repeated entry identificator", _tokens[curtoken].line, _tokens[curtoken].charnum);
-	}
+	return true;
+}
 
-	entries[_tokens[curtoken].val]=codex_entry{};
+void tools::i8n::parser::value_phase(const std::vector<lexer::token>& _tokens, int& _curtoken, const int _size) {
 
-	//Check we are closing...
-	++curtoken;
-	if(lexer::tokentypes::closelabel!=_tokens[curtoken].type) {
-		throw i8n_parser_token_error("unexpected token, expecting label close", _tokens[curtoken].line, _tokens[curtoken].charnum);
-	}
+	//Store these, we are skipping to the "value open" now and might get to the end of the tokens.
+	int line=_tokens[_curtoken].line,
+		charnum=_tokens[_curtoken].charnum;
 
-	//Store these, we are skipping to the value now and might get to the end of the tokens.
-	int line=_tokens[curtoken].line,
- 		charnum=_tokens[curtoken].charnum;
-
-	++curtoken;
-	curtoken=find_next_of(_tokens, lexer::tokentypes::openvalue, curtoken);
-	if(curtoken >= size) {
+	_curtoken=find_next_of(_tokens, lexer::tokentypes::openvalue, _curtoken);
+	if(_curtoken > _size) {
 		throw i8n_parser_token_error("expecting value open", line, charnum);
 	}
 
+	//Curtoken is sits now at the beginning of the next token, if any...
+	++_curtoken;
+
+	//Now, read until we find a "close value...""
+	while(true){
+
+		//If there are no more tokens, the syntax of the file was not ok...
+		if(_curtoken > _size) {
+			throw i8n_parser_token_error("value not closed after ", line, charnum);
+		}
+
+		const auto& tok=_tokens[_curtoken];
+		auto curtype=tok.type;
+
+		//We are looking for literals, openvar or openembed...
+		switch(curtype) {
+			case lexer::tokentypes::literal:
+				entries[current_label].segments.push_back({entry_segment::types::literal, tok.val});
+			break;
+			case lexer::tokentypes::openvar:
+				parse_open_close(_tokens, lexer::tokentypes::closevar, _curtoken, &parser::add_var);
+				_curtoken+=2;
+			break;
+			case lexer::tokentypes::openembed:
+				parse_open_close(_tokens, lexer::tokentypes::closeembed, _curtoken, &parser::add_embed);
+				_curtoken+=2;
+			break;
+			case lexer::tokentypes::closevalue:
+				++_curtoken;
+				return;
+			break;
+			default:
+				throw i8n_parser_token_error("unexpected '"+lexer::typetostring(curtype)+"' inside value", tok.line, tok.charnum);
+		}
+
+		++_curtoken;
+	}
+}
+
+void tools::i8n::parser::parse_open_close(const std::vector<lexer::token>& _tokens, lexer::tokentypes _closetype, int _curtoken, void(parser::*_callback)(const lexer::token&)) {
+
 	//Skip the opening...
-	++curtoken;
-	//TODO: All bets are off here!!!.
+	++_curtoken;
+
+	//Check we have a literal...
+	if(lexer::tokentypes::literal!=_tokens[_curtoken].type) {
+		throw i8n_parser_token_error("unexpected '"+lexer::typetostring(_tokens[_curtoken].type)+"', expecting literal", _tokens[_curtoken].line, _tokens[_curtoken].charnum);
+	}
+
+	(this->*_callback)(_tokens[_curtoken]);
+
+	//Skip the value and check we are closing...
+	++_curtoken;
+	if(_closetype!=_tokens[_curtoken].type) {
+		throw i8n_parser_token_error("unexpected '"+lexer::typetostring(_tokens[_curtoken].type)+"', expecting '"+lexer::typetostring(_closetype)+"'", _tokens[_curtoken].line, _tokens[_curtoken].charnum);
+	}
+}
+
+void tools::i8n::parser::create_entry(const lexer::token& _tok) {
+
+	//Check we have an unique id.
+	const std::string val=_tok.val;
+
+	if(entries.count(val)) {
+		throw i8n_parser_token_error("repeated entry identificator", _tok.line, _tok.charnum);
+	}
+
+	current_label=val;
+	entries[current_label]=codex_entry{};
+}
+
+void tools::i8n::parser::add_embed(const lexer::token& _tok) {
+
+	entries[current_label].segments.push_back({entry_segment::types::embed, _tok.val});
+}
+
+void tools::i8n::parser::add_var(const lexer::token& _tok) {
+
+	entries[current_label].segments.push_back({entry_segment::types::variable, _tok.val});
 }
 
 int tools::i8n::parser::find_next_of(const std::vector<lexer::token>& _tokens, lexer::tokentypes _type, int _curtoken) {
@@ -385,7 +491,7 @@ int tools::i8n::parser::find_next_of(const std::vector<lexer::token>& _tokens, l
 				continue;
 			}
 
-			throw i8n_parser_token_error("unexpected literal ", tok.line, tok.charnum);
+			throw i8n_parser_token_error("unskippable "+lexer::typetostring(tok.type)+", expecting '"+lexer::typetostring(_type)+"'", tok.line, tok.charnum);
 		}
 
 		throw i8n_parser_token_error("unexpected token, expecting '"+lexer::typetostring(_type)+"', found '"+lexer::typetostring(tok.type)+"'", tok.line, tok.charnum);

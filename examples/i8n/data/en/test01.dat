@@ -1,13 +1,7 @@
-#		const std::string	open_label="[/",
-#							close_label="/]",
-#							open_value="{/",
-#							close_value="/}",
-#							open_var="(/",
-#							close_var="/)",
-#							open_embed="</",
-#							close_embed="/>";
-#
-#		const char 			comment='#';
 [/label-1/]{/This is my value/}
+
 [/label-2/]{/This is another
 value with two lines/}
+
+[/label-embed/]{/I will embed a value yet to be defined </label-4/> and enjoy life/}
+[/label-embed-complex/]{/I will embed a value yet to be defined </complex/> and enjoy life/}

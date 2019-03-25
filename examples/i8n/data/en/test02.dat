@@ -10,3 +10,4 @@
 #		const char 			comment='#';
 [/label-3/]{/(/varhere/) that was a var, this (/varthere/) is another/}
 [/label-4/]{/</embedhere/> that was an embed, this </embedthere/> is another/}
+[/complex/]{/This has (/varhere/) vars and embeds </label-3/>/}
