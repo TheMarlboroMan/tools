@@ -24,6 +24,13 @@ class i8n_exception_no_path
 					i8n_exception_no_path();
 };
 
+//!Thrown when trying to add the same path multiple times.
+class i8n_repeated_path
+	:public i8n_exception {
+	public:
+					i8n_repeated_path(const std::string&);
+};
+
 //!Thrown when calling "add" when no language has been specified.
 class i8n_exception_no_language
 	:public i8n_exception {
@@ -31,25 +38,11 @@ class i8n_exception_no_language
 					i8n_exception_no_language();
 };
 
-//!Thrown when trying to retrieve data from an empty i8n class.
-class i8n_exception_no_data
-	:public i8n_exception {
-	public:
-					i8n_exception_no_data();
-};
-
 //!Thrown when a file cannot be added.
 class i8n_exception_file_error
 	:public i8n_exception {
 	public:
 					i8n_exception_file_error(const std::string&);
-};
-
-//!Thrown when trying to add a file with an already existing key.
-class i8n_exception_repeated_key
-	:public i8n_exception {
-	public:
-					i8n_exception_repeated_key(const std::string&);
 };
 
 //!Visible lexer exception, with path, line, error and line number.
@@ -80,6 +73,7 @@ class i8n_parser_error
 					i8n_parser_error(const std::string);
 };
 
+//!Simple internationalization module.
 class i8n {
 
 	public:
@@ -88,12 +82,7 @@ class i8n {
 	struct substitution {
 		std::string		key,
 						value;
-	};
-
-	//!Fet to "get" methods to indicate key and entry.
-	struct i8n_get {
-		const std::string	key,
-					entry;
+		bool 			operator==(const substitution&) const;
 	};
 
 	//!Class constructor with path, default language and list of files.
@@ -117,13 +106,18 @@ class i8n {
 
 	//!Retrieves - from the key database - the given text.
 	//!Returns a fail string if not found.
-	std::string				get(const i8n_get&) const;
+	std::string				get(const std::string&) const;
 
 	//!Retrieves - from the key database - the given text performing the
-	//!substitions passed. Returns a fail string if not found.
-	std::string				get(const i8n_get&, const std::vector<substitution>&) const;
+	//!substitions passed. Returns a fail string if not found. Substitutions are
+	//!checked first agains the parameter, then against the "substitutions"
+	//!property.
+	std::string				get(const std::string&, const std::vector<substitution>&) const;
 
 	private:
+
+	//TODO: This should be customizable. Maybe with codex entry, a special codex entry.
+	std::string				fail_string(const std::string&) const;
 
 	//!Reloads all entries.
 	void					reload_codex();
@@ -135,7 +129,8 @@ class i8n {
 	std::string				file_path,	//<!File path where files are located.
 							language;	//<!Language string, must be a subdirectory of the file_path.
 
-	std::map<std::string, std::string>		substitutions;	//<!Permanent substitutions.
+	std::vector<substitution>				substitutions;	//<!Permanent substitutions.
+	std::vector<std::string>				paths;			//<!List of currently added paths.
 
 	//!Files are resolved to entries (one entry per data item). Each entry is
 	//!composed by segments, which represent a fixed test or a variable to be resolved.
@@ -147,6 +142,13 @@ class i8n {
 	//!Entry in the i8n dictionary.
 	struct codex_entry {
 		std::vector<entry_segment>		segments;
+		//!Returns a translation of the segments, substituting variables for the vectors given.
+		std::string						get(const std::vector<substitution>&) const;
+		std::string						get(const std::vector<substitution>&, const std::vector<substitution>&) const;
+
+		private:
+		//!Performs the substitution of the given key with the substitution vector, into the last string.
+		bool							substitute(const std::string&, const std::vector<substitution>&, std::string&) const;
 	};
 
 	std::map<std::string, codex_entry>		codex;	//<!All data.
@@ -179,6 +181,7 @@ class i8n {
 		tokentypes		scan_buffer(const std::string&);
 
 		//Delimiters...
+		//TODO: All these fuckers should be customizable, built on construction.
 		const std::string	open_label="[/",
 							close_label="/]",
 							open_value="{/",
@@ -199,18 +202,23 @@ class i8n {
 	class parser {
 
 		public:
-		//!Class constructor. Created from a map of file names to lexer tokens.
-						parser(const std::map<std::string, std::vector<lexer::token>>&);
+
+		std::map<std::string, codex_entry>			parse(const std::map<std::string, std::vector<lexer::token>>&);
 
 		private:
 
+		//!Replaces every embed entry with its corresponding literals.
+		void			compile_entries();
+
 		//!Prints out the tokens to the given stream, for debug purposes.
-		void			debug_tokens(const std::vector<lexer::token>&, std::ostream&);
-		void			debug_token(const lexer::token&, std::ostream&);
-		void			debug_entry(const codex_entry&, std::ostream&);
-		void			debug_segment(const entry_segment&, std::ostream&);
+		void			debug(const std::vector<lexer::token>&, std::ostream&);
+		void			debug(const lexer::token&, std::ostream&);
+		void			debug(const codex_entry&, std::ostream&);
+		void			debug(const entry_segment&, std::ostream&);
+		//!Compacts consecutive literal entries into one.
+		void			compact_entry(codex_entry&);
 		//!Parsers all the tokens from a file.
-		void			parse_file(const std::vector<lexer::token>&);
+		void			interpret_tokens(const std::vector<lexer::token>&);
 		//!Starts the label phase: skip all whitespace until a label is reached, store the label. Returns false if there is no error and the tokens ended.
 		bool 			label_phase(const std::vector<lexer::token>& _tokens, int& _curtoken, const int _size);
 		//!Parse the value contents until a "close value" is found.
@@ -227,12 +235,11 @@ class i8n {
 		void			add_var(const lexer::token&);
 		//!Checks that every entry is solvable. Throws if it can't.
 		void			check_integrity();
-		//!In compile mode, returns true if a codex entry has no embed dependencies left.
-		bool 			is_entry_solved(const codex_entry& _entry, const std::map<std::string, codex_entry>& _solved) const;
-		//!In compile mode, tries to replace all embed entries with their resulting static or variable segments.
-		bool 			solve_entry(codex_entry& _entry, const std::map<std::string, codex_entry>& _solved);
+		//!In compile mode, tries to replace all embed entries with their resulting static or variable segments. Returns true if the entry has no embeds.
+		bool 			solve_entry(codex_entry& _entry);
 
-		std::map<std::string, codex_entry>		entries;		//<!Entries that have been added, yet unsolved.
+		std::map<std::string, codex_entry>		entries,		//<!Entries that have been added, yet unsolved.
+												solved;			//<!Solved entries, the result of "parse".
 		std::string								current_label;	//<!Label that is currently in process.
 	};
 };

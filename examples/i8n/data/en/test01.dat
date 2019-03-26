@@ -8,12 +8,12 @@ value with two lines/}
 [/embedhere/]{/This is here/}
 [/embedthere/]{/This is there/}
 #Dependencies
-#	label-1
-#	label-2
-#	label-embed 
-#		label-4
-#			embedhere <- These do not exist!.
-#			embedthere
-#	label-embed-complex
-#		complex
-#			label-3
+#	label-1										ok
+#	label-2										ok
+#	label-embed									ok
+#		label-4									ok
+#			embedhere 							ok
+#			embedthere							ok
+#	label-embed-complex							ok
+#		complex									ok
+#			label-3								ok

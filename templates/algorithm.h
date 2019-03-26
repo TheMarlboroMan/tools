@@ -1,24 +1,24 @@
 #ifndef TOOLS_ALGORITHM_H
 #define TOOLS_ALGORITHM_H
 
-#include <functional> 
+#include <functional>
 
 namespace tools {
 
 //!Reduces the range begin-end to a value of rtype (with an initial value of
-//!_initial) calling the callback _lambda, which will accept the element the
-//!iterators point at.
+//!_initial) calling the callback _lambda, which will accept a reference to
+//!initial and the current item to compupte its reduction.
 template <typename iterator, typename lambda, typename rtype>
-rtype reduce(iterator _begin, iterator _end, lambda _callback, rtype initial) {
+rtype reduce(iterator _begin, iterator _end, lambda _callback, rtype&& initial) {
+
+	rtype result{initial}; //The callback will not accept a reference to initial if it is an rvalue.
 
 	while(_begin != _end) {
-		//TODO: Actually, the "+" operation is the one thing I don't like...
-		//having + here is limiting our options.
-		initial+=_callback(*_begin);
+		_callback(result, *_begin);
 		++_begin;
 	}
 
-	return initial;
+	return result;
 };
 
 }
