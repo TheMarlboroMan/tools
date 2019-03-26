@@ -45,14 +45,14 @@ class i8n_exception_file_error
 					i8n_exception_file_error(const std::string&);
 };
 
-//!Visible lexer exception, with path, line, error and line number.
-class i8n_lexer_error
+//!Lexer exception with file information
+class i8n_lexer_error_with_file
 	:public i8n_exception {
 	public:
-					i8n_lexer_error(const std::string&, const std::string&, const std::string&, int);
+					i8n_lexer_error_with_file(const std::string&, const std::string&);
 };
 
-//!Minimal lexer exception, to be thrown from within
+//!Minimal lexer exception.
 class i8n_lexer_generic_error
 	:public std::runtime_error {
 	public:
@@ -116,7 +116,7 @@ class i8n {
 
 	private:
 
-	//TODO: This should be customizable. Maybe with codex entry, a special codex entry.
+//TODO: This should be customizable. Maybe with a codex entry passed as a string.
 	std::string				fail_string(const std::string&) const;
 
 	//!Reloads all entries.
@@ -172,6 +172,9 @@ class i8n {
 
 		//!Processes the file of the given filename. Returns a list of
 		//!lexer tokens.
+		std::vector<token>	from_file(const std::string&);
+		//!Processes tokens from the raw string. Returns a list of
+		//!lexer tokens.
 		std::vector<token>	process(const std::string&);
 
 		private:
@@ -181,7 +184,7 @@ class i8n {
 		tokentypes		scan_buffer(const std::string&);
 
 		//Delimiters...
-		//TODO: All these fuckers should be customizable, built on construction.
+//TODO: All these fuckers should be customizable, built on construction.
 		const std::string	open_label="[/",
 							close_label="/]",
 							open_value="{/",

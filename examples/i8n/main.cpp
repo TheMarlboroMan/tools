@@ -1,5 +1,6 @@
 #include "../../class/i8n.cpp"
 #include "../../source/string_utils.cpp"
+#include "../../source/file_utils.cpp"
 
 int main(int, char **) {
 
@@ -8,7 +9,6 @@ int main(int, char **) {
 	i8n localization={"data", "en", {"test01.dat", "test02.dat"}};
 	//i8n localization={"data", "en", {"test03.dat"}};
 
-	//TODO: This makes the world fail!!!
 	localization.add({"test03.dat"});
 
 	localization.set({"var", "supervar"});

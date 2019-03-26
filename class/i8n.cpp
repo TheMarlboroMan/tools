@@ -4,8 +4,10 @@
 #include <ctype.h>
 #include <iostream>			//For the debug methods.
 #include <iterator>
+#include <cassert>
 
 #include "../source/string_utils.h"
+#include "../source/file_utils.h"
 #include "../templates/algorithm.h"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -36,16 +38,11 @@ tools::i8n_repeated_path::i8n_repeated_path(const std::string& _path)
 
 }
 
-tools::i8n_lexer_error::i8n_lexer_error(const std::string& _err, const std::string& _file, const std::string& _line, int _linenum)
+tools::i8n_lexer_error_with_file::i8n_lexer_error_with_file(const std::string& _err, const std::string& _file)
 	:i8n_exception("lexer error: "
 		+_err
 		+" in file "
-		+_file
-		+" line ["
-		+std::to_string(_linenum)
-		+"] '"
-		+_line
-		+"'") {
+		+_file) {
 };
 
 tools::i8n_lexer_generic_error::i8n_lexer_generic_error(const std::string& _err)
@@ -114,7 +111,7 @@ void tools::i8n::add_private(const std::string& _path) {
 	}
 
 	lexer lx;
-	lexer_tokens[_path]=lx.process(path);
+	lexer_tokens[_path]=lx.from_file(path);
 }
 
 void tools::i8n::set(const substitution& _sub) {
@@ -183,82 +180,83 @@ void tools::i8n::reload_codex() {
 ////////////////////////////////////////////////////////////////////////////////
 // Lexer.
 
-std::vector<tools::i8n::lexer::token> tools::i8n::lexer::process(const std::string& _filepath) {
+std::vector<tools::i8n::lexer::token> tools::i8n::lexer::from_file(const std::string& _filepath) {
+
+	std::ifstream file(_filepath.c_str());
+	if(!file) {
+		throw i8n_lexer_generic_error("cannot open file "+_filepath);
+	}
+
+	try {
+		return process(tools::dump_file(_filepath));
+	}
+	catch(i8n_lexer_generic_error& e) {
+		throw i8n_lexer_error_with_file(e.what(), _filepath);
+	}
+}
+
+std::vector<tools::i8n::lexer::token> tools::i8n::lexer::process(const std::string& _raw_text) {
 
 	std::string line;
 	int linenum=0, charnum=0;
+	auto lines=tools::explode(_raw_text, tools::newline);
 
-	try {
-		std::ifstream file(_filepath.c_str());
-		if(!file) {
-			throw i8n_lexer_generic_error("cannot open file");
+	//The lexer just reads line by line, storing data as tokens are found.
+	std::string buffer;
+	std::vector<tools::i8n::lexer::token>	result;
+
+	while(lines.size()) {
+		//Pop from front...
+		line=lines.front();
+		lines.erase(std::begin(lines));
+		++linenum;
+		charnum=0;
+
+		//Skip comments... Blank lines will not be skipped, as they might carry meaning!
+		if(comment==line.front()) {
+			continue;
 		}
 
-		//The lexer just reads line by line, storing data as tokens are found.
-		std::string buffer;
-		std::vector<tools::i8n::lexer::token>	result;
+		line+=tools::newline; //Newlines are lost in getline, but they might carry significance here...
+		while(line.size()) {
 
-		while(true) {
-			std::getline(file, line);
-			++linenum;
-			charnum=0;
+			++charnum;
+			buffer+=line.front();
+			line.erase(0, 1);
 
-			if(file.eof()) {
-				break;
-			}
+			auto size=buffer.size();
+			if(size >= 2) {
+				auto last_two=buffer.substr(size-2);
+				auto type=scan_buffer(last_two);
+				if(tokentypes::nothing!=type) {
 
-			//Skip comments... Blank lines will not be skipped, as they might carry meaning!
-			if(comment==line.front()) {
-				continue;
-			}
+					if(size > 2) {
+						result.push_back({tokentypes::literal, buffer.substr(0, size-2), linenum, charnum-2});
+					}
 
-			line+=tools::newline; //Newlines are lost in getline, but they might carry significance here...
-			while(line.size()) {
+					result.push_back({type, last_two, linenum, charnum});
+					buffer.clear();
 
-				++charnum;
-				buffer+=line.front();
-				line.erase(0, 1);
-
-				auto size=buffer.size();
-				if(size >= 2) {
-					auto last_two=buffer.substr(size-2);
-					auto type=scan_buffer(last_two);
-					if(tokentypes::nothing!=type) {
-
-						if(size > 2) {
-							result.push_back({tokentypes::literal, buffer.substr(0, size-2), linenum, charnum-2});
-						}
-
-						result.push_back({type, last_two, linenum, charnum});
-						buffer.clear();
-
-						//When closing a value we discard the rest of the line. A little convenience thing.
-						if(tokentypes::closevalue==type) {
-							line.clear();
-						}
+					//When closing a value we discard the rest of the line. A little convenience thing.
+					if(tokentypes::closevalue==type) {
+						line.clear();
 					}
 				}
 			}
 		}
-
-		//!The last thing we expect is actually a delimiter, so this is an error.
-		if(str_trim(buffer).size()) {
-			throw i8n_lexer_generic_error("non-token found at the end of the file");
-		}
-
-		return result;
 	}
-	catch(i8n_lexer_generic_error& e) {
-		throw i8n_lexer_error(_filepath, line, e.what(), linenum);
+
+	//!The last thing we expect is actually a delimiter, so this is an error.
+	if(str_trim(buffer).size()) {
+		throw i8n_lexer_generic_error("non-token found at the end of the stream");
 	}
+
+	return result;
 }
 
 tools::i8n::lexer::tokentypes tools::i8n::lexer::scan_buffer(const std::string& _control) {
 
-	//This should actually be an assertion, but hey...
-	if(2!=_control.size()) {
-		throw i8n_lexer_generic_error("scan buffer cannot be called with a string larger than 2 characters");
-	}
+	assert(2!=_control.size());
 
 	if(open_label==_control) 		return tokentypes::openlabel;
 	else if(close_label==_control) 	return tokentypes::closelabel;
@@ -307,12 +305,18 @@ std::map<std::string, tools::i8n::codex_entry> tools::i8n::parser::parse(const s
 }
 
 void tools::i8n::parser::compact_entry(codex_entry& _entry) {
+#if __GNUC__ <= 4
 
+	//TODO: Think... polyfill or different implementation??
+
+#else
+	//TODO: Only C++14
 	auto it=std::rbegin(_entry.segments);
 
 	while(true) {
 
 		auto prev=it+1;
+		//TODO: Only C++14
 		if(prev == std::rend(_entry.segments)) {
 			break;
 		}
@@ -327,6 +331,7 @@ void tools::i8n::parser::compact_entry(codex_entry& _entry) {
 
 		++it;
 	}
+#endif
 }
 
 void tools::i8n::parser::debug(const std::vector<lexer::token>& _tokens, std::ostream& _stream) {
