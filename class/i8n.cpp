@@ -256,7 +256,7 @@ std::vector<tools::i8n::lexer::token> tools::i8n::lexer::process(const std::stri
 
 tools::i8n::lexer::tokentypes tools::i8n::lexer::scan_buffer(const std::string& _control) {
 
-	assert(2!=_control.size());
+	assert(2==_control.size());
 
 	if(open_label==_control) 		return tokentypes::openlabel;
 	else if(close_label==_control) 	return tokentypes::closelabel;
