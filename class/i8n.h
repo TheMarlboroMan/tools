@@ -204,16 +204,20 @@ class i8n {
 		std::map<std::string, codex_entry>			parse(const std::map<std::string, std::vector<lexer::token>> &) const;
 		//!Parses the tokens to a codex entry.
 		codex_entry									parse(const std::vector<lexer::token>&) const;
-		private:
 
-		//!Replaces every embed entry with its corresponding literals. Empties the parameter in the process.
-		std::map<std::string, codex_entry>	compile_entries(std::map<std::string, codex_entry>&) const;
-
+#ifdef WITH_DEBUG_CODE
 		//!Prints out the tokens to the given stream, for debug purposes.
 		void			debug(const std::vector<lexer::token>&, std::ostream&) const;
 		void			debug(const lexer::token&, std::ostream&) const;
 		void			debug(const codex_entry&, std::ostream&) const;
 		void			debug(const entry_segment&, std::ostream&) const;
+#endif
+
+		private:
+
+		//!Replaces every embed entry with its corresponding literals. Empties the parameter in the process.
+		std::map<std::string, codex_entry>	compile_entries(std::map<std::string, codex_entry>&) const;
+
 		//!Compacts consecutive literal entries into one.
 		void			compact_entry(codex_entry&) const;
 		//!Parsers all the tokens from a file.

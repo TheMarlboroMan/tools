@@ -1,5 +1,4 @@
 #Machine specifics.
-DIR_HOME=c:/devel/repos/
 DIR_OBJ=objects
 
 SYSTEM_FLAGS=-DWINCOMPIL=1 -D__NO_INLINE__
@@ -11,6 +10,8 @@ CREATE_OBJ_DIR=	if not exist $(DIR_OBJ) mkdir $(DIR_OBJ)
 #Build specifics.
 #OPTIMIZATION=-O2
 DEBUG=-g
+#WITH_DEBUG_CODE=-DWITH_DEBUG_CODE
+DISABLE_ASSERT=-DNDEBUG=1
 
 #Fixed compiler definitions.
 CC=g++

@@ -1,5 +1,4 @@
 #Local specifics.
-DIR_HOME=~/devel/other/
 MINGW32_INCLUDE=
 MINGW32_LIB=
 DIR_SDL2=
@@ -11,8 +10,10 @@ CLEAN=if [ -d $(DIR_OBJ) ]; then rm -rf $(DIR_OBJ); fi; if [ -f libtools.a ]; th
 CREATE_OBJ_DIR=mkdir -p $(DIR_OBJ)
 
 #Build specifics.
-#OPTIMIZATION=-O2
-DEBUG=-g
+__TEMPLATE_OPTIMIZATION__
+__TEMPLATE_DEBUG__
+__TEMPLATE_WITH_DEBUG_CODE__
+__TEMPLATE_DISABLE_ASSERT__
 
 #Fixed compiler definitions.
 CC=g++

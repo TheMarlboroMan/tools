@@ -77,15 +77,14 @@ tools::i8n_parser_error::i8n_parser_error(const std::string _err)
 tools::i8n::i8n(const std::string& _path, const std::string& _lan, const std::vector<std::string>& _input)
 	:file_path(_path), language(_lan) {
 
-	std::map<std::string, std::vector<lexer::token>>	lexer_tokens;
+	set_fail_entry("{/ERROR : could not locate i8n key (/__key__/)/}");
 
+	std::map<std::string, std::vector<lexer::token>>	lexer_tokens;
 	for(const auto& _i : _input) {
 		paths.push_back(_i);
 		add_private(_i, lexer_tokens);
 	}
-
 	build_entries(lexer_tokens);
-	set_fail_entry("{/** ERROR : could not locate i8n key (/__key__/)/}");
 }
 
 void tools::i8n::add(const std::string& _path) {
@@ -246,7 +245,9 @@ std::vector<tools::i8n::lexer::token> tools::i8n::lexer::from_string(const std::
 
 			auto size=buffer.size();
 			if(size >= 2) {
+
 				auto last_two=buffer.substr(size-2);
+
 				auto type=scan_buffer(last_two);
 				if(tokentypes::nothing!=type) {
 
@@ -312,7 +313,7 @@ std::string tools::i8n::lexer::typetostring(tokentypes _type) {
 //in how they work internally.
 tools::i8n::codex_entry tools::i8n::parser::parse(const std::vector<lexer::token>& _tokens) const {
 
-	int curtoken=0, size=0;
+	int curtoken=0, size=_tokens.size();
 	return value_phase(_tokens, curtoken, size);
 }
 
@@ -357,29 +358,6 @@ void tools::i8n::parser::compact_entry(codex_entry& _entry) const {
 	}
 }
 
-void tools::i8n::parser::debug(const std::vector<lexer::token>& _tokens, std::ostream& _stream) const {
-
-	for(const auto& token : _tokens) {
-		debug(token, _stream);
-	}
-}
-
-void tools::i8n::parser::debug(const lexer::token& _token, std::ostream& _stream) const {
-
-	switch(_token.type) {
-		case lexer::tokentypes::openlabel: 	_stream<<"[OPENLAB] "<<_token.line<<":"<<_token.charnum<<std::endl; break;
-		case lexer::tokentypes::closelabel: _stream<<"[CLSELAB] "<<_token.line<<":"<<_token.charnum<<std::endl; break;
-		case lexer::tokentypes::openvalue: 	_stream<<"[OPENVAL] "<<_token.line<<":"<<_token.charnum<<std::endl; break;
-		case lexer::tokentypes::closevalue:	_stream<<"[CLSEVAL] "<<_token.line<<":"<<_token.charnum<<std::endl; break;
-		case lexer::tokentypes::openvar:	_stream<<"[OPENVAR] "<<_token.line<<":"<<_token.charnum<<std::endl; break;
-		case lexer::tokentypes::closevar:	_stream<<"[CLSEVAR] "<<_token.line<<":"<<_token.charnum<<std::endl; break;
-		case lexer::tokentypes::openembed:	_stream<<"[OPENEMB] "<<_token.line<<":"<<_token.charnum<<std::endl; break;
-		case lexer::tokentypes::closeembed:	_stream<<"[CLSEEMB] "<<_token.line<<":"<<_token.charnum<<std::endl; break;
-		case lexer::tokentypes::nothing:	_stream<<"[NOTHING] "<<_token.line<<":"<<_token.charnum<<std::endl; break;
-		case lexer::tokentypes::literal:	_stream<<"[LITERAL] "<<_token.line<<":"<<_token.charnum<<" '"<<_token.val<<"'"<<std::endl; break;
-	}
-}
-
 std::map<std::string, tools::i8n::codex_entry> tools::i8n::parser::compile_entries(std::map<std::string, tools::i8n::codex_entry>& _entries) const {
 
 	std::map<std::string, codex_entry> solved;
@@ -417,6 +395,31 @@ std::map<std::string, tools::i8n::codex_entry> tools::i8n::parser::compile_entri
 	return solved;
 }
 
+
+#ifdef WITH_DEBUG_CODE
+void tools::i8n::parser::debug(const std::vector<lexer::token>& _tokens, std::ostream& _stream) const {
+
+	for(const auto& token : _tokens) {
+		debug(token, _stream);
+	}
+}
+
+void tools::i8n::parser::debug(const lexer::token& _token, std::ostream& _stream) const {
+
+	switch(_token.type) {
+		case lexer::tokentypes::openlabel: 	_stream<<"[OPENLAB] "<<_token.line<<":"<<_token.charnum<<std::endl; break;
+		case lexer::tokentypes::closelabel: _stream<<"[CLSELAB] "<<_token.line<<":"<<_token.charnum<<std::endl; break;
+		case lexer::tokentypes::openvalue: 	_stream<<"[OPENVAL] "<<_token.line<<":"<<_token.charnum<<std::endl; break;
+		case lexer::tokentypes::closevalue:	_stream<<"[CLSEVAL] "<<_token.line<<":"<<_token.charnum<<std::endl; break;
+		case lexer::tokentypes::openvar:	_stream<<"[OPENVAR] "<<_token.line<<":"<<_token.charnum<<std::endl; break;
+		case lexer::tokentypes::closevar:	_stream<<"[CLSEVAR] "<<_token.line<<":"<<_token.charnum<<std::endl; break;
+		case lexer::tokentypes::openembed:	_stream<<"[OPENEMB] "<<_token.line<<":"<<_token.charnum<<std::endl; break;
+		case lexer::tokentypes::closeembed:	_stream<<"[CLSEEMB] "<<_token.line<<":"<<_token.charnum<<std::endl; break;
+		case lexer::tokentypes::nothing:	_stream<<"[NOTHING] "<<_token.line<<":"<<_token.charnum<<std::endl; break;
+		case lexer::tokentypes::literal:	_stream<<"[LITERAL] "<<_token.line<<":"<<_token.charnum<<" '"<<_token.val<<"'"<<std::endl; break;
+	}
+}
+
 void tools::i8n::parser::debug(const codex_entry& _entry, std::ostream& _stream) const {
 
 	for(const auto& s : _entry.segments) {
@@ -432,6 +435,7 @@ void tools::i8n::parser::debug(const entry_segment& _segment, std::ostream& _str
 		case entry_segment::types::embed: 		_stream<<"[EMB] "<<_segment.value<<std::endl; break;
 	}
 }
+#endif
 
 void tools::i8n::parser::interpret_tokens(const std::vector<lexer::token>& _tokens, std::map<std::string, codex_entry>& _entries) const {
 
@@ -545,7 +549,6 @@ tools::i8n::codex_entry tools::i8n::parser::value_phase(const std::vector<lexer:
 		//We are looking for literals, openvar or openembed...
 		switch(curtype) {
 			case lexer::tokentypes::literal:
-				//TODO: This is the part that will not work...
 				entry.segments.push_back({entry_segment::types::literal, tok.val});
 			break;
 			case lexer::tokentypes::openvar:

@@ -15,6 +15,10 @@ int main(int, char **) {
 	std::cout<<localization.get("label-1")<<std::endl;
 	std::cout<<localization.get("label-4")<<std::endl;
 	std::cout<<localization.get("complex", {{"varhere","varhere1"}, {"varthere","varthere1"}})<<std::endl;
+	std::cout<<localization.get("label-doesnotexist")<<std::endl;
+
+	localization.set_fail_entry("{/Will not be able to find (/__key__/)/}");
+	std::cout<<localization.get("label-doesnotexist")<<std::endl;
 
 	return 0;
 }
