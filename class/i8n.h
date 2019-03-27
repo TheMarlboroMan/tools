@@ -24,6 +24,14 @@ class i8n_exception_no_path
 					i8n_exception_no_path();
 };
 
+//!Thrown when calling "set_fail_entry" with an invalid entry string.
+class i8n_exception_invalid_fail_entry
+	:public i8n_exception {
+	public:
+					i8n_exception_invalid_fail_entry(const std::string&);
+};
+
+
 //!Thrown when trying to add the same path multiple times.
 class i8n_repeated_path
 	:public i8n_exception {
@@ -114,23 +122,13 @@ class i8n {
 	//!property.
 	std::string				get(const std::string&, const std::vector<substitution>&) const;
 
+	//!Allows passing a value string that will act as a codex_entry to be
+	//!translated when a key cannot be found in a call to get. The entry
+	//!must accept the variable __key__, which will represent the failed key,
+	//!Will throw parser and lexer errors if the string cannot be parsed.
+	void					set_fail_entry(const std::string&);
+
 	private:
-
-//TODO: This should be customizable. Maybe with a codex entry passed as a string.
-	std::string				fail_string(const std::string&) const;
-
-	//!Reloads all entries.
-	void					reload_codex();
-	//!Internally adds a file, does not trigger recompilation.
-	void					add_private(const std::string&);
-	//!Compiles the lexer tokens into the codex entries.
-	void					build_entries();
-
-	std::string				file_path,	//<!File path where files are located.
-							language;	//<!Language string, must be a subdirectory of the file_path.
-
-	std::vector<substitution>				substitutions;	//<!Permanent substitutions.
-	std::vector<std::string>				paths;			//<!List of currently added paths.
 
 	//!Files are resolved to entries (one entry per data item). Each entry is
 	//!composed by segments, which represent a fixed test or a variable to be resolved.
@@ -151,8 +149,6 @@ class i8n {
 		bool							substitute(const std::string&, const std::vector<substitution>&, std::string&) const;
 	};
 
-	std::map<std::string, codex_entry>		codex;	//<!All data.
-
 	//!Internal lexer: converts files into streams of tokens.
 	class lexer {
 		public:
@@ -172,19 +168,19 @@ class i8n {
 
 		//!Processes the file of the given filename. Returns a list of
 		//!lexer tokens.
-		std::vector<token>	from_file(const std::string&);
+		std::vector<token>	from_file(const std::string&) const;
 		//!Processes tokens from the raw string. Returns a list of
 		//!lexer tokens.
-		std::vector<token>	process(const std::string&);
+		std::vector<token>	from_string(const std::string&) const;
 
 		private:
 
 		//!Scans two characters to see if they correspond with delimiters,
 		//!returning the token type (nothing if none detected).
-		tokentypes		scan_buffer(const std::string&);
+		tokentypes			scan_buffer(const std::string&) const;
 
 		//Delimiters...
-//TODO: All these fuckers should be customizable, built on construction.
+	//TODO: All these fuckers should be customizable, built on construction.
 		const std::string	open_label="[/",
 							close_label="/]",
 							open_value="{/",
@@ -197,8 +193,6 @@ class i8n {
 		const char 			comment='#';
 	};
 
-	std::map<std::string, std::vector<lexer::token>>		lexer_tokens;	//<!Temporary map of file to a vector of tokens.
-
 	//!Internal parser, converts tokens into codex entries. Given that codex
 	//!entries can have dependencies between them, this also solves then in
 	//!as many passes as needed. Circular dependencies cause it to throw.
@@ -206,45 +200,57 @@ class i8n {
 
 		public:
 
-		std::map<std::string, codex_entry>			parse(const std::map<std::string, std::vector<lexer::token>>&);
-
+		//!Parses a map of string to tokens to a map of strings to codex entries.
+		std::map<std::string, codex_entry>			parse(const std::map<std::string, std::vector<lexer::token>> &) const;
+		//!Parses the tokens to a codex entry.
+		codex_entry									parse(const std::vector<lexer::token>&) const;
 		private:
 
-		//!Replaces every embed entry with its corresponding literals.
-		void			compile_entries();
+		//!Replaces every embed entry with its corresponding literals. Empties the parameter in the process.
+		std::map<std::string, codex_entry>	compile_entries(std::map<std::string, codex_entry>&) const;
 
 		//!Prints out the tokens to the given stream, for debug purposes.
-		void			debug(const std::vector<lexer::token>&, std::ostream&);
-		void			debug(const lexer::token&, std::ostream&);
-		void			debug(const codex_entry&, std::ostream&);
-		void			debug(const entry_segment&, std::ostream&);
+		void			debug(const std::vector<lexer::token>&, std::ostream&) const;
+		void			debug(const lexer::token&, std::ostream&) const;
+		void			debug(const codex_entry&, std::ostream&) const;
+		void			debug(const entry_segment&, std::ostream&) const;
 		//!Compacts consecutive literal entries into one.
-		void			compact_entry(codex_entry&);
+		void			compact_entry(codex_entry&) const;
 		//!Parsers all the tokens from a file.
-		void			interpret_tokens(const std::vector<lexer::token>&);
+		void			interpret_tokens(const std::vector<lexer::token>&, std::map<std::string, codex_entry>&) const;
 		//!Starts the label phase: skip all whitespace until a label is reached, store the label. Returns false if there is no error and the tokens ended.
-		bool 			label_phase(const std::vector<lexer::token>& _tokens, int& _curtoken, const int _size);
+		std::string		label_phase(const std::vector<lexer::token>& _tokens, int&, const int _size) const;
 		//!Parse the value contents until a "close value" is found.
-		void 			value_phase(const std::vector<lexer::token>& _tokens, int& _curtoken, const int _size);
+		codex_entry 	value_phase(const std::vector<lexer::token>& _tokens, int& _curtoken, const int _size) const;
 		//!Returns the index of the next token that maches type, skipping whitespace literals, from _curtoken. Any other type than whitespace literals will throw!.
-		int				find_next_of(const std::vector<lexer::token>& _tokens, lexer::tokentypes _type, int _curtoken);
-		//!Parses the inner component open+identifier+close from _curtoken, call the callback with the middle token after checking it is a literal.
-		void			parse_open_close(const std::vector<lexer::token>& _tokens, lexer::tokentypes _closetype, int _curtoken, void(parser::*)(const lexer::token&));
-		//!Callback that will add a new entry to "entries" and set current_label.
-		void			create_entry(const lexer::token&);
-		//!Callback to add a new embed element to the current codex_entry.
-		void			add_embed(const lexer::token&);
-		//!Callback to add a new variable element to the current codex_entry.
-		void			add_var(const lexer::token&);
+		int				find_next_of(const std::vector<lexer::token>& _tokens, lexer::tokentypes _type, int _curtoken) const;
+		//!Parses the inner component open+identifier+close from _curtoken. Returns the middle token once checked that it is a literal.
+		std::string		parse_open_close(const std::vector<lexer::token>& _tokens, lexer::tokentypes _closetype, int _curtoken) const;
+		//!Callback that will add a new entry to "entries".
+		void			create_entry(const std::string&) const;
 		//!Checks that every entry is solvable. Throws if it can't.
-		void			check_integrity();
+		void			check_integrity(const std::map<std::string, codex_entry>&) const;
 		//!In compile mode, tries to replace all embed entries with their resulting static or variable segments. Returns true if the entry has no embeds.
-		bool 			solve_entry(codex_entry& _entry);
-
-		std::map<std::string, codex_entry>		entries,		//<!Entries that have been added, yet unsolved.
-												solved;			//<!Solved entries, the result of "parse".
-		std::string								current_label;	//<!Label that is currently in process.
+		bool 			solve_entry(codex_entry& _entry, std::map<std::string, codex_entry>&) const;
 	};
+
+	std::string								file_path,	//<!File path where files are located.
+											language;	//<!Language string, must be a subdirectory of the file_path.
+
+	std::vector<substitution>				substitutions;	//<!Permanent substitutions.
+	std::vector<std::string>				paths;			//<!List of currently added paths.
+	std::map<std::string, codex_entry>		codex;	//<!All data.
+	codex_entry								fail_entry;
+
+	//!Translates the fail string with the given key.
+	std::string				fail_string(const std::string&) const;
+
+	//!Reloads all entries.
+	void					reload_codex();
+	//!Internally adds a file, does not trigger recompilation.
+	void					add_private(const std::string&, std::map<std::string, std::vector<lexer::token>>&);
+	//!Compiles the lexer tokens into the codex entries.
+	void					build_entries(std::map<std::string, std::vector<lexer::token>>&);
 };
 
 }

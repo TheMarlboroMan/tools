@@ -28,6 +28,11 @@ tools::i8n_exception_no_language::i8n_exception_no_language()
 
 }
 
+tools::i8n_exception_invalid_fail_entry::i8n_exception_invalid_fail_entry(const std::string& _str)
+	:i8n_exception("Invalid fail entry string '"+_str+"'") {
+
+}
+
 tools::i8n_exception_file_error::i8n_exception_file_error(const std::string& _path)
 	:i8n_exception("could not open file "+_path) {
 
@@ -72,12 +77,15 @@ tools::i8n_parser_error::i8n_parser_error(const std::string _err)
 tools::i8n::i8n(const std::string& _path, const std::string& _lan, const std::vector<std::string>& _input)
 	:file_path(_path), language(_lan) {
 
+	std::map<std::string, std::vector<lexer::token>>	lexer_tokens;
+
 	for(const auto& _i : _input) {
 		paths.push_back(_i);
-		add_private(_i);
+		add_private(_i, lexer_tokens);
 	}
 
-	build_entries();
+	build_entries(lexer_tokens);
+	set_fail_entry("{/** ERROR : could not locate i8n key (/__key__/)/}");
 }
 
 void tools::i8n::add(const std::string& _path) {
@@ -101,7 +109,7 @@ void tools::i8n::add(const std::string& _path) {
 	reload_codex();
 }
 
-void tools::i8n::add_private(const std::string& _path) {
+void tools::i8n::add_private(const std::string& _path, std::map<std::string, std::vector<lexer::token>>& _lexer_tokens) {
 
 	const std::string path=file_path+"/"+language+"/"+_path;
 	std::ifstream file(path);
@@ -111,7 +119,7 @@ void tools::i8n::add_private(const std::string& _path) {
 	}
 
 	lexer lx;
-	lexer_tokens[_path]=lx.from_file(path);
+	_lexer_tokens[_path]=lx.from_file(path);
 }
 
 void tools::i8n::set(const substitution& _sub) {
@@ -157,30 +165,42 @@ std::string tools::i8n::get(const std::string& _get, const std::vector<substitut
 
 std::string tools::i8n::fail_string(const std::string& _get) const {
 
-	return "*** FAIL "+_get+" ***";
+	return fail_entry.get({{"__key__", _get}});
 }
 
-void tools::i8n::build_entries() {
+void tools::i8n::build_entries(std::map<std::string, std::vector<lexer::token>>& _lexer_tokens) {
 
 	parser pr;
-	codex=pr.parse(lexer_tokens);
-	lexer_tokens.clear();
+	codex=pr.parse(_lexer_tokens);
 }
 
 void tools::i8n::reload_codex() {
 
 	codex.clear();
+	std::map<std::string, std::vector<lexer::token>> lexer_tokens;
 	for(auto& p : paths) {
-		add_private(p);
+		add_private(p, lexer_tokens);
 	}
 
-	build_entries();
+	build_entries(lexer_tokens);
+}
+
+void tools::i8n::set_fail_entry(const std::string& _str) {
+
+	try {
+		lexer lx;
+		parser pr;
+		fail_entry=pr.parse(lx.from_string(_str));
+	}
+	catch(i8n_exception& e) {
+		throw i8n_exception_invalid_fail_entry(_str+" : "+e.what());
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Lexer.
 
-std::vector<tools::i8n::lexer::token> tools::i8n::lexer::from_file(const std::string& _filepath) {
+std::vector<tools::i8n::lexer::token> tools::i8n::lexer::from_file(const std::string& _filepath) const {
 
 	std::ifstream file(_filepath.c_str());
 	if(!file) {
@@ -188,14 +208,14 @@ std::vector<tools::i8n::lexer::token> tools::i8n::lexer::from_file(const std::st
 	}
 
 	try {
-		return process(tools::dump_file(_filepath));
+		return from_string(tools::dump_file(_filepath));
 	}
 	catch(i8n_lexer_generic_error& e) {
 		throw i8n_lexer_error_with_file(e.what(), _filepath);
 	}
 }
 
-std::vector<tools::i8n::lexer::token> tools::i8n::lexer::process(const std::string& _raw_text) {
+std::vector<tools::i8n::lexer::token> tools::i8n::lexer::from_string(const std::string& _raw_text) const {
 
 	std::string line;
 	int linenum=0, charnum=0;
@@ -254,7 +274,7 @@ std::vector<tools::i8n::lexer::token> tools::i8n::lexer::process(const std::stri
 	return result;
 }
 
-tools::i8n::lexer::tokentypes tools::i8n::lexer::scan_buffer(const std::string& _control) {
+tools::i8n::lexer::tokentypes tools::i8n::lexer::scan_buffer(const std::string& _control) const {
 
 	assert(2==_control.size());
 
@@ -288,15 +308,25 @@ std::string tools::i8n::lexer::typetostring(tokentypes _type) {
 ////////////////////////////////////////////////////////////////////////////////
 // Parser.
 
-std::map<std::string, tools::i8n::codex_entry> tools::i8n::parser::parse(const std::map<std::string, std::vector<lexer::token>>& _lexer_tokens) {
+//TODO: I don't like how these two parse functions are radically different
+//in how they work internally.
+tools::i8n::codex_entry tools::i8n::parser::parse(const std::vector<lexer::token>& _tokens) const {
+
+	int curtoken=0, size=0;
+	return value_phase(_tokens, curtoken, size);
+}
+
+std::map<std::string, tools::i8n::codex_entry> tools::i8n::parser::parse(const std::map<std::string, std::vector<lexer::token>>& _lexer_tokens) const {
+
+	std::map<std::string, codex_entry>	entries;
 
 	for(const auto& pair : _lexer_tokens) {
-		interpret_tokens(pair.second);
+		interpret_tokens(pair.second, entries);
 	}
 
-	check_integrity();
-	compile_entries();
+	check_integrity(entries);
 
+	auto solved=compile_entries(entries);
 	for(auto& pair : solved) {
 		compact_entry(pair.second);
 	}
@@ -304,19 +334,13 @@ std::map<std::string, tools::i8n::codex_entry> tools::i8n::parser::parse(const s
 	return solved;
 }
 
-void tools::i8n::parser::compact_entry(codex_entry& _entry) {
-#if __GNUC__ <= 4
+void tools::i8n::parser::compact_entry(codex_entry& _entry) const {
 
-	//TODO: Think... polyfill or different implementation??
-
-#else
-	//TODO: Only C++14
 	auto it=std::rbegin(_entry.segments);
 
 	while(true) {
 
 		auto prev=it+1;
-		//TODO: Only C++14
 		if(prev == std::rend(_entry.segments)) {
 			break;
 		}
@@ -331,17 +355,16 @@ void tools::i8n::parser::compact_entry(codex_entry& _entry) {
 
 		++it;
 	}
-#endif
 }
 
-void tools::i8n::parser::debug(const std::vector<lexer::token>& _tokens, std::ostream& _stream) {
+void tools::i8n::parser::debug(const std::vector<lexer::token>& _tokens, std::ostream& _stream) const {
 
 	for(const auto& token : _tokens) {
 		debug(token, _stream);
 	}
 }
 
-void tools::i8n::parser::debug(const lexer::token& _token, std::ostream& _stream) {
+void tools::i8n::parser::debug(const lexer::token& _token, std::ostream& _stream) const {
 
 	switch(_token.type) {
 		case lexer::tokentypes::openlabel: 	_stream<<"[OPENLAB] "<<_token.line<<":"<<_token.charnum<<std::endl; break;
@@ -357,17 +380,19 @@ void tools::i8n::parser::debug(const lexer::token& _token, std::ostream& _stream
 	}
 }
 
-void tools::i8n::parser::compile_entries() {
+std::map<std::string, tools::i8n::codex_entry> tools::i8n::parser::compile_entries(std::map<std::string, tools::i8n::codex_entry>& _entries) const {
+
+	std::map<std::string, codex_entry> solved;
 
 	int last_solved=0;
-	while(entries.size()) {
+	while(_entries.size()) {
 
 		//Move solvable entries around...
-		for(auto it=std::begin(entries); it != std::end(entries);) {
+		for(auto it=std::begin(_entries); it != std::end(_entries);) {
 
-			if(solve_entry(it->second)) {
+			if(solve_entry(it->second, solved)) {
 				solved[it->first]=it->second;
-				it=entries.erase(it);
+				it=_entries.erase(it);
 			}
 			else {
 				it++;
@@ -379,8 +404,8 @@ void tools::i8n::parser::compile_entries() {
 
 			typedef const std::pair<std::string, codex_entry> tpair;
 			throw i8n_parser_error(std::string("circular references found in data :")+tools::reduce(
-				std::begin(entries),
-				std::end(entries),
+				std::begin(_entries),
+				std::end(_entries),
 				[](std::string&& _carry, const tpair& _item){return _carry+=_item.first+" ";},
 				"")
 			);
@@ -388,16 +413,18 @@ void tools::i8n::parser::compile_entries() {
 
 		last_solved=solved.size();
 	}
+
+	return solved;
 }
 
-void tools::i8n::parser::debug(const codex_entry& _entry, std::ostream& _stream) {
+void tools::i8n::parser::debug(const codex_entry& _entry, std::ostream& _stream) const {
 
 	for(const auto& s : _entry.segments) {
 		debug(s, _stream);
 	}
 }
 
-void tools::i8n::parser::debug(const entry_segment& _segment, std::ostream& _stream) {
+void tools::i8n::parser::debug(const entry_segment& _segment, std::ostream& _stream) const {
 
 	switch(_segment.type) {
 		case entry_segment::types::literal: 	_stream<<"[LIT] "<<_segment.value<<std::endl; break;
@@ -406,29 +433,34 @@ void tools::i8n::parser::debug(const entry_segment& _segment, std::ostream& _str
 	}
 }
 
-void tools::i8n::parser::interpret_tokens(const std::vector<lexer::token>& _tokens) {
+void tools::i8n::parser::interpret_tokens(const std::vector<lexer::token>& _tokens, std::map<std::string, codex_entry>& _entries) const {
 
 	int curtoken=0,
 		size=size=_tokens.size()-1;
 
+	std::string curlabel;
+
 	while(true) {
-		if(!label_phase(_tokens, curtoken, size)) {
+
+		curlabel=label_phase(_tokens, curtoken, size);
+		_entries[curlabel]=value_phase(_tokens, curtoken, size);
+
+		if(curtoken >= size) {
 			break;
 		}
-		value_phase(_tokens, curtoken, size);
 	}
 }
 
-void tools::i8n::parser::check_integrity(){
+void tools::i8n::parser::check_integrity(const std::map<std::string, codex_entry>& _entries) const {
 
 	typedef const std::pair<std::string, codex_entry> tpair;
-	size_t total=tools::reduce(std::begin(entries), std::end(entries), [](size_t&& _carry, tpair _pair) {return _carry+=_pair.second.segments.size();}, 0);
+	size_t total=tools::reduce(std::begin(_entries), std::end(_entries), [](size_t&& _carry, tpair _pair) {return _carry+=_pair.second.segments.size();}, 0);
 	std::vector<entry_segment> embeds(total);
 
-	for(const auto& pair : entries) {
-		std::copy_if(std::begin(pair.second.segments), std::end(pair.second.segments), std::begin(embeds), [this](const entry_segment& _seg) {
+	for(const auto& pair : _entries) {
+		std::copy_if(std::begin(pair.second.segments), std::end(pair.second.segments), std::begin(embeds), [this, &_entries](const entry_segment& _seg) {
 			return entry_segment::types::embed==_seg.type
-				&& !entries.count(_seg.value);
+				&& !_entries.count(_seg.value);
 		});
 	}
 
@@ -440,7 +472,7 @@ void tools::i8n::parser::check_integrity(){
 }
 
 
-bool tools::i8n::parser::solve_entry(codex_entry& _entry) {
+bool tools::i8n::parser::solve_entry(codex_entry& _entry, std::map<std::string, codex_entry>& _solved) const {
 
 	for(auto it=std::begin(_entry.segments); it != std::end(_entry.segments); it++) {
 
@@ -450,7 +482,7 @@ bool tools::i8n::parser::solve_entry(codex_entry& _entry) {
 
 			const std::string key=segment.value;
 
-			if(!solved.count(key)) {
+			if(!_solved.count(key)) {
 				return false;
 			}
 
@@ -458,7 +490,7 @@ bool tools::i8n::parser::solve_entry(codex_entry& _entry) {
 			it=_entry.segments.erase(it);
 
 			//Add the new ones... Reset: the new segments may include embeds too!
-			const auto& new_segments=solved.at(key).segments;
+			const auto& new_segments=_solved.at(key).segments;
 			_entry.segments.insert(it, std::begin(new_segments), std::end(new_segments));
 			it=std::begin(_entry.segments);
 		}
@@ -467,23 +499,23 @@ bool tools::i8n::parser::solve_entry(codex_entry& _entry) {
 	return true;
 }
 
-bool tools::i8n::parser::label_phase(const std::vector<lexer::token>& _tokens, int& _curtoken, const int _size) {
+std::string tools::i8n::parser::label_phase(const std::vector<lexer::token>& _tokens, int& _curtoken, const int _size) const {
 
 	//Trim all whitespace tokens before the first opening...
 	_curtoken=find_next_of(_tokens, lexer::tokentypes::openlabel, _curtoken);
 
 	//Either there are not tokens or there's only whitespace.
 	if(_curtoken > _size) {
-		return false;
+		throw i8n_parser_error("unexpected end, expecting open label");
 	}
 
-	parse_open_close(_tokens, lexer::tokentypes::closelabel, _curtoken, &parser::create_entry);
+	std::string label=parse_open_close(_tokens, lexer::tokentypes::closelabel, _curtoken);
 	_curtoken+=3;
 
-	return true;
+	return label;
 }
 
-void tools::i8n::parser::value_phase(const std::vector<lexer::token>& _tokens, int& _curtoken, const int _size) {
+tools::i8n::codex_entry tools::i8n::parser::value_phase(const std::vector<lexer::token>& _tokens, int& _curtoken, const int _size) const {
 
 	//Store these, we are skipping to the "value open" now and might get to the end of the tokens.
 	int line=_tokens[_curtoken].line,
@@ -491,18 +523,20 @@ void tools::i8n::parser::value_phase(const std::vector<lexer::token>& _tokens, i
 
 	_curtoken=find_next_of(_tokens, lexer::tokentypes::openvalue, _curtoken);
 	if(_curtoken > _size) {
-		throw i8n_parser_token_error("expecting value open", line, charnum);
+		throw i8n_parser_token_error("unexpected end, expecting value open", line, charnum);
 	}
 
 	//Curtoken is sits now at the beginning of the next token, if any...
 	++_curtoken;
+
+	codex_entry entry;
 
 	//Now, read until we find a "close value...""
 	while(true){
 
 		//If there are no more tokens, the syntax of the file was not ok...
 		if(_curtoken > _size) {
-			throw i8n_parser_token_error("value not closed after ", line, charnum);
+			throw i8n_parser_token_error("unexpected end, value not closed after ", line, charnum);
 		}
 
 		const auto& tok=_tokens[_curtoken];
@@ -511,19 +545,20 @@ void tools::i8n::parser::value_phase(const std::vector<lexer::token>& _tokens, i
 		//We are looking for literals, openvar or openembed...
 		switch(curtype) {
 			case lexer::tokentypes::literal:
-				entries[current_label].segments.push_back({entry_segment::types::literal, tok.val});
+				//TODO: This is the part that will not work...
+				entry.segments.push_back({entry_segment::types::literal, tok.val});
 			break;
 			case lexer::tokentypes::openvar:
-				parse_open_close(_tokens, lexer::tokentypes::closevar, _curtoken, &parser::add_var);
+				entry.segments.push_back({entry_segment::types::variable, parse_open_close(_tokens, lexer::tokentypes::closevar, _curtoken) });
 				_curtoken+=2;
 			break;
 			case lexer::tokentypes::openembed:
-				parse_open_close(_tokens, lexer::tokentypes::closeembed, _curtoken, &parser::add_embed);
+				entry.segments.push_back({entry_segment::types::embed, parse_open_close(_tokens, lexer::tokentypes::closeembed, _curtoken) });
 				_curtoken+=2;
 			break;
 			case lexer::tokentypes::closevalue:
 				++_curtoken;
-				return;
+				return entry;
 			break;
 			default:
 				throw i8n_parser_token_error("unexpected '"+lexer::typetostring(curtype)+"' inside value", tok.line, tok.charnum);
@@ -533,49 +568,35 @@ void tools::i8n::parser::value_phase(const std::vector<lexer::token>& _tokens, i
 	}
 }
 
-void tools::i8n::parser::parse_open_close(const std::vector<lexer::token>& _tokens, lexer::tokentypes _closetype, int _curtoken, void(parser::*_callback)(const lexer::token&)) {
+std::string tools::i8n::parser::parse_open_close(const std::vector<lexer::token>& _tokens, lexer::tokentypes _closetype, int _curtoken) const {
 
 	//Skip the opening...
 	++_curtoken;
+	if(_curtoken >= _tokens.size()) {
+		throw i8n_parser_error("unexpected end of tokens");
+	}
 
 	//Check we have a literal...
 	if(lexer::tokentypes::literal!=_tokens[_curtoken].type) {
 		throw i8n_parser_token_error("unexpected '"+lexer::typetostring(_tokens[_curtoken].type)+"', expecting literal", _tokens[_curtoken].line, _tokens[_curtoken].charnum);
 	}
 
-	(this->*_callback)(_tokens[_curtoken]);
+	std::string result=_tokens[_curtoken].val;
 
 	//Skip the value and check we are closing...
 	++_curtoken;
+	if(_curtoken >= _tokens.size()) {
+		throw i8n_parser_error("unexpected end of file");
+	}
+
 	if(_closetype!=_tokens[_curtoken].type) {
 		throw i8n_parser_token_error("unexpected '"+lexer::typetostring(_tokens[_curtoken].type)+"', expecting '"+lexer::typetostring(_closetype)+"'", _tokens[_curtoken].line, _tokens[_curtoken].charnum);
 	}
+
+	return result;
 }
 
-void tools::i8n::parser::create_entry(const lexer::token& _tok) {
-
-	//Check we have an unique id.
-	const std::string val=_tok.val;
-
-	if(entries.count(val)) {
-		throw i8n_parser_token_error("repeated entry identificator", _tok.line, _tok.charnum);
-	}
-
-	current_label=val;
-	entries[current_label]=codex_entry{};
-}
-
-void tools::i8n::parser::add_embed(const lexer::token& _tok) {
-
-	entries[current_label].segments.push_back({entry_segment::types::embed, _tok.val});
-}
-
-void tools::i8n::parser::add_var(const lexer::token& _tok) {
-
-	entries[current_label].segments.push_back({entry_segment::types::variable, _tok.val});
-}
-
-int tools::i8n::parser::find_next_of(const std::vector<lexer::token>& _tokens, lexer::tokentypes _type, int _curtoken) {
+int tools::i8n::parser::find_next_of(const std::vector<lexer::token>& _tokens, lexer::tokentypes _type, int _curtoken) const {
 
 	int size=_tokens.size()-1;
 	while(_curtoken < size) {
