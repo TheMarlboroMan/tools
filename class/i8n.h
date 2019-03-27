@@ -46,6 +46,13 @@ class i8n_exception_no_language
 					i8n_exception_no_language();
 };
 
+//!Thrown when calling "set_delimiters" with invalid sizes.
+class i8n_delimiter_exception
+	:public i8n_exception {
+	public:
+					i8n_delimiter_exception();
+};
+
 //!Thrown when a file cannot be added.
 class i8n_exception_file_error
 	:public i8n_exception {
@@ -93,14 +100,37 @@ class i8n {
 		bool 			operator==(const substitution&) const;
 	};
 
+	//!Delimiters for the lexer. Constructed by default with sensible
+	//!values.
+	struct delimiters {
+
+							delimiters();
+
+		std::string	open_label,
+							close_label,
+							open_value,
+							close_value,
+							open_var,
+							close_var,
+							open_embed,
+							close_embed;
+
+		char 			comment;
+	};
+
 	//!Class constructor with path, default language and list of files.
 							i8n(const std::string&, const std::string&, const std::vector<std::string>&);
 
-	//!Adds a key to the database, associated to the given file.
-	//!Will throw on failure to open the file,  if the key is used
-	//!or if no path/language have been set. This will trigger a recompilation
-	//!of all texts.
+	//!Adds the given file to the database. Will throw on failure to 
+	//!or if no path/language has been set (along with parser and lexer
+	//!errors. Calling add will trigger a recompilation of all texts, so 
+	//!the preferred way adding texts is by doing so in the constructor.
+	//TODO: Perhaps a pair of lock-unlock, so add is not so intensive.
 	void					add(const std::string&);
+	
+	//TODO: method to directly add a string, instead of a file.
+	//TODO: Such method could have two signatures: one with key - value
+	//and the other with raw string.
 
 	//!Adds a permanent substitution.
 	void					set(const substitution&);
@@ -128,6 +158,13 @@ class i8n {
 	//!Will throw parser and lexer errors if the string cannot be parsed.
 	void					set_fail_entry(const std::string&);
 
+	//!Returns a copy of the delimiters.
+	delimiters				get_delimiters() const;
+
+	//!Assigns the delimiters. Checks them for valid lengths. Throws if
+	//!invalid lengths are found.
+	void					set_delimiters(const delimiters&);
+
 	private:
 
 	//!Files are resolved to entries (one entry per data item). Each entry is
@@ -152,6 +189,8 @@ class i8n {
 	//!Internal lexer: converts files into streams of tokens.
 	class lexer {
 		public:
+					lexer(const delimiters&);
+
 
 		//!The different ytpes
 		enum class tokentypes {openlabel, closelabel, openvalue, closevalue,
@@ -179,18 +218,7 @@ class i8n {
 		//!returning the token type (nothing if none detected).
 		tokentypes			scan_buffer(const std::string&) const;
 
-		//Delimiters...
-	//TODO: All these fuckers should be customizable, built on construction.
-		const std::string	open_label="[/",
-							close_label="/]",
-							open_value="{/",
-							close_value="/}",
-							open_var="(/",
-							close_var="/)",
-							open_embed="</",
-							close_embed="/>";
-
-		const char 			comment='#';
+		const delimiters&		delim;
 	};
 
 	//!Internal parser, converts tokens into codex entries. Given that codex
@@ -238,6 +266,7 @@ class i8n {
 		bool 			solve_entry(codex_entry& _entry, std::map<std::string, codex_entry>&) const;
 	};
 
+	delimiters								delimiter_set; //!< Current set of delimiters.
 	std::string								file_path,	//<!File path where files are located.
 											language;	//<!Language string, must be a subdirectory of the file_path.
 

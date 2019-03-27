@@ -1,13 +1,3 @@
-#		const std::string	open_label="[/",
-#							close_label="/]",
-#							open_value="{/",
-#							close_value="/}",
-#							open_var="(/",
-#							close_var="/)",
-#							open_embed="</",
-#							close_embed="/>";
-#
-#		const char 			comment='#';
-[/label-3/]{/(/varhere/) that was a var, this (/varthere/) is another/}
-[/label-4/]{/</embedhere/>- that was an embed, this </embedthere/> is another/}
-[/complex/]{/This has (/var/) vars and embeds </label-3/>/}
+[[label-3]]{{((varhere)) that was a var, this ((varthere)) is another}}
+[[label-4]]{{<<embedhere>>- that was an embed, this <<embedthere>> is another}}
+[[complex]]{{This has ((var)) vars and embeds <<label-3>>}}

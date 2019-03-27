@@ -55,6 +55,11 @@ tools::i8n_lexer_generic_error::i8n_lexer_generic_error(const std::string& _err)
 
 };
 
+tools::i8n_delimiter_exception::i8n_delimiter_exception()
+	:i8n_exception("invalid delimiters size: delimiters must be 2 chars long") {
+
+};
+
 
 tools::i8n_parser_token_error::i8n_parser_token_error(const std::string _err, int _line, int _char)
 	:i8n_exception(_err
@@ -77,7 +82,13 @@ tools::i8n_parser_error::i8n_parser_error(const std::string _err)
 tools::i8n::i8n(const std::string& _path, const std::string& _lan, const std::vector<std::string>& _input)
 	:file_path(_path), language(_lan) {
 
-	set_fail_entry("{/ERROR : could not locate i8n key (/__key__/)/}");
+	set_fail_entry(
+		delimiter_set.open_value
+		+"ERROR : could not locate i8n key "
+		+delimiter_set.open_var
+		+"__key__"
+		+delimiter_set.close_var
+		+delimiter_set.close_value);
 
 	std::map<std::string, std::vector<lexer::token>>	lexer_tokens;
 	for(const auto& _i : _input) {
@@ -117,7 +128,7 @@ void tools::i8n::add_private(const std::string& _path, std::map<std::string, std
 		throw i8n_exception_file_error(path);
 	}
 
-	lexer lx;
+	lexer lx{delimiter_set};
 	_lexer_tokens[_path]=lx.from_file(path);
 }
 
@@ -162,6 +173,32 @@ std::string tools::i8n::get(const std::string& _get, const std::vector<substitut
 	return codex.at(_get).get(_subs, substitutions);
 }
 
+tools::i8n::delimiters tools::i8n::get_delimiters() const {
+
+	return delimiter_set;
+}
+
+void tools::i8n::set_delimiters(const tools::i8n::delimiters& _delim) {
+
+	//Sanity check: are all delimiters the correct size?
+	std::vector<std::string> del{
+		_delim.open_label,
+		_delim.close_label,
+		_delim.open_value,
+		_delim.close_value,
+		_delim.open_var,
+		_delim.close_var,
+		_delim.open_embed,
+		_delim.close_embed
+	};
+
+	if(std::any_of(std::begin(del), std::end(del), [](const std::string& _s) {return 2!=_s.size();})) {
+		throw i8n_delimiter_exception{};
+	}
+
+	delimiter_set=_delim;
+}
+
 std::string tools::i8n::fail_string(const std::string& _get) const {
 
 	return fail_entry.get({{"__key__", _get}});
@@ -187,7 +224,7 @@ void tools::i8n::reload_codex() {
 void tools::i8n::set_fail_entry(const std::string& _str) {
 
 	try {
-		lexer lx;
+		lexer lx{delimiter_set};
 		parser pr;
 		fail_entry=pr.parse(lx.from_string(_str));
 	}
@@ -198,6 +235,11 @@ void tools::i8n::set_fail_entry(const std::string& _str) {
 
 ////////////////////////////////////////////////////////////////////////////////
 // Lexer.
+
+tools::i8n::lexer::lexer(const delimiters& _del)
+	:delim{_del} {
+
+}
 
 std::vector<tools::i8n::lexer::token> tools::i8n::lexer::from_file(const std::string& _filepath) const {
 
@@ -232,7 +274,7 @@ std::vector<tools::i8n::lexer::token> tools::i8n::lexer::from_string(const std::
 		charnum=0;
 
 		//Skip comments... Blank lines will not be skipped, as they might carry meaning!
-		if(comment==line.front()) {
+		if(delim.comment==line.front()) {
 			continue;
 		}
 
@@ -269,7 +311,7 @@ std::vector<tools::i8n::lexer::token> tools::i8n::lexer::from_string(const std::
 
 	//!The last thing we expect is actually a delimiter, so this is an error.
 	if(str_trim(buffer).size()) {
-		throw i8n_lexer_generic_error("non-token found at the end of the stream");
+		throw i8n_lexer_generic_error("non-token found at the end of the stream: '"+buffer+"'");
 	}
 
 	return result;
@@ -279,14 +321,14 @@ tools::i8n::lexer::tokentypes tools::i8n::lexer::scan_buffer(const std::string& 
 
 	assert(2==_control.size());
 
-	if(open_label==_control) 		return tokentypes::openlabel;
-	else if(close_label==_control) 	return tokentypes::closelabel;
-	else if(open_value==_control) 	return tokentypes::openvalue;
-	else if(close_value==_control)	return tokentypes::closevalue;
-	else if(open_var==_control) 	return tokentypes::openvar;
-	else if(close_var==_control) 	return tokentypes::closevar;
-	else if(open_embed==_control) 	return tokentypes::openembed;
-	else if(close_embed==_control) 	return tokentypes::closeembed;
+	if(delim.open_label==_control) 		return tokentypes::openlabel;
+	else if(delim.close_label==_control) 	return tokentypes::closelabel;
+	else if(delim.open_value==_control) 	return tokentypes::openvalue;
+	else if(delim.close_value==_control)	return tokentypes::closevalue;
+	else if(delim.open_var==_control) 	return tokentypes::openvar;
+	else if(delim.close_var==_control) 	return tokentypes::closevar;
+	else if(delim.open_embed==_control) 	return tokentypes::openembed;
+	else if(delim.close_embed==_control) 	return tokentypes::closeembed;
 	return tokentypes::nothing;
 }
 
@@ -682,4 +724,16 @@ bool tools::i8n::substitution::operator==(const substitution& _o) const {
 
 	return _o.key==key
 		&& _o.value==value;
+}
+
+tools::i8n::delimiters::delimiters()
+	:open_label{"[["},
+	close_label{"]]"},
+	open_value{"{{"},
+	close_value{"}}"},
+	open_var{"(("},
+	close_var{"))"},
+	open_embed{"<<"},
+	close_embed{">>"},
+	comment{'#'} {
 }
