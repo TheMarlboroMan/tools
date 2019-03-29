@@ -82,13 +82,7 @@ tools::i8n_parser_error::i8n_parser_error(const std::string _err)
 tools::i8n::i8n(const std::string& _path, const std::string& _lan, const std::vector<std::string>& _input)
 	:file_path(_path), language(_lan) {
 
-	set_fail_entry(
-		delimiter_set.open_value
-		+"ERROR : could not locate i8n key "
-		+delimiter_set.open_var
-		+"__key__"
-		+delimiter_set.close_var
-		+delimiter_set.close_value);
+	create_default_error_entry();
 
 	std::map<std::string, std::vector<lexer::token>>	lexer_tokens;
 	for(const auto& _i : _input) {
@@ -98,7 +92,25 @@ tools::i8n::i8n(const std::string& _path, const std::string& _lan, const std::ve
 	build_entries(lexer_tokens);
 }
 
-void tools::i8n::add(const std::string& _path) {
+//!Class constructor with path and default language.
+tools::i8n::i8n(const std::string& _path, const std::string& _lan)
+	:file_path(_path), language(_lan) {
+
+	create_default_error_entry();
+}
+
+void tools::i8n::create_default_error_entry() {
+
+	set_fail_entry(
+		delimiter_set.open_value
+		+"ERROR : could not locate i8n key "
+		+delimiter_set.open_var
+		+"__key__"
+		+delimiter_set.close_var
+		+delimiter_set.close_value);
+}
+
+void tools::i8n::add_file(const std::string& _path) {
 
 	if(!_path.size()) {
 		throw i8n_exception_no_path{};

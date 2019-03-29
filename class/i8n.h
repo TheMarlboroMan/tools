@@ -120,17 +120,25 @@ class i8n {
 
 	//!Class constructor with path, default language and list of files.
 							i8n(const std::string&, const std::string&, const std::vector<std::string>&);
+	//!Class constructor with path and default language.
+							i8n(const std::string&, const std::string&);
 
-	//!Adds the given file to the database. Will throw on failure to 
+	//!Adds the given file to the database. Will throw on failure to
 	//!or if no path/language has been set (along with parser and lexer
-	//!errors. Calling add will trigger a recompilation of all texts, so 
+	//!errors. Calling add will trigger a recompilation of all texts, so
 	//!the preferred way adding texts is by doing so in the constructor.
 	//TODO: Perhaps a pair of lock-unlock, so add is not so intensive.
+	void					add_file(const std::string&);
+
+	//!Adds the string to the database. The string might contain as many tokens
+	//!as needed.
+	//TODO: Beware of this: the whole thing with exceptions now depends on
+	//!files.
 	void					add(const std::string&);
-	
-	//TODO: method to directly add a string, instead of a file.
-	//TODO: Such method could have two signatures: one with key - value
-	//and the other with raw string.
+	//!Adds a single pair of key -> value to the database.
+	//TODO: Beware of this: the whole thing with exceptions now depends on
+	//!files.
+	void					add(const std::string&, const std::string&);
 
 	//!Adds a permanent substitution.
 	void					set(const substitution&);
@@ -284,6 +292,8 @@ class i8n {
 	void					add_private(const std::string&, std::map<std::string, std::vector<lexer::token>>&);
 	//!Compiles the lexer tokens into the codex entries.
 	void					build_entries(std::map<std::string, std::vector<lexer::token>>&);
+	//!Creates the default error entry.
+	void					create_default_error_entry();
 };
 
 }

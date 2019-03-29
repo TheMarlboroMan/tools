@@ -9,7 +9,7 @@ int main(int, char **) {
 	i8n localization={"data", "en", {"test01.dat", "test02.dat"}};
 	//i8n localization={"data", "en", {"test03.dat"}};
 
-	localization.add({"test03.dat"});
+	localization.add_file({"test03.dat"});
 
 	localization.set({"var", "supervar"});
 	std::cout<<localization.get("label-1")<<std::endl;
