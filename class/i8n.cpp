@@ -87,7 +87,7 @@ tools::i8n::i8n(const std::string& _path, const std::string& _lan, const std::ve
 	std::map<std::string, std::vector<lexer::token>>	lexer_tokens;
 	for(const auto& _i : _input) {
 		paths.push_back(_i);
-		add_private(_i, lexer_tokens);
+		lexicalize_file(_i, lexer_tokens);
 	}
 	build_entries(lexer_tokens);
 }
@@ -131,7 +131,7 @@ void tools::i8n::add_file(const std::string& _path) {
 	reload_codex();
 }
 
-void tools::i8n::add_private(const std::string& _path, std::map<std::string, std::vector<lexer::token>>& _lexer_tokens) {
+void tools::i8n::lexicalize_file(const std::string& _path, std::map<std::string, std::vector<lexer::token>>& _lexer_tokens) {
 
 	const std::string path=file_path+"/"+language+"/"+_path;
 	std::ifstream file(path);
@@ -227,7 +227,7 @@ void tools::i8n::reload_codex() {
 	codex.clear();
 	std::map<std::string, std::vector<lexer::token>> lexer_tokens;
 	for(auto& p : paths) {
-		add_private(p, lexer_tokens);
+		lexicalize_file(p, lexer_tokens);
 	}
 
 	build_entries(lexer_tokens);

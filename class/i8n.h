@@ -88,7 +88,9 @@ class i8n_parser_error
 					i8n_parser_error(const std::string);
 };
 
-//!Simple internationalization module.
+//!Simple internationalization module. Supports embedding of entries and 
+//!variables. As a design decision, all entries must exist whitin files, to make
+//!sure the module can keep a list of data sources when the language changes.
 class i8n {
 
 	public:
@@ -127,18 +129,7 @@ class i8n {
 	//!or if no path/language has been set (along with parser and lexer
 	//!errors. Calling add will trigger a recompilation of all texts, so
 	//!the preferred way adding texts is by doing so in the constructor.
-	//TODO: Perhaps a pair of lock-unlock, so add is not so intensive.
 	void					add_file(const std::string&);
-
-	//!Adds the string to the database. The string might contain as many tokens
-	//!as needed.
-	//TODO: Beware of this: the whole thing with exceptions now depends on
-	//!files.
-	void					add(const std::string&);
-	//!Adds a single pair of key -> value to the database.
-	//TODO: Beware of this: the whole thing with exceptions now depends on
-	//!files.
-	void					add(const std::string&, const std::string&);
 
 	//!Adds a permanent substitution.
 	void					set(const substitution&);
@@ -147,7 +138,9 @@ class i8n {
 	void					set_root(const std::string&);
 
 	//!Sets the current language key. Will reload the database of texts
-	//!and trigger a recompilation.
+	//!and trigger a recompilation. The recompilation will fail if the new
+	//!language does not include the same complete set of files as the
+	//!original.
 	void					set_language(const std::string&);
 
 	//!Retrieves - from the key database - the given text.
@@ -289,7 +282,7 @@ class i8n {
 	//!Reloads all entries.
 	void					reload_codex();
 	//!Internally adds a file, does not trigger recompilation.
-	void					add_private(const std::string&, std::map<std::string, std::vector<lexer::token>>&);
+	void					lexicalize_file(const std::string&, std::map<std::string, std::vector<lexer::token>>&);
 	//!Compiles the lexer tokens into the codex entries.
 	void					build_entries(std::map<std::string, std::vector<lexer::token>>&);
 	//!Creates the default error entry.
