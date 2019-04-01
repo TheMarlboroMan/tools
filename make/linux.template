@@ -16,7 +16,7 @@ __TEMPLATE_WITH_DEBUG_CODE__
 __TEMPLATE_DISABLE_ASSERT__
 
 #Fixed compiler definitions.
-CC=g++
+CC=g++-6
 WARNING_FLAGS=-Wall -Wextra -Wundef -Wcast-align -Wwrite-strings -Wlogical-op -Wmissing-declarations -Wredundant-decls -Wshadow -Woverloaded-virtual
 FLAGS_BASE=-Wno-deprecated -ansi -pedantic -std=c++14 -fno-rtti $(SYSTEM_FLAGS)
 INCLUDES=

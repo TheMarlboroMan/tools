@@ -665,20 +665,21 @@ root:[			//This is the root key, with a vector value.
 ]
 **/
 
-template<typename Tkey>
+template<typename tkey, typename t_transkey>
 void mount_from_dnot(
 	const tools::dnot_token& root,
-	options_menu<Tkey>& data,
-	//TODO: Nope. this should be a template too!!! TKey to TTransKey
-	std::map<Tkey, int>* translation_map=nullptr)
+	options_menu<tkey>& data,
+	std::map<tkey, t_transkey>* translation_map=nullptr)
 {
 	for(const auto& opt : root.get_vector())
 	{
-		const /*std::string*/ Tkey k_opt=opt["k"];
+		const /*std::string*/ tkey k_opt=opt["k"];
 
 		//TODO: The comment would be out of sync: no more ints.
-		if(translation_map!=nullptr) (*translation_map)[k_opt]=opt["t"]; //So here we write the key with its integer translation data.
-
+		if(translation_map!=nullptr) {
+			(*translation_map)[k_opt]=opt["t"]; //So here we write the key with its translation data.
+		}
+		
 		const std::string menu_type=opt["m"];
 
 		if(menu_type=="templated")
@@ -687,9 +688,15 @@ void mount_from_dnot(
 			//que ayuda a saber que es un método templatizado y no una propiedad seguida de "menor que".
 
 			const std::string mt=opt["mt"];
-			if(mt=="string") data.template insert_templated<std::string>(k_opt, "#string_templated_placeholder#");
-			else if(mt=="int") data.template insert_templated<int>(k_opt, "#int_templated_placeholder#");
-			else if(mt=="bool") data.template insert_templated<bool>(k_opt, "#bool_templated_placeholder#");
+			if(mt=="string") {
+				data.template insert_templated<std::string>(k_opt, "#string_templated_placeholder#");
+			}
+			else if(mt=="int") {
+				data.template insert_templated<int>(k_opt, "#int_templated_placeholder#");
+			}
+			else if(mt=="bool") {
+				data.template insert_templated<bool>(k_opt, "#bool_templated_placeholder#");
+			}
 			else throw std::runtime_error("unknown template type "+mt);
 
 			const auto& selections=opt["o"].get_vector();
