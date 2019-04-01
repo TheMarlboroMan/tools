@@ -17,7 +17,7 @@ DISABLE_ASSERT=-DNDEBUG=1
 CC=g++
 INCLUDES=
 WARNING_FLAGS=-Wno-deprecated -Wall
-FLAGS_BASE= -fno-rtti -ansi -pedantic -std=c++14 $(SYSTEM_FLAGS)
+FLAGS_BASE= -fno-rtti -ansi -pedantic -std=c++11 $(SYSTEM_FLAGS)
 CFLAGS=-c $(DEBUG) $(OPTIMIZATION) $(FLAGS_BASE) $(WARNING_FLAGS) $(INCLUDES)
 
 include make/core

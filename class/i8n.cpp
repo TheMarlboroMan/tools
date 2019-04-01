@@ -391,6 +391,29 @@ std::map<std::string, tools::i8n::codex_entry> tools::i8n::parser::parse(const s
 
 void tools::i8n::parser::compact_entry(codex_entry& _entry) const {
 
+#ifdef WINCOMPIL
+//Current Windows builds do not support C++14 features.
+
+	auto it=std::begin(_entry.segments);
+
+	while(true) {
+
+		auto next=it+1;
+		if(next >= std::end(_entry.segments)) {
+			break;
+		}
+
+		if(entry_segment::types::literal==it->type && it->type==next->type) {
+			it->value+=next->value;
+			it=_entry.segments.erase(next);
+			continue;
+		}
+
+		++it;
+	}
+
+#else
+//For the fun of it, we can do it in reverse and use some C++14.
 	auto it=std::rbegin(_entry.segments);
 
 	while(true) {
@@ -410,6 +433,7 @@ void tools::i8n::parser::compact_entry(codex_entry& _entry) const {
 
 		++it;
 	}
+#endif
 }
 
 std::map<std::string, tools::i8n::codex_entry> tools::i8n::parser::compile_entries(std::map<std::string, tools::i8n::codex_entry>& _entries) const {
