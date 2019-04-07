@@ -15,6 +15,7 @@ $(DIR_O)file_utils.o\
 $(DIR_O)string_utils.o\
 $(DIR_O)number_utils.o\
 $(DIR_O)chrono.o\
+$(DIR_O)i8n.o\
 $(DIR_O)dnot_config_file.o
 
 all: create_obj $(ALL_OBJECTS)
