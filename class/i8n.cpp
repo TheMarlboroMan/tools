@@ -48,17 +48,17 @@ tools::i8n_lexer_error_with_file::i8n_lexer_error_with_file(const std::string& _
 		+_err
 		+" in file "
 		+_file) {
-};
+}
 
 tools::i8n_lexer_generic_error::i8n_lexer_generic_error(const std::string& _err)
 	:std::runtime_error(_err) {
 
-};
+}
 
 tools::i8n_delimiter_exception::i8n_delimiter_exception()
 	:i8n_exception("invalid delimiters size: delimiters must be 2 chars long") {
 
-};
+}
 
 
 tools::i8n_parser_token_error::i8n_parser_token_error(const std::string _err, int _line, int _char)
@@ -358,6 +358,8 @@ std::string tools::i8n::lexer::typetostring(tokentypes _type) {
 		case tokentypes::literal:	return "literal";
 		case tokentypes::nothing:	return "nothing";
 	}
+
+	return "shut up compiler";
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -440,7 +442,7 @@ std::map<std::string, tools::i8n::codex_entry> tools::i8n::parser::compile_entri
 
 	std::map<std::string, codex_entry> solved;
 
-	int last_solved=0;
+	size_t last_solved=0;
 	while(_entries.size()) {
 
 		//Move solvable entries around...
@@ -518,7 +520,7 @@ void tools::i8n::parser::debug(const entry_segment& _segment, std::ostream& _str
 void tools::i8n::parser::interpret_tokens(const std::vector<lexer::token>& _tokens, std::map<std::string, codex_entry>& _entries) const {
 
 	int curtoken=0,
-		size=size=_tokens.size()-1;
+		size=_tokens.size()-1;
 
 	std::string curlabel;
 
@@ -653,7 +655,7 @@ std::string tools::i8n::parser::parse_open_close(const std::vector<lexer::token>
 
 	//Skip the opening...
 	++_curtoken;
-	if(_curtoken >= _tokens.size()) {
+	if((size_t)_curtoken >= _tokens.size()) {
 		throw i8n_parser_error("unexpected end of tokens");
 	}
 
@@ -666,7 +668,7 @@ std::string tools::i8n::parser::parse_open_close(const std::vector<lexer::token>
 
 	//Skip the value and check we are closing...
 	++_curtoken;
-	if(_curtoken >= _tokens.size()) {
+	if((size_t)_curtoken >= _tokens.size()) {
 		throw i8n_parser_error("unexpected end of file");
 	}
 

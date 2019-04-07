@@ -19,7 +19,7 @@ rtype reduce(iterator _begin, iterator _end, lambda _callback, rtype&& initial) 
 	}
 
 	return result;
-};
+}
 
 }
 
