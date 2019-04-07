@@ -71,6 +71,12 @@ $(DIR_SOURCE)string_utils.h \
 $(DIR_SOURCE)string_utils.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_SOURCE)string_utils.cpp -o $(DIR_O)string_utils.o
 
+$(DIR_O)i8n.o :\
+create_obj\
+$(DIR_HERRAMIENTAS_PROYECTO)i8n.h \
+$(DIR_HERRAMIENTAS_PROYECTO)i8n.cpp
+	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_HERRAMIENTAS_PROYECTO)i8n.cpp -o $(DIR_O)i8n.o
+
 $(DIR_O)text_reader.o :\
 create_obj\
 $(DIR_HERRAMIENTAS_PROYECTO)text_reader.h \
