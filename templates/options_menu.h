@@ -677,7 +677,7 @@ void mount_from_dnot(
 
 		//TODO: The comment would be out of sync: no more ints.
 		if(translation_map!=nullptr) {
-			(*translation_map)[k_opt]=opt["t"]; //So here we write the key with its translation data.
+			(*translation_map)[k_opt]=(t_transkey)opt["t"]; //So here we write the key with its translation data.
 		}
 		
 		const std::string menu_type=opt["m"];
@@ -703,7 +703,9 @@ void mount_from_dnot(
 			for(const auto& sel : selections)
 			{
 				const std::string k_sel=sel["k"];
-				if(translation_map!=nullptr) (*translation_map)[k_sel]=sel["t"];
+				if(translation_map!=nullptr) {
+					(*translation_map)[k_sel]=(t_transkey)sel["t"];
+				}
 
 				if(mt=="string") data.template insert_templated<std::string>(k_opt, k_sel, "#string_selection_placeholder#", sel["v"]);
 				else if(mt=="int") data.template insert_templated<int>(k_opt, k_sel, "#int_selection_placeholder", sel["v"]); 
