@@ -25,6 +25,9 @@ optimizations=$__retval;
 y_n_choice "With debug" "DEBUG=-g" "#DEBUG=-g"
 debug=$__retval;
 
+y_n_choice "With C++14" "CPPREV=-std=c++14" "CPPREV=-std=c++11"
+cpprev=$__retval
+
 y_n_choice "With debug code" "WITH_DEBUG_CODE=-DWITH_DEBUG_CODE" "#WITH_DEBUG_CODE=-DWITH_DEBUG_CODE"
 debug_code=$__retval;
 
@@ -38,6 +41,7 @@ sed -i -e "s/__TEMPLATE_OPTIMIZATION__/$optimizations/g" ./$makefile_name;
 sed -i -e "s/__TEMPLATE_DEBUG__/$debug/g" ./$makefile_name;
 sed -i -e "s/__TEMPLATE_WITH_DEBUG_CODE__/$debug_code/g" ./$makefile_name;
 sed -i -e "s/__TEMPLATE_DISABLE_ASSERT__/$disable_assert/g" ./$makefile_name;
+sed -i -e "s/__TEMPLATE_CPPREV__/$cpprev/g" ./$makefile_name;
 
 y_n_choice "Begin compilation" "" ""
 if [ $? -eq 0 ]; then

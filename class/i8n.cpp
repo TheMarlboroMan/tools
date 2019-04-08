@@ -393,9 +393,7 @@ std::map<std::string, tools::i8n::codex_entry> tools::i8n::parser::parse(const s
 
 void tools::i8n::parser::compact_entry(codex_entry& _entry) const {
 
-#ifdef WINCOMPIL
-//Current Windows builds do not support C++14 features.
-
+#if __GNUC__ <= 4
 	auto it=std::begin(_entry.segments);
 
 	while(true) {
