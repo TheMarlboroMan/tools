@@ -497,8 +497,8 @@ class options_menu
 	//!Manually sets bool values for a bool option.
 
 	//!This function is useful to load saved values of a menu from a save file.
-	void	set_bool(const Tkey& key, bool value)
-	{
+	void	set_bool(const Tkey& key, bool value) {
+
 		check_option(key, "key does not exist for set_bool");
 		auto& o=options.at(key);
 		validate_type(o->get_type(), types::tbool, "option is not bool");
@@ -506,8 +506,8 @@ class options_menu
 	}
 
 	//!Specifically returns string values from a string option.
-	std::string	get_string(const Tkey& key) const
-	{
+	std::string	get_string(const Tkey& key) const {
+
 		check_option(key, "key does not exist for get_string");
 		const auto& o=options.at(key);
 		validate_type(o->get_type(), types::tstring, "option is not string");
@@ -517,8 +517,8 @@ class options_menu
 	//!Manually sets string values for an string option.
 
 	//!This function is useful to load saved values of a menu from a save file.
-	void	set_string(const Tkey& key, const std::string& value)
-	{
+	void	set_string(const Tkey& key, const std::string& value) {
+
 		check_option(key, "key does not exist for set_string");
 		auto& o=options.at(key);
 		validate_type(o->get_type(), types::tstring, "option is not string");
@@ -526,8 +526,8 @@ class options_menu
 	}
 
 	//!Returns the option name for the given key.
-	std::string	get_name(const Tkey& key) const
-	{
+	std::string	get_name(const Tkey& key) const {
+
 		check_option(key, "key does not exist for get_name");
 		return options.at(key)->name;
 	}
@@ -712,20 +712,16 @@ void mount_from_dnot(
 				else if(mt=="bool") data.template insert_templated<bool>(k_opt, k_sel, "#bool_selection_placeholder", sel["v"]);
 			}
 		}
-		else if(menu_type=="int")
-		{
+		else if(menu_type=="int") {
 			data.insert_int(k_opt, "#int_placeholder#", opt["min"], opt["max"], opt["min"]);
 		}
-		else if(menu_type=="bool")
-		{
+		else if(menu_type=="bool") {
 			data.insert_bool(k_opt, "#bool_placeholder#", true);
 		}
-		else if(menu_type=="string")
-		{
+		else if(menu_type=="string") {
 			data.insert_string(k_opt, "#string_placeholder#", "#string_placeholder_value#");
 		}
-		else if(menu_type=="void")
-		{
+		else if(menu_type=="void") {
 			data.insert_void(k_opt, "#void_placeholder#");
 		}
 	}
