@@ -12,38 +12,45 @@ dnot_parser::dnot_parser(std::istream& pstream, int l, int c)
 	stream(pstream), line(l), column(c) {
 
 	buffer.reserve(1024);
-	//TODO: What about the type... this is failing like hell... Where do we control this???.
+	//TODO: What about the type... this is failing like hell... 
+	//Where do we control this???.
 }
 
 void dnot_parser::operator()() {
 
 	while(true) {
 
+		//Forcing exit from an inner function....
 		if(state==tstates::exiting) {
-			break;
+			return;
+		}
+
+		if(stream.eof()) {
+
+			//TODO: Es posible que esté malformado si estamos reading quotes;
+			if(state==tstates::reading) {
+				assign_tobject();
+			}
+
+			state=tstates::exiting;
+			done=true;
+			return;
 		}
 
 		//Tenemos dos modos de lectura: estoy "dentro de una string"
 		//o fuera.
 
 		char cb=read_stream(read_quotes);
-
-		if(stream.eof()) {
-			//TODO: Es posible que esté malformado si estamos reading quotes;
-			if(state==tstates::reading) assign_tobject();
-			state=tstates::exiting;
-			done=true;
-			break;
-		}
-
 		buffer+=cb;
 		read_quotes ? process_string(cb) : process_stream(cb);
 	}
 }
 
 char dnot_parser::read_stream(bool reading_quotes) {
-	char cb;
 
+	//TODO: What if this fucker has ended and there is nothing to read???
+	
+	char cb=0;
 	stream.get(cb);
 
 	++column;
@@ -373,6 +380,11 @@ void dnot_parser::clear_buffer() {
 
 dnot_token tools::dnot_parse(const std::string& c) {
 
+	return dnot_parse_file(c);
+}
+
+dnot_token tools::dnot_parse_file(const std::string& c) {
+
 	std::ifstream f(c.c_str());
 	if(!f.is_open()) {
 		throw std::runtime_error("unable to open file for parsing "+c);
@@ -381,11 +393,6 @@ dnot_token tools::dnot_parse(const std::string& c) {
 	dnot_parser p(f);
 	p();
 	return p.get_token();
-}
-
-dnot_token tools::dnot_parse_file(const std::string& c) {
-
-	return dnot_parse(c);
 }
 
 dnot_token tools::dnot_parse_string(const std::string& c) {
