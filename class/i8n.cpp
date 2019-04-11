@@ -249,7 +249,7 @@ void tools::i8n::set_fail_entry(const std::string& _str) {
 // Lexer.
 
 tools::i8n::lexer::lexer(const delimiters& _del)
-	:delim{_del} {
+	:delim(_del) {
 
 }
 

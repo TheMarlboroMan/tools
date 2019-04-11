@@ -91,6 +91,22 @@ class i8n_parser_error
 //!Simple internationalization module. Supports embedding of entries and 
 //!variables. As a design decision, all entries must exist whitin files, to make
 //!sure the module can keep a list of data sources when the language changes.
+
+//TODO: provide an interface, so we can provide a mock to work with it, just
+//in case.
+
+class i8n_mock {
+
+	public:
+						i8n_mock(const std::string&, const std::string&, const std::vector<std::string>&) {}
+						i8n_mock(const std::string&, const std::string&) {}
+	void					add_file(const std::string&) {}
+	void					set_root(const std::string&) {}
+	void					set_language(const std::string&) {}
+	std::string				get(const std::string&) const {return "mock";}
+	void					set_fail_entry(const std::string&) {}
+};
+
 class i8n {
 
 	public:
