@@ -19,8 +19,11 @@ std::string tools::dump_file(const std::string& c) {
 		}
 
 		std::getline(f, lin);
+
 		res+=lin+"\n";
 	}
 
+	//Remove last newline.
+	res.pop_back();
 	return res;
 }
