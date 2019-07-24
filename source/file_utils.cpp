@@ -14,13 +14,18 @@ std::string tools::dump_file(const std::string& c) {
 	std::ifstream f(c);
 	
 	while(true) {
+
 		if(f.eof()) {
 			break;
 		}
 
 		std::getline(f, lin);
+		res+=lin;
 
-		res+=lin+"\n";
+
+		if(!f.eof()) {
+			res+="\n";
+		}
 	}
 
 	//Remove last newline.
