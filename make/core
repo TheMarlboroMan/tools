@@ -14,6 +14,7 @@ $(DIR_O)pair_file_parser.o\
 $(DIR_O)file_utils.o\
 $(DIR_O)string_utils.o\
 $(DIR_O)number_utils.o\
+$(DIR_O)system.o\
 $(DIR_O)chrono.o\
 $(DIR_O)i8n.o\
 $(DIR_O)dnot_config_file.o
@@ -89,6 +90,11 @@ $(DIR_O)file_utils.o :\
 $(DIR_SOURCE)file_utils.h \
 $(DIR_SOURCE)file_utils.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_SOURCE)file_utils.cpp -o $(DIR_O)file_utils.o
+
+$(DIR_O)system.o :\
+$(DIR_SOURCE)system.h \
+$(DIR_SOURCE)system.cpp
+	$(CC) $(CFLAGS) $(INCLUDES) $(DIR_SOURCE)system.cpp -o $(DIR_O)system.o
 
 $(DIR_O)chrono.o :\
 $(DIR_HERRAMIENTAS_PROYECTO)chrono.h \

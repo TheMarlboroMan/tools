@@ -393,7 +393,6 @@ std::map<std::string, tools::i8n::codex_entry> tools::i8n::parser::parse(const s
 
 void tools::i8n::parser::compact_entry(codex_entry& _entry) const {
 
-#if __GNUC__ <= 4
 	auto it=std::begin(_entry.segments);
 
 	while(true) {
@@ -411,29 +410,6 @@ void tools::i8n::parser::compact_entry(codex_entry& _entry) const {
 
 		++it;
 	}
-
-#else
-//For the fun of it, we can do it in reverse and use some C++14.
-	auto it=std::rbegin(_entry.segments);
-
-	while(true) {
-
-		auto prev=it+1;
-		if(prev == std::rend(_entry.segments)) {
-			break;
-		}
-
-		if(entry_segment::types::literal==it->type && it->type==prev->type) {
-
-			prev->value+=it->value;
-			_entry.segments.erase(it.base()-1); //For a reverse iterator, base is the next element the forward iterator would be pointing to.
-			it=prev;
-			continue;
-		}
-
-		++it;
-	}
-#endif
 }
 
 std::map<std::string, tools::i8n::codex_entry> tools::i8n::parser::compile_entries(std::map<std::string, tools::i8n::codex_entry>& _entries) const {
