@@ -6,4 +6,4 @@ makefile_linux
 makefile
 examples/*.out
 examples/*.exe
-.build/
+build
