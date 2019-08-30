@@ -2,6 +2,8 @@ set(SOURCE
    ${SOURCE}
    ${CMAKE_CURRENT_SOURCE_DIR}/arg_manager.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/arg_manager.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/chrono.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/chrono.h
    ${CMAKE_CURRENT_SOURCE_DIR}/dnot_config_file.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/dnot_config_file.h
    ${CMAKE_CURRENT_SOURCE_DIR}/dnot_parser.cpp
