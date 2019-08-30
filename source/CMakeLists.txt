@@ -1,0 +1,12 @@
+set(SOURCE
+   ${SOURCE}
+   ${CMAKE_CURRENT_SOURCE_DIR}/file_utils.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/file_utils.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/number_utils.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/number_utils.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/string_utils.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/string_utils.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/system.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/system.cpp
+   PARENT_SCOPE
+)

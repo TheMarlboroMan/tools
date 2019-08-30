@@ -1,0 +1,19 @@
+set(SOURCE
+   ${SOURCE}
+   ${CMAKE_CURRENT_SOURCE_DIR}/dnot_config_file.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/dnot_config_file.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/dnot_parser.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/dnot_parser.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/dnot_token.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/dnot_token.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/i8n.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/i8n.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/number_generator.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/pager.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/pager.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/pair_file_parser.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/pair_file_parser.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/text_reader.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/text_reader.h
+   PARENT_SCOPE
+)
