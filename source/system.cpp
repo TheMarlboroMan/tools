@@ -2,8 +2,10 @@
 #include <iostream>
 #include <memory>
 #include <cstring>
+#include <sys/wait.h>
 
 #include "system.h"
+
 
 using namespace tools;
 
@@ -29,5 +31,16 @@ exec_result tools::exec(const char * _command, size_t _bufsize) {
 		result+=buffer.get();
 	}
 
-	return {pclose(pipe), result};
+	int status=pclose(pipe);
+	if(WIFEXITED(status)) {
+		status=WEXITSTATUS(status);
+	}
+	else if(WIFSIGNALED(status)) {
+		status=WTERMSIG(status);
+	}
+	else if(WIFSTOPPED(status)) {
+		status=WSTOPSIG(status);
+	}
+
+	return {status, result};
 }
