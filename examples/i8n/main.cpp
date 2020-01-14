@@ -1,13 +1,14 @@
-#include <tools/i8n.cpp>
-#include <tools/string_utils.cpp>
-#include <tools/file_utils.cpp>
+#include <tools/i8n.h>
+#include <tools/string_utils.h>
+#include <tools/file_utils.h>
+
+#include <iostream>
 
 int main(int, char **) {
 
 	using namespace tools;
 
-	i8n localization={"data", "en", {"test01.dat", "test02.dat"}};
-	//i8n localization={"data", "en", {"test03.dat"}};
+	i8n localization={"../examples/i8n/data", "en", {"test01.dat", "test02.dat"}};
 
 	localization.add_file({"test03.dat"});
 
@@ -17,8 +18,8 @@ int main(int, char **) {
 	std::cout<<localization.get("complex", {{"varhere","varhere1"}, {"varthere","varthere1"}})<<std::endl;
 	std::cout<<localization.get("label-doesnotexist")<<std::endl;
 
-//	localization.set_fail_entry("{{Will not be able to find ((__key__))}}");
-//	std::cout<<localization.get("label-doesnotexist")<<std::endl;
+	localization.set_fail_entry("{{Will not be able to find ((__key__))}}");
+	std::cout<<localization.get("label-doesnotexist")<<std::endl;
 
 	return 0;
 }

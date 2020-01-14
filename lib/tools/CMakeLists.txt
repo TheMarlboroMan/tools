@@ -1,18 +1,18 @@
 set(SOURCE
-   ${SOURCE}
-   ${CMAKE_CURRENT_SOURCE_DIR}/localization_base.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/localization_base.h
-   PARENT_SCOPE
-)CMakeLists.txt
-set(SOURCE
-   ${SOURCE}
-   ${CMAKE_CURRENT_SOURCE_DIR}/file_utils.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/file_utils.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/number_utils.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/number_utils.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/string_utils.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/string_utils.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/system.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/system.cpp
-   PARENT_SCOPE
+	${SOURCE}
+	${CMAKE_CURRENT_SOURCE_DIR}/arg_manager.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/chrono.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/dnot_config_file.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/dnot_parser.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/dnot_token.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/i8n.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/pager.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/pair_file_parser.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/text_reader.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/localization_base.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/file_utils.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/number_utils.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/string_utils.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/system.cpp
+	PARENT_SCOPE
 )

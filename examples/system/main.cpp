@@ -1,5 +1,4 @@
-
-#include <tools/system.cpp>
+#include <tools/system.h>
 #include <iostream>
 
 int main(int /*argc*/, char ** /*argv*/) {
