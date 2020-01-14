@@ -17,13 +17,11 @@ add_compile_options(-std=c++11)
 
 set(SOURCE "")
 
-add_subdirectory("${PROJECT_SOURCE_DIR}/base")
-add_subdirectory("${PROJECT_SOURCE_DIR}/class")
-add_subdirectory("${PROJECT_SOURCE_DIR}/source")
+add_subdirectory("${PROJECT_SOURCE_DIR}/src")
 
 add_library(tools SHARED ${SOURCE})
 install(TARGETS tools DESTINATION /usr/local/lib)
-install(DIRECTORY class/ DESTINATION /usr/local/include/tools/class FILES_MATCHING PATTERN "*.h")
-install(DIRECTORY base/ DESTINATION /usr/local/include/tools/base FILES_MATCHING PATTERN "*.h")
-install(DIRECTORY templates/ DESTINATION /usr/local/include/tools/templates FILES_MATCHING PATTERN "*.h")
-install(DIRECTORY source/ DESTINATION /usr/local/include/tools/source FILES_MATCHING PATTERN "*.h")
+install(DIRECTORY src/class/ DESTINATION /usr/local/include/tools/class FILES_MATCHING PATTERN "*.h")
+install(DIRECTORY src/base/ DESTINATION /usr/local/include/tools/base FILES_MATCHING PATTERN "*.h")
+install(DIRECTORY src/templates/ DESTINATION /usr/local/include/tools/templates FILES_MATCHING PATTERN "*.h")
+install(DIRECTORY src/source/ DESTINATION /usr/local/include/tools/source FILES_MATCHING PATTERN "*.h")
