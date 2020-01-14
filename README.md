@@ -6,6 +6,10 @@ With the purpose of reusability and independence the makefile only generate obje
 
 As for July 2016 these tools have been translated into english and retooled to some point (some things have been changed, all interfaces have been redone and some utilities have been deleted). As a result of this, all compatibility with the previous versions has been broken. There should still be copies in the branches "master" and "classic" of the "herramientas_proyecto" repository, but these will be developed no more.
 
+# compatibility
+
+As of January 2020 compatibility with previous versions is broken, as the project has underwent a file reorganization.
+
 # building
 
 Must be built with a compiler that accepts the c++14 standard.
