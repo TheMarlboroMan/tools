@@ -1,6 +1,6 @@
-#include "pair_file_parser.h"
-#include "text_reader.h"
-#include "../templates/compatibility_patches.h"
+#include <tools/pair_file_parser.h>
+#include <tools/text_reader.h>
+#include <tools/compatibility_patches.h>
 
 #include <fstream>
 

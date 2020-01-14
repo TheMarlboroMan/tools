@@ -1,6 +1,6 @@
-#include "../../class/i8n.cpp"
-#include "../../source/string_utils.cpp"
-#include "../../source/file_utils.cpp"
+#include <tools/i8n.cpp>
+#include <tools/string_utils.cpp>
+#include <tools/file_utils.cpp>
 
 int main(int, char **) {
 

@@ -3,7 +3,7 @@
 #include "ranged_value.h"
 #include "compatibility_patches.h"
 
-#include "../class/dnot_parser.h"
+#include "dnot_parser.h"
 
 #include <iostream>
 #include <type_traits>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../class/pager.h"
+#include "pager.h"
 
 #include <iostream>
 #include <vector>

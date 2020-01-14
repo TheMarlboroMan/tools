@@ -1,7 +1,7 @@
-#include "string_utils.h"
+#include <tools/string_utils.h>
 
-#include "../class/text_reader.h"
-#include "../templates/compatibility_patches.h"
+#include <tools/text_reader.h>
+#include <tools/compatibility_patches.h>
 
 #include <bitset>
 #include <iostream>

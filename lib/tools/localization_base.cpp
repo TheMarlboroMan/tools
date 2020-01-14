@@ -1,7 +1,7 @@
-#include "localization_base.h"
+#include <tools/localization_base.h>
 
-#include "../templates/compatibility_patches.h"
-#include "../source/number_utils.h"
+#include <tools/compatibility_patches.h>
+#include <tools/number_utils.h>
 
 #include <cstdlib>
 

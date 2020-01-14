@@ -1,6 +1,6 @@
-#include "dnot_parser.h"
-#include "../source/string_utils.h"
-#include "../templates/compatibility_patches.h"
+#include <tools/dnot_parser.h>
+#include <tools/string_utils.h>
+#include <tools/compatibility_patches.h>
 #include <sstream>
 
 using namespace tools;

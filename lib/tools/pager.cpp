@@ -1,4 +1,4 @@
-#include "pager.h"
+#include <tools/pager.h>
 
 #include <iostream>
 

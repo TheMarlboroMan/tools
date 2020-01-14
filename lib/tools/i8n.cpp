@@ -1,8 +1,8 @@
-#include "i8n.h"
+#include <tools/i8n.h>
 
-#include "../source/string_utils.h"
-#include "../source/file_utils.h"
-#include "../templates/algorithm.h"
+#include <tools/string_utils.h>
+#include <tools/file_utils.h>
+#include <tools/algorithm.h>
 
 #include <algorithm>
 #include <ctype.h>

@@ -1,5 +1,5 @@
-#include "dnot_config_file.h"
-#include "../source/string_utils.h"
+#include <tools/dnot_config_file.h>
+#include <tools/string_utils.h>
 #include <map>
 
 using namespace tools;

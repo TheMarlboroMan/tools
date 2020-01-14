@@ -6,22 +6,25 @@ set(CMAKE_BUILD_TYPE Release)
 
 add_compile_options(-Wall -Wextra -Wundef -Wcast-align -Wwrite-strings -Wlogical-op -Wmissing-declarations -Wredundant-decls -Wshadow -Woverloaded-virtual -Wno-deprecated -ansi -pedantic -fno-rtti)
 
+option(BUILD_EXAMPLES "Build example code" ON)
+
 #TODO: Should also allow for c++14
 add_compile_options(-std=c++11)
-
-#TODO: Add these:
-#optimizations_y="OPTIMIZATION=-O2" optimizations_n="#OPTIMIZATION=-O2"
-#debug_y="DEBUG=-g" debug_n="#DEBUG=-g"
-#debug_code_y="WITH_DEBUG_CODE=-DWITH_DEBUG_CODE" debug_code_n="#WITH_DEBUG_CODE=-DWITH_DEBUG_CODE"
-#disable_assert_y="#DISABLE_ASSERT=-DNDEBUG=1" disable_assert_n="DISABLE_ASSERT=-DNDEBUG=1";
-
+include_directories("${PROJECT_SOURCE_DIR}/include")
 set(SOURCE "")
 
-add_subdirectory("${PROJECT_SOURCE_DIR}/src")
+add_subdirectory("${PROJECT_SOURCE_DIR}/lib")
 
 add_library(tools SHARED ${SOURCE})
 install(TARGETS tools DESTINATION /usr/local/lib)
-install(DIRECTORY src/class/ DESTINATION /usr/local/include/tools/class FILES_MATCHING PATTERN "*.h")
-install(DIRECTORY src/base/ DESTINATION /usr/local/include/tools/base FILES_MATCHING PATTERN "*.h")
-install(DIRECTORY src/templates/ DESTINATION /usr/local/include/tools/templates FILES_MATCHING PATTERN "*.h")
-install(DIRECTORY src/source/ DESTINATION /usr/local/include/tools/source FILES_MATCHING PATTERN "*.h")
+install(DIRECTORY include/ DESTINATION /usr/local/include/ FILES_MATCHING PATTERN "*.h")
+install(DIRECTORY include/ DESTINATION /usr/local/include/ FILES_MATCHING PATTERN "*.h")
+install(DIRECTORY include/ DESTINATION /usr/local/include/ FILES_MATCHING PATTERN "*.h")
+install(DIRECTORY include/ DESTINATION /usr/local/include/ FILES_MATCHING PATTERN "*.h")
+
+if(${BUILD_EXAMPLES})
+	add_executable(i8n examples/i8n/main.cpp)
+	target_link_libraries(i8n tools)
+	add_executable(system examples/system/main.cpp)
+	target_link_libraries(system tools)
+endif()

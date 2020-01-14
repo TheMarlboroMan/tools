@@ -1,5 +1,11 @@
 set(SOURCE
    ${SOURCE}
+   ${CMAKE_CURRENT_SOURCE_DIR}/localization_base.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/localization_base.h
+   PARENT_SCOPE
+)CMakeLists.txt
+set(SOURCE
+   ${SOURCE}
    ${CMAKE_CURRENT_SOURCE_DIR}/file_utils.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/file_utils.h
    ${CMAKE_CURRENT_SOURCE_DIR}/number_utils.h
