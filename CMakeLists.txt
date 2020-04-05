@@ -20,8 +20,8 @@ else()
 	add_library(tools SHARED ${SOURCE})
 endif()
 
-install(TARGETS tools DESTINATION /usr/local/lib)
-install(DIRECTORY include/ DESTINATION /usr/local/include)
+install(TARGETS tools DESTINATION lib)
+install(DIRECTORY include/ DESTINATION include)
 
 if(${BUILD_EXAMPLES})
 	add_executable(i8n examples/i8n/main.cpp)
