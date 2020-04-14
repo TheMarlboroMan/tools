@@ -8,11 +8,14 @@ As for July 2016 these tools have been translated into english and retooled to s
 
 # compatibility
 
+As of April 2020 the dnot parser has been retired. RapidJson is introduced to take its place.
 As of January 2020 compatibility with previous versions is broken, as the project has underwent a file reorganization.
 
 # building
 
 Must be built with a compiler that accepts the c++14 standard.
+
+Requires of the rapidjson library at https://github.com/Tencent/rapidjson
 
 ## TODO
 

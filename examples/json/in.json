@@ -1,0 +1,14 @@
+{
+	"int": 1,
+	"float": 1.0,
+	"double": 1.0,
+	"string":"this is a string",
+	"array": [1,2,3,4],
+	"object":{
+		"this":{
+			"is":{
+				"nested":99
+			}
+		}		
+	}
+}
