@@ -26,8 +26,18 @@ install(DIRECTORY include/ DESTINATION include)
 if(${BUILD_EXAMPLES})
 	add_executable(i8n examples/i8n/main.cpp)
 	target_link_libraries(i8n tools)
+
 	add_executable(system examples/system/main.cpp)
 	target_link_libraries(system tools)
+
 	add_executable(json examples/json/main.cpp)
 	target_link_libraries(json tools)
+
+	add_executable(file_utils examples/file_utils/main.cpp)
+	target_link_libraries(file_utils tools)
+	add_custom_command(TARGET file_utils POST_BUILD COMMAND cp -r ../examples/file_utils/*.txt ./)
+
+#	add_executable(menu examples/json/main.cpp)
+#	target_link_libraries(menu tools)
+#	add_custom_command(TARGET menu POST_BUILD COMMAND cp -r ../examples/menu/menu.json ./)
 endif()

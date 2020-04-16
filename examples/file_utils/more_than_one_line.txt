@@ -1,0 +1,4 @@
+This is more than one line, each line ends with a period.
+This is the second line.
+And this is the third line.
+And the document is over.

@@ -104,5 +104,5 @@ rapidjson::Value& json_config_file::token_from_path(const std::string& _path) {
 		}
 	}
 
-	return *p;return document;
+	return *p;
 }

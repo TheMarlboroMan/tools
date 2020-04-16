@@ -1,0 +1,53 @@
+{
+	"string_string_menu": [
+		{
+			"type":"choice",
+			"key":"10_WINDOW",
+			"translation":150,
+			"properties" : {
+				"value_type":"string",
+				"values":[
+					{"key":"01_WINDOW_10", "value": "800x500", "translation":151},
+					{"key":"01_WINDOW_20", "value": "1200x750", "translation":152},
+					{"key":"01_WINDOW_30", "value": "1600x1000", "translation":153}
+				]
+			}
+		},
+		{
+			"type":"choice",
+			"key":"20_HELP",
+			"translation":160,
+			"properties":{
+				"value_type":"bool",
+				"values":[
+					{"key":"02_HELP_10", "value": true, "translation":161},
+					{"key":"02_HELP_20", "value": false, "translation":162}
+				]
+			}
+		},
+		{
+			"type":"string",
+			"key":"22_NAME",
+			"translation":210
+		},
+		{
+			"type":"int",
+			"key":"25_FILESIZE",
+			"translation":215,
+			"properties": {
+				"min": 1,
+				"max": 9999
+			}
+		},
+		{
+			"type":"bool",
+			"key":"27_BACKUP",
+			"translation":216
+		},
+		{
+			"type":"void",
+			"key":"30_EXIT",
+			"translation":170
+		}
+	]
+}

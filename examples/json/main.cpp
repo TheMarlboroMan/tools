@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <stdexcept>
 #include <tools/file_utils.h>
 #include <tools/json_config_file.h>
 

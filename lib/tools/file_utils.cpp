@@ -1,5 +1,8 @@
 #include <tools/file_utils.h>
 
+#include <stdexcept>
+#include <iostream>
+
 using namespace tools;
 
 bool tools::file_exists(const std::string& c) {
@@ -10,25 +13,19 @@ bool tools::file_exists(const std::string& c) {
 
 std::string tools::dump_file(const std::string& c) {
 
-	std::string res, lin;
 	std::ifstream f(c);
-	
-	while(true) {
-
-		if(f.eof()) {
-			break;
-		}
-
-		std::getline(f, lin);
-		res+=lin;
-
-
-		if(!f.eof()) {
-			res+="\n";
-		}
+	if(!f) {
+		throw std::runtime_error("dump_file failed, not a file");
 	}
 
-	//Remove last newline.
-	res.pop_back();
+	std::string res, lin;
+	while(std::getline(f, lin)) {
+		res+=lin+"\n";
+	}
+
+	if(res.size()) {
+		res.pop_back();
+	}
+
 	return res;
 }
