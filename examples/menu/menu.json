@@ -49,5 +49,21 @@
 			"key":"30_EXIT",
 			"translation":170
 		}
+	],
+	"translation_pairs_english":[
+		{"index":150, "value": "Window size"},
+		{"index":151, "value": "800x500"},
+		{"index":152, "value": "1200x750"},
+		{"index":153, "value": "1600x100"},
+		{"index":160, "value": "Show help"},
+		{"index":161, "value": "Yes"},
+		{"index":162, "value": "No"},
+		{"index":170, "value": "Exit"},
+		{"index":210, "value": "Username"},
+		{"index":215, "value": "Max filesize"},
+		{"index":216, "value": "Auto backup"}
 	]
 }
+
+
+
