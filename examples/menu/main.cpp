@@ -35,15 +35,14 @@ int main(int, char **) {
 
 		//We can se some values right away... string, bool and int values are 
 		//straightforward: just use the proper argument type...
-		menu_str_str.set("22_NAME", "Bob Ross");
+		menu_str_str.set("22_NAME", std::string("Bob Ross"));
 		menu_str_str.set("25_FILESIZE", 1024);
 		menu_str_str.set("27_BACKUP", false);
 
 		//Choice values are not difficult either as long as we assign by value.
-//		menu_str_str.set("10_WINDOW", "1200x750");
-//		menu_str_str.set("20_HELP", false);
+		menu_str_str.set("10_WINDOW", "1200x750");
+		menu_str_str.set("20_HELP", false);
 		menu_str_str.set("40_PERIODICITY", 4);
-
 
 		//TODO: Do all sorts of things that would make it throw.
 
