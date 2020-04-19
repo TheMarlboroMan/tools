@@ -2,6 +2,7 @@
 
 #include "ranged_value.h"
 #include "compatibility_patches.h"
+#include "json.h"
 
 #include <rapidjson/document.h>
 
@@ -13,6 +14,7 @@
 #include <exception>
 #include <algorithm>
 #include <memory>
+#include <sstream>
 
 namespace tools {
 
@@ -52,7 +54,8 @@ menu:
 
 Entries and values are identified by an unique key. This key must be 
 completely unique: if shared between, for example, an entry and a value,
-an exception will be thrown. The key is the typename of the template.
+an exception will be thrown. The key is the typename of the template. The key
+must be printable by streams.
 
 The order of entries and values is determined by the natural order of the
 typename. For the best flexibility, std::strings are recommended.
@@ -82,14 +85,98 @@ class options_menu_translator {
 
 	public:
 
-	void	add_key_to_id(const tkey& _key, const ttranslation_id& _tid) {
-
-		key_to_id[_key]=_tid;
-	}
-
 	void	add_id_to_text(const ttranslation_id& _tid, const std::string& _text) {
 
 		id_to_text[_tid]=_text;
+	}
+
+	void	load_translation_ids(const rapidjson::Value& _root) {
+
+		const char 	* k_key="key",
+					* k_translation="translation",
+					* k_type="type",
+					* k_properties="properties",
+					* k_values="values";
+
+		if(!_root.IsArray()) {
+			throw std::runtime_error("load_translation_ids: root node must be an array ");
+		}
+
+		for(const auto& val : _root.GetArray()) {
+
+			if(!val.IsObject()) {
+				throw std::runtime_error("load_translation_ids: entry must be an object");
+			}
+
+			if(!val.HasMember(k_translation)) {
+				throw std::runtime_error("load_translation_ids: entry must have a translation value");
+			}
+
+			//Nooope.
+			if(!json_is<ttranslation_id>(val[k_translation])) {
+				throw std::runtime_error("load_translation_ids: the translation value must be of the templated type");
+			}
+
+			if(!val.HasMember(k_type)) {
+				throw std::runtime_error("load_translation_ids: entry must have a type value");
+			}
+
+			if(!val[k_type].IsString()) {
+				throw std::runtime_error("load_translation_ids: the type value must be an string");
+			}
+
+			//Add the translation for the entry...
+			const tkey entry_key=json_get<tkey>(val[k_key]);
+			key_to_id[entry_key]=json_get<ttranslation_id>(val[k_translation]);
+
+			//Only choices have translations...
+			const std::string entry_type=val[k_type].GetString();
+			if(entry_type=="choice") {
+
+				if(!val.HasMember(k_properties)) {
+					throw std::runtime_error("load_translation_ids: entry of type 'choice' must have a properties node");
+				}
+
+				const auto& properties=val[k_properties];
+				if(!properties.IsObject()) {
+					throw std::runtime_error("load_translation_ids: properties node must be an object for entry of type 'choice'");
+				}
+
+				if(!properties.HasMember(k_values)) {
+					throw std::runtime_error("load_translation_ids: properties must have a values property for entry of type 'choice'");
+				}
+
+				if(!properties[k_values].IsArray()) {
+					throw std::runtime_error("load_translation_ids: values property must be an array for entry of type 'choice'");
+				}
+
+				for(const auto& choice : properties[k_values].GetArray()) {
+
+					if(!choice.IsObject()) {
+						throw std::runtime_error("load_translation_ids: each choice in 'values' must be an object");
+					}
+
+					if(!choice.HasMember(k_key)) {
+						throw std::runtime_error("load_translation_ids: choice in 'values' must have a key property");
+					}
+
+					if(!json_is<tkey>(choice[k_key])) {
+						throw std::runtime_error("load_translation_ids: choice key must be of the template type");
+					}
+
+					if(!choice.HasMember(k_translation)) {
+						throw std::runtime_error("load_translation_ids: choice in 'values' must have a translation property");
+					}
+
+					if(!json_is<ttranslation_id>(choice[k_translation])) {
+						throw std::runtime_error("load_translation_ids: choice translation property must be of the template type");
+					}
+
+					const tkey value_key=json_get<tkey>(choice[k_key]);
+					key_to_id[value_key]=json_get<ttranslation_id>(val[k_translation]);
+				}
+			}
+		}
 	}
 
 	private:
@@ -103,6 +190,10 @@ class options_menu_translator {
 template<typename Tkey>
 class options_menu {
 
+	public:
+
+	enum class browse_dir{next, previous};
+	
 	private:
 
 	//!Translation structure that matches the typename key to a string that will be used to name it. Many of these are needed for a translation.
@@ -123,19 +214,19 @@ class options_menu {
 	};
 
 	//!Defines the different types of choices.
-	enum class types {ttemplated, tint, tbool, tstring, tvoid};
+	enum class types {tchoice, tint, tbool, tstring, tvoid};
 
 	//!Base class for all entries.
 	struct base_entry {
 
-		std::string 			name; //!< All entries have a name string.
+		std::string 			name; //!< All entries have a name string. Will end up being the printable representation of it, like "window size".
 
-		//!Will return the name of the current entry (or its equivalent).
-		virtual	std::string		get_title() const=0;
+		//!Will return a printable value for the current entry (or its equivalent).
+		virtual	std::string		get_str_value() const=0;
 		//!Returns its type. Internal use.
 		virtual types			get_type() const=0;
 		//!Chooses the next/previous value in the option.
-		virtual void			browse(int)=0;
+		virtual void			browse(browse_dir)=0;
 		//!Translates the entry. 
 		virtual void			translate(const translation_struct& t)=0;
 		//Base constructor.
@@ -154,10 +245,11 @@ class options_menu {
 	//!terms of a std::map.
 	template<typename Tvalue>
 	struct entry_choice:public base_entry {
+
 		//!Pair of value and name.
 		struct choice {
 			Tvalue			value;	//!< Stored value.
-			std::string		name; 	//!< Display name.
+			std::string		str_value; 	//!< Display name.
 		};
 
 		std::map<Tkey, choice>	choices; //!< Internal option map.
@@ -165,29 +257,28 @@ class options_menu {
 
 		//!Returns the typename value for the current selection (0,1,2 in the example).
 		Tvalue				get_value() const {
-			check_options("option with no choices for get_value");
+			check_entrys("option with no choices for get_value");
 			return choices.at(current_key).value;
 		}
 
 		//!Returns the string that represents the current selection ("txt", "html" or "latex" in the example).
-		virtual std::string		get_title() const {
-			check_options("option with no choices for get_title");
-			return choices.at(current_key).name;
+		virtual std::string		get_str_value() const {
+			check_entrys("option with no choices for get_str_value");
+			return choices.at(current_key).str_value;
 		}
 
 		//!Returns the type of this class.
 		virtual types				get_type() const {
-			return types::ttemplated;
+			return types::tchoice;
 		}
 
 		//!Changes the current selection. 
 
-		//!Values smaller than zero turn the selection "left" and larger
-		//!than zero turn it right. The choices wrap around.
-		virtual void 				browse(int dir) {
+		//!The choices wrap around.
+		virtual void 				browse(browse_dir _dir) {
 			auto it=choices.find(current_key);
 
-			if(dir < 0) {
+			if(_dir==browse_dir::previous) {
 				if(it==choices.begin()) {
 					current_key=choices.rbegin()->first;
 				}
@@ -218,7 +309,10 @@ class options_menu {
 				}
 			}
 
-			throw options_menu_exception("value does not exist for set_by_value");
+			std::stringstream ss;
+			ss<<"value does not exist for set_by_value '"<<value<<"'";
+
+			throw options_menu_exception(ss.str());
 		}
 
 		//!Sets the selection by the typename of the menu.
@@ -241,7 +335,7 @@ class options_menu {
 		//!Checks that there are choices. Throws an error with the message if there are none.
 
 		//!Internal use only.
-		void				check_options(const std::string& msg) const {
+		void				check_entrys(const std::string& msg) const {
 			if(!choices.size()) {
 				throw options_menu_exception(msg);
 			}
@@ -275,7 +369,8 @@ class options_menu {
 		virtual void			translate(const translation_struct& t) {
 
 			for(auto& s : choices) {
-				t.replace(s.first, s.second.name);
+
+				t.replace(s.first, s.second.str_value);
 			}
 		}
 
@@ -292,13 +387,16 @@ class options_menu {
 
 		//!Returns the current value as a string.
 		//TODO: Fuck the compat thing xD!.
-		virtual std::string		get_title() const {return compat::to_string(value.get());}
+		virtual std::string		get_str_value() const {return compat::to_string(value.get());}
 		//!Returns the current value as an integer.
 		int						get_value() const {return value.get();}
 		//!Returns its type. Internal use.
 		virtual types			get_type() const {return types::tint;}
 		//!Adds or substracts from the value.
-		virtual void			browse(int d){value+=d;}
+		virtual void			browse(browse_dir _dir){
+			value+=_dir==browse_dir::next ? 1 : -1;
+		}
+
 		//!Translates the value. Actually, it does nothing.
 		virtual void			translate(const translation_struct&){}
 
@@ -313,13 +411,13 @@ class options_menu {
 		bool				value; //!< Option value.
 	
 		//!Returns the value as a string.
-		virtual std::string		get_title() const {return compat::to_string(value);}
+		virtual std::string		get_str_value() const {return compat::to_string(value);}
 		//!Returns the boolean value.
 		bool				get_value() const {return value ? "true" : "false";}
 		//!Returns its type. Internal use.
 		virtual types			get_type() const {return types::tbool;}
 		//!Ignores the parameter and just flips the value.
-		virtual void			browse(int){value=!value;}
+		virtual void			browse(browse_dir){value=!value;}
 		//!Translates... does nothing.
 		virtual void			translate(const translation_struct&){}
 
@@ -335,11 +433,11 @@ class options_menu {
 		//!Returns the string value.
 		std::string			get_value() const {return value;}
 		//!Returns the string value.
-		virtual std::string		get_title() const {return value;}
+		virtual std::string		get_str_value() const {return value;}
 		//!Returns its type. Internal use.
 		virtual types			get_type() const {return types::tstring;}
 		//!Has no effect. Values of this type are manually set.
-		virtual void			browse(int){}
+		virtual void			browse(browse_dir){}
 		//!Has no effect.
 		virtual void			translate(const translation_struct&){}
 		//!Constructor.
@@ -353,11 +451,11 @@ class options_menu {
 		//!Does nothing.
 		void				get_value() const {}
 		//!Returns an empty string.
-		virtual std::string		get_title() const {return "";}
+		virtual std::string		get_str_value() const {return "";}
 		//!Returns its type. Internal use only.
 		virtual types			get_type() const {return types::tvoid;}
 		//!Does nothing.
-		virtual void			browse(int ){}
+		virtual void			browse(browse_dir ){}
 		//!Does nothing.
 		virtual void			translate(const translation_struct&){}
 		//!Constructor.
@@ -365,7 +463,7 @@ class options_menu {
 	};
 
 	//!Internal use. Checks that the option with the key does not exist.
-	void	check_option(const Tkey& key, const std::string& msg) const {
+	void	check_entry(const Tkey& key, const std::string& msg) const {
 
 		if(!entries.count(key)) throw options_menu_exception(msg);
 	}
@@ -374,16 +472,23 @@ class options_menu {
 	void	check_unique_key(const Tkey& key) const {
 
 		if(std::find(std::begin(keys), std::end(keys), key)!=std::end(keys)) {
-			throw options_menu_exception("duplicate key detected");
+
+			std::stringstream ss;
+			ss<<"duplicate key detected: '"<<key<<"'";
+			throw options_menu_exception(ss.str());
 		}
 
 		keys.push_back(key);
 	}
 
 	//!Validates of the types are the same. Throws when they are not. Internal use.
-	void	validate_type(types ot, types t, const std::string& msg) const {
+	void		check_type(types ot, types t, const Tkey& _key, const std::string& msg) const {
 
-		if(ot!=t) throw new options_menu_exception(msg);
+		if(ot!=t) {
+			std::stringstream ss;
+			ss<<msg<<" for key '"<<_key<<"'";
+			throw options_menu_exception(ss.str());
+		}
 	}
 
 	public:
@@ -439,7 +544,7 @@ class options_menu {
 	//!Erases the option with the given key.
 	void		erase(const Tkey& key) {
 
-		check_option(key, "key does not exist for erase");
+		check_entry(key, "key does not exist for erase");
 		entries.erase(key);
 	}
 
@@ -468,9 +573,9 @@ class options_menu {
 	) {
 
 		check_unique_key(key_sel);
-		check_option(key, "key does not exist for insert choice: "+translation);
+		check_entry(key, "key does not exist for insert choice: "+translation);
 		auto& o=entries.at(key);
-		validate_type(o->get_type(), types::ttemplated, "option is not choice");
+		check_type(o->get_type(), types::tchoice, key, "option is not choice");
 		static_cast<entry_choice<Tvalue> *>(o.get())->insert(key_sel, value, translation);
 	}
 
@@ -478,9 +583,9 @@ class options_menu {
 	template<typename Tvalue>
 	void		erase_choice(const Tkey& key, const Tkey& key_sel) {
 
-		check_option(key, "key does not exist for erase choice");
+		check_entry(key, "key does not exist for erase choice");
 		auto& o=entries.at(key);
-		validate_type(o->get_type(), types::ttemplated, "option is not choice");
+		check_type(o->get_type(), types::tchoice, key, "option is not choice");
 		static_cast<entry_choice<Tvalue> *>(o.get())->erase(key_sel);
 	}
 
@@ -488,9 +593,9 @@ class options_menu {
 	template<typename Tvalue>
 	void		set_by_key_choice(const Tkey& key, const Tkey& key_sel) {
 
-		check_option(key, "key does not exist for set_by_key choice");
+		check_entry(key, "key does not exist for set_by_key choice");
 		auto& o=entries.at(key);
-		validate_type(o->get_type(), types::ttemplated, "option is not choice");
+		check_type(o->get_type(), types::tchoice, key, "option is not choice");
 		static_cast<entry_choice<Tvalue> *>(o.get())->set_by_key(key_sel);
 	}
 
@@ -498,9 +603,9 @@ class options_menu {
 	template<typename Tvalue>
 	void		set_by_value_choice(const Tkey& key, const Tvalue& value) {
 
-		check_option(key, "key does not exist for set_by_value choice");
+		check_entry(key, "key does not exist for set_by_value choice");
 		auto& o=entries.at(key);
-		validate_type(o->get_type(), types::ttemplated, "option is not choice");
+		check_type(o->get_type(), types::tchoice, key, "option is not choice");
 		static_cast<entry_choice<Tvalue> *>(o.get())->set_by_value(value);
 	}
 
@@ -508,9 +613,9 @@ class options_menu {
 	template<typename Tvalue>
 	Tvalue		get_value_choice(const Tkey& key) const {
 
-		check_option(key, "key does not exist for get_value choice");
+		check_entry(key, "key does not exist for get_value choice");
 		const auto& o=entries.at(key);
-		validate_type(o->get_type(), types::ttemplated, "option is not choice");
+		check_type(o->get_type(), types::tchoice, key, "option is not choice");
 		return static_cast<entry_choice<Tvalue> *>(o.get())->get_value();
 	}
 
@@ -518,92 +623,165 @@ class options_menu {
 	template<typename Tvalue>
 	size_t		size_choice(const Tkey& key) const {
 
-		check_option(key, "key does not exist for size choice");
+		check_entry(key, "key does not exist for size choice");
 		auto& o=entries.at(key);
-		validate_type(o->get_type(), types::ttemplated, "option is not choice");
+		check_type(o->get_type(), types::tchoice, key, "option is not choice");
 		return static_cast<entry_choice<Tvalue> *>(o.get())->size();
 	}
 
 	//!Browses the option key in the direction dir.
-	void		browse(const Tkey& key, int dir) {
+	void		browse(const Tkey& key, browse_dir _dir) {
 
-		check_option(key, "key does not exist for browse");
-		entries.at(key)->browse(dir);
+		check_entry(key, "key does not exist for browse");
+		entries.at(key)->browse(_dir);
 	}
 
 	//!Specifically returns integer values from an integer option.
-	int	get_int(const Tkey& key) const {
+	//TODO: These should be only get.
+	int		get_int(const Tkey& key) const {
 
-		check_option(key, "key does not exist for get_int");
+		check_entry(key, "key does not exist for get_int");
 		const auto& o=entries.at(key);
-		validate_type(o->get_type(), types::tint, "option is not int");
+		check_type(o->get_type(), types::tint, key, "option is not int");
 		return static_cast<entry_int *>(o.get())->get_value();
-	}
-
-	//!Manually sets integer values for an integer option.
-
-	//!This function is useful to load saved values of a menu from a save file.
-	void	set_int(const Tkey& key, int value) {
-
-		check_option(key, "key does not exist for set_int");
-		auto& o=entries.at(key);
-		validate_type(o->get_type(), types::tint, "option is not int");
-		static_cast<entry_int *>(o.get())->value=value;
 	}
 
 	//!Specifically returns bool values from an bool option.
 	bool	get_bool(const Tkey& key) const {
 
-		check_option(key, "key does not exist for get_bool");
+		check_entry(key, "key does not exist for get_bool");
 		const auto& o=entries.at(key);
-		validate_type(o->get_type(), types::tbool, "option is not bool");
+		check_type(o->get_type(), types::tbool, key, "option is not bool");
 		return static_cast<entry_bool *>(o.get())->get_value();
-	}
-
-	//!Manually sets bool values for a bool option.
-
-	//!This function is useful to load saved values of a menu from a save file.
-	void	set_bool(const Tkey& key, bool value) {
-
-		check_option(key, "key does not exist for set_bool");
-		auto& o=entries.at(key);
-		validate_type(o->get_type(), types::tbool, "option is not bool");
-		static_cast<entry_bool *>(o.get())->value=value;
 	}
 
 	//!Specifically returns string values from a string option.
 	std::string	get_string(const Tkey& key) const {
 
-		check_option(key, "key does not exist for get_string");
+		check_entry(key, "key does not exist for get_string");
 		const auto& o=entries.at(key);
-		validate_type(o->get_type(), types::tstring, "option is not string");
+		check_type(o->get_type(), types::tstring, key, "option is not string");
 		return static_cast<entry_string *>(o.get())->get_value();
 	}
 
-	//!Manually sets string values for an string option.
+	//!Returns the string value representation for the current selection in the option.
+	std::string	get_str_value(const Tkey& key) const
+	{
+		check_entry(key, "key does not exist for get_str_value");
+		const auto& o=entries.at(key);
+		return o->get_str_value();
+	}
+
+	//!Manually sets integer values for an integer option.
 
 	//!This function is useful to load saved values of a menu from a save file.
-	void	set_string(const Tkey& key, const std::string& value) {
+	void	set(const Tkey& key, int value) {
 
-		check_option(key, "key does not exist for set_string");
+		check_entry(key, "key does not exist for set_int");
 		auto& o=entries.at(key);
-		validate_type(o->get_type(), types::tstring, "option is not string");
+		check_type(o->get_type(), types::tint, key, "option is not int");
+		static_cast<entry_int *>(o.get())->value=value;
+	}
+
+	//!Manually sets bool values for a bool option.
+/*
+	void	set(const Tkey& _key, bool _value) {
+
+		check_entry(_key, "key does not exist for set_bool");
+		auto& o=entries.at(_key);
+
+		switch(o->get_type()) {
+			case types::tbool:
+				static_cast<entry_bool *>(o.get())->value=_value;
+			break;
+			case types::tchoice:
+
+				//TODO: This should be some function...
+//				const auto * choice=dynamic_cast<entry_choice<bool>>(o);
+	//			if(nullptr==choice) {
+//					throw throw options_menu_exception(std::stirng("choice "+_key+" is not of bool type")); 
+	//			}
+
+				if(!std::is_same<decltype(_value), decltype( entry_choice<bool>::choice::value)>::value) {
+
+					std::stringstream ss; 
+					ss<<"choice "<<_key<<" is not of bool type";
+					throw options_menu_exception(ss.str()); 
+				}
+
+				static_cast<entry_choice<bool>*>(o.get())->set_by_value(_value);
+			break;
+			default:
+				//TODO: Which is the same as saying "throw".
+				check_type(o->get_type(), types::tbool, _key, "option is not assignable by bool");
+		}
+	}
+*/
+	template<typename tvalue>
+	void	set(const Tkey& _key, tvalue _value) {
+
+		check_entry(_key, "key does not exist for set");
+		auto& o=entries.at(_key);
+
+		switch(o->get_type()) {
+			case types::tbool:
+				if(!std::is_same<tvalue, bool>::value) {
+					check_entry(_key, "not a boolean value");
+				}
+				static_cast<entry_bool *>(o.get())->value=_value;
+			break;
+			case types::tint:
+				if(!std::is_same<tvalue, int>::value) {
+					check_entry(_key, "not an int value");
+				}
+				static_cast<entry_bool *>(o.get())->value=_value;
+			break;
+			case types::tstring:
+				if(!std::is_same<tvalue, std::string>::value) {
+					check_entry(_key, "not an string value");
+				}
+				static_cast<entry_string *>(o.get())->value=_value;
+			break;
+			case types::tchoice:
+
+				if(!std::is_same<decltype(_value), decltype( entry_choice<tvalue>::choice::value)>::value) {
+
+					std::stringstream ss; 
+					ss<<"choice "<<_key<<" is not of the intended type";
+					throw options_menu_exception(ss.str()); 
+				}
+
+				static_cast<entry_choice<tvalue>*>(o.get())->set_by_value(_value);
+			break;
+			case types::tvoid:
+				throw options_menu_exception("void choices are not assignable"); 
+			break;
+		}
+	}
+/*
+	//!Manually sets string values for an string option.
+	void	set(const Tkey& key, const std::string& value) {
+
+		check_entry(key, "key does not exist for set_string");
+		auto& o=entries.at(key);
+		check_type(o->get_type(), types::tstring, key, "option is not string");
 		static_cast<entry_string *>(o.get())->value=value;
 	}
 
+	//!Manually sets string values for an string option.
+	void	set(const Tkey& _key, const char * _value) {
+
+		check_entry(_key, "key does not exist for set_string");
+		auto& o=entries.at(_key);
+		check_type(o->get_type(), types::tstring, _key, "option is not string");
+		static_cast<entry_string *>(o.get())->value=_value;
+	}
+*/
 	//!Returns the option name for the given key.
 	std::string	get_name(const Tkey& key) const {
 
-		check_option(key, "key does not exist for get_name");
+		check_entry(key, "key does not exist for get_name");
 		return entries.at(key)->name;
-	}
-
-	//!Returns the string value representation for the current selection in the option.
-	std::string	get_title(const Tkey& key) const
-	{
-		check_option(key, "key does not exist for get_title");
-		const auto& o=entries.at(key);
-		return o->get_title();
 	}
 
 	//!Translates the full menu.
@@ -650,30 +828,6 @@ class options_menu {
 	mutable std::vector<Tkey>				keys; //!< Stores all different Tkey keys for duplicate checking.
 	std::map<Tkey, std::unique_ptr<base_entry>>		entries;
 };
-
-//!Convenience function to get all names of options from a menu separated by a newline.
-template<typename T>
-std::string	names_from_menu(const options_menu<T>& menu) {
-
-	std::string res;
-	for(const auto& k : menu.get_keys()) {
-		res+=menu.get_name(k)+"\n";
-	}
-	res.pop_back();
-	return res;
-}
-
-//!Convenience function to get all names of choices from a menu separated by a newline.
-template<typename T>
-std::string	titles_from_menu(const options_menu<T>& menu) {
-
-	std::string res;
-	for(const auto& k : menu.get_keys()) {
-		res+=menu.get_title(k)+"\n";
-	}
-	res.pop_back();
-	return res;
-}
 
 //!Mounts a previously created menu using a JSON value with rapidjson..
 
@@ -750,46 +904,12 @@ The structure of the json must be rigid, lest this function will throw.
 ]
 **/
 
-
-//I am not sure if rapidjson already has those. I read something in v1.1 but 
-//could not get it to work. Anyway, these are templates that check if a 
-//rapidjson value is of the given type, which comes in handy when we are dealing
-//with templated types. 
-template<typename tkey> 
-bool rapidjson_is(const rapidjson::Value&) {
-	throw std::runtime_error("unsupported type");
-	return false;
-}
-
-template<> 
-bool rapidjson_is<std::string>(const rapidjson::Value& _val) {return _val.IsString();}
-
-template<> 
-bool rapidjson_is<int>(const rapidjson::Value& _val) {return _val.IsInt();}
-
-//These are the same as above, but for retrieving values.
-template<typename tkey> 
-tkey rapidjson_get(const rapidjson::Value&) {
-	throw std::runtime_error("unsupported type");
-	return tkey{};
-}
-template<> 
-std::string rapidjson_get<std::string>(const rapidjson::Value& _val) {return _val.GetString();}
-
-template<> 
-int rapidjson_get<int>(const rapidjson::Value& _val) {return _val.GetInt();}
-
-template<> 
-bool rapidjson_get<bool>(const rapidjson::Value& _val) {return _val.GetBool();}
-
-template<typename tkey, typename ttranskey>
+template<typename tkey>
 void options_menu_from_json(
 	const rapidjson::Value& _root,
-	options_menu<tkey>& _target_menu,
-	options_menu_translator<tkey, ttranskey> * _translator=nullptr)
-{
+	options_menu<tkey>& _target_menu
+) {
 	const char 	* k_key="key",
-				* k_translation="translation",
 				* k_type="type",
 				* k_properties="properties",
 				* k_min="min",
@@ -799,68 +919,55 @@ void options_menu_from_json(
 				* k_value="value";
 
 	if(!_root.IsArray()) {
-		throw std::runtime_error("root node must be an array");
+		throw std::runtime_error("options_menu_from_json: root node must be an array");
 	}
 
-	for(const auto& val : _root.GetArray()) {
+	for(const auto& entry : _root.GetArray()) {
 
-		if(!val.IsObject()) {
-			throw std::runtime_error("entry must be an object");
+		if(!entry.IsObject()) {
+			throw std::runtime_error("options_menu_from_json: entry must be an object");
 		}
 
-		if(!val.HasMember(k_key)) {
-			throw std::runtime_error("entry node must have a key value");
+		if(!entry.HasMember(k_key)) {
+			throw std::runtime_error("options_menu_from_json: entry node must have a key value");
 		}
 
-		if(!rapidjson_is<tkey>(val[k_key])) {
-			throw std::runtime_error("the key value must be an of the template type");
+		if(!json_is<tkey>(entry[k_key])) {
+			throw std::runtime_error("options_menu_from_json: the key value must be an of the template type");
 		}
 
-		if(!val.HasMember(k_translation)) {
-			throw std::runtime_error("entry node must have a translation value");
+		if(!entry.HasMember(k_type)) {
+			throw std::runtime_error("options_menu_from_json: entry node must have a type value");
 		}
 
-		//Nooope.
-		if(!val[k_translation].IsInt()) {
-			throw std::runtime_error("the translation value must be an integer");
+		if(!entry[k_type].IsString()) {
+			throw std::runtime_error("options_menu_from_json: the type value must be an string");
 		}
 
-		if(!val.HasMember(k_type)) {
-			throw std::runtime_error("entry node must have a type value");
-		}
+		const std::string entry_type=entry[k_type].GetString();
+		const tkey entry_key=json_get<tkey>(entry[k_key]);
 
-		if(!val[k_type].IsString()) {
-			throw std::runtime_error("the type value must be an string");
-		}
+		if(entry_type=="choice") {
 
-		const tkey choice_key=rapidjson_get<tkey>(val[k_key]);
-		if(_translator!=nullptr) {
-			_translator->add_key_to_id(choice_key, rapidjson_get<ttranskey>(val[k_translation]));
-		}
-		
-		const std::string choice_type=val[k_type].GetString();
-
-		if(choice_type=="choice") {
-
-			if(!val.HasMember(k_properties)) {
-				throw std::runtime_error("choice entry must have a properties node");
+			if(!entry.HasMember(k_properties)) {
+				throw std::runtime_error("options_menu_from_json: choice entry must have a properties node");
 			}
 
-			const auto& properties=val[k_properties];
+			const auto& properties=entry[k_properties];
 			if(!properties.IsObject()) {
-				throw std::runtime_error("the properties node must be an object");
+				throw std::runtime_error("options_menu_from_json: the properties node must be an object");
 			}
 
 			if(!properties.HasMember(k_value_type)) {
-				throw std::runtime_error("the properties node must have a value_type property");
+				throw std::runtime_error("options_menu_from_json: the properties node must have a value_type property");
 			}
 
 			if(!properties[k_value_type].IsString()) {
-				throw std::runtime_error("value_type must be a string");
+				throw std::runtime_error("options_menu_from_json: value_type must be a string");
 			}
 
 			if(!properties.HasMember(k_values)) {
-				throw std::runtime_error("the properties node must have a values property");
+				throw std::runtime_error("options_menu_from_json: the properties node must have a values property");
 			}
 
 			if(!properties[k_values].IsArray()) {
@@ -870,53 +977,43 @@ void options_menu_from_json(
 			//Bufff... Ese "template" está para que el compilador no se grille: es el "template disambiguator", 
 			//que ayuda a saber que es un método templatizado y no una propiedad seguida de "menor que".
 			const std::string value_type=properties[k_value_type].GetString();
+
 			if(value_type=="string") {
-				_target_menu.template insert_choice<std::string>(choice_key, "#string_choice_placeholder#");
+				_target_menu.template insert_choice<std::string>(entry_key, "#string_choice_placeholder#");
 			}
 			else if(value_type=="int") {
-				_target_menu.template insert_choice<int>(choice_key, "#int_choice_placeholder#");
+				_target_menu.template insert_choice<int>(entry_key, "#int_choice_placeholder#");
 			}
 			else if(value_type=="bool") {
-				_target_menu.template insert_choice<bool>(choice_key, "#bool_choice_placeholder#");
+				_target_menu.template insert_choice<bool>(entry_key, "#bool_choice_placeholder#");
 			}
 			else {
-				throw std::runtime_error("unknown choice type "+value_type);
+				throw std::runtime_error("options_menu_from_json: unknown choice type "+value_type);
 			}
 
 			for(const auto& choice : properties[k_values].GetArray()) {
 
 				if(!choice.IsObject()) {
-					throw std::runtime_error("each choice in 'values' must be an object");
+					throw std::runtime_error("options_menu_from_json: each choice in 'values' must be an object");
 				}
 
 				if(!choice.HasMember(k_key)) {
-					throw std::runtime_error("choice in 'values' must have a key property");
+					throw std::runtime_error("options_menu_from_json: choice in 'values' must have a key property");
 				}
 
-				if(!rapidjson_is<tkey>(choice[k_key])) {
-					throw std::runtime_error("choice key must be of the template type");
+				if(!json_is<tkey>(choice[k_key])) {
+					throw std::runtime_error("options_menu_from_json: choice key must be of the template type");
 				}
 
 				if(!choice.HasMember(k_value)) {
-					throw std::runtime_error("choice in 'values' must have a value property");
+					throw std::runtime_error("options_menu_from_json: choice in 'values' must have a value property");
 				}
 
-				if(!choice.HasMember(k_translation)) {
-					throw std::runtime_error("choice in 'values' must have a translation property");
-				}
-
-				if(!rapidjson_is<ttranskey>(choice[k_translation])) {
-					throw std::runtime_error("choice translation property must be of the template type");
-				}
-
-				const tkey value_key=rapidjson_get<tkey>(choice[k_key]);
-				if(_translator!=nullptr) {
-					_translator->add_key_to_id(value_key, rapidjson_get<ttranskey>(choice[k_translation]));
-				}
+				const tkey value_key=json_get<tkey>(choice[k_key]);
 
 				if(value_type=="string") {
 					_target_menu.template insert_choice<std::string>(
-						choice_key, 
+						entry_key, 
 						value_key,
 						"#string_value_placeholder#", 
 						choice["value"].GetString()
@@ -924,7 +1021,7 @@ void options_menu_from_json(
 				}
 				else if(value_type=="int") {
 					_target_menu.template insert_choice<int>(
-						choice_key, 
+						entry_key, 
 						value_key, 
 						"#int_value_placeholder", 
 						choice["value"].GetInt()
@@ -935,7 +1032,7 @@ void options_menu_from_json(
 					bool value=choice["value"].GetBool();
 
 					_target_menu.template insert_choice<bool>(
-						choice_key,
+						entry_key,
 						value_key,
 						"#bool_value_placeholder", 
 						value
@@ -943,59 +1040,59 @@ void options_menu_from_json(
 				}
 			}
 		}
-		else if(choice_type=="int") {
+		else if(entry_type=="int") {
 
-			if(!val.HasMember(k_properties)) {
-				throw std::runtime_error("int entry must have a properties node");
+			if(!entry.HasMember(k_properties)) {
+				throw std::runtime_error("options_menu_from_json: int entry must have a properties node");
 			}
 
-			const auto& properties=val[k_properties];
+			const auto& properties=entry[k_properties];
 			if(!properties.IsObject()) {
-				throw std::runtime_error("the properties node must be an object");
+				throw std::runtime_error("options_menu_from_json: the properties node must be an object");
 			}
 
 			if(!properties.HasMember(k_min)) {
-				throw std::runtime_error("the properties node must have a min property");
+				throw std::runtime_error("options_menu_from_json: the properties node must have a min property");
 			}
 
 			if(!properties[k_min].IsInt()) {
-				throw std::runtime_error("min property must be an integer");
+				throw std::runtime_error("options_menu_from_json: min property must be an integer");
 			}
 
 			if(!properties.HasMember(k_max)) {
-				throw std::runtime_error("the properties node must have a min property");
+				throw std::runtime_error("options_menu_from_json: the properties node must have a min property");
 			}
 
 			if(!properties[k_max].IsInt()) {
-				throw std::runtime_error("max property must be an integer");
+				throw std::runtime_error("options_menu_from_json: max property must be an integer");
 			}
 
 			int minval=properties[k_min].GetInt(),
 				maxval=properties[k_max].GetInt();
 
 			_target_menu.insert_int(
-				choice_key, 
+				entry_key, 
 				"#int_placeholder#", 
 				minval, 
 				maxval, 
 				minval
 			);
 		}
-		else if(choice_type=="bool") {
+		else if(entry_type=="bool") {
 
-			_target_menu.insert_bool(choice_key, "#bool_placeholder#", true);
+			_target_menu.insert_bool(entry_key, "#bool_placeholder#", true);
 		}
-		else if(choice_type=="string") {
+		else if(entry_type=="string") {
 
-			_target_menu.insert_string(choice_key, "#string_placeholder#", "#string_placeholder_value#");
+			_target_menu.insert_string(entry_key, "#string_placeholder#", "#string_placeholder_value#");
 		}
-		else if(choice_type=="void") {
+		else if(entry_type=="void") {
 
-			_target_menu.insert_void(choice_key, "#void_placeholder#");
+			_target_menu.insert_void(entry_key, "#void_placeholder#");
 		}
 		else {
 
-			throw std::runtime_error("unknown choice type "+choice_type);
+			throw std::runtime_error("options_menu_from_json: unknown entry type "+entry_type);
 		}
 	}
 }

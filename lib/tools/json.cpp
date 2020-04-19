@@ -49,3 +49,30 @@ int	tools::json_int(const rapidjson::Value& _doc, const std::string& _k) {
 
 	return _doc[_k.c_str()].GetInt();
 }
+
+namespace tools {
+
+template<> 
+bool json_is<std::string>(const rapidjson::Value& _val) {return _val.IsString();}
+
+template<> 
+bool json_is<int>(const rapidjson::Value& _val) {return _val.IsInt();}
+
+template<> 
+bool json_is<bool>(const rapidjson::Value& _val) {return _val.IsBool();}
+
+template<> 
+bool json_is<double>(const rapidjson::Value& _val) {return _val.IsDouble();}
+
+template<> 
+std::string json_get<std::string>(const rapidjson::Value& _val) {return _val.GetString();}
+
+template<> 
+int json_get<int>(const rapidjson::Value& _val) {return _val.GetInt();}
+
+template<> 
+bool json_get<bool>(const rapidjson::Value& _val) {return _val.GetBool();}
+
+template<> 
+double json_get<double>(const rapidjson::Value& _val) {return _val.GetDouble();}
+}
