@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ranged_value.h"
-#include "compatibility_patches.h"
 #include "json.h"
 
 #include <rapidjson/document.h>
@@ -196,6 +195,25 @@ class options_menu {
 	
 	private:
 
+	//Assignment overloads for the "set" function. Read "set" to get it.
+	void	assign(const Tkey& _key, int _value) {
+
+		auto& o=entries.at(_key);
+		static_cast<entry_int *>(o.get())->value=_value;
+	}
+
+	void	assign(const Tkey& _key, bool _value) {
+
+		auto& o=entries.at(_key);
+		static_cast<entry_bool *>(o.get())->value=_value;
+	}
+
+	void	assign(const Tkey& _key, const std::string& _value) {
+
+		auto& o=entries.at(_key);
+		static_cast<entry_string *>(o.get())->value=_value;
+	}
+
 	//!Translation structure that matches the typename key to a string that will be used to name it. Many of these are needed for a translation.
 
 	//!Basically means "when you find this Tkey, give it this string name".
@@ -311,18 +329,34 @@ class options_menu {
 		//!Sets the selection by its value. 
 
 		//!This is particularly useful if the value is known beforehand.
-		void 					set_by_value(const Tvalue& value) {
+		void 					set_by_value(const Tvalue& _value) {
 
-			for(auto& s : choices) {
-				if(s.second.value==value) {
+			for(const auto& s : choices) {
+
+				if(std::is_same<decltype(s.second.value), const char *>::value) {
+std::cout<<"second as char "<<s.second.value<<std::endl;
+				}
+
+				if(std::is_same<decltype(s.second.value), std::string>::value) {
+std::cout<<"second as str "<<s.second.value<<std::endl;
+				}
+
+				if(s.second.value==_value) {
 					current_key=s.first;
 					return;
 				}
 			}
 
-			std::stringstream ss;
-			ss<<"value does not exist for set_by_value '"<<value<<"'";
+				if(std::is_same<Tvalue, const char *>::value) {
+std::cout<<"inside as char "<<_value<<std::endl;
+				}
 
+				if(std::is_same<Tvalue, std::string>::value) {
+std::cout<<"inside as str "<<_value<<std::endl;
+				}
+
+			std::stringstream ss;
+			ss<<"value does not exist for set_by_value '"<<_value<<"'";
 			throw options_menu_exception(ss.str());
 		}
 
@@ -397,8 +431,7 @@ class options_menu {
 		ranged_value<int>		value; //!< Ranged value for the option.
 
 		//!Returns the current value as a string.
-		//TODO: Fuck the compat thing xD!.
-		virtual std::string		get_str_value() const {return compat::to_string(value.get());}
+		virtual std::string		get_str_value() const {return std::to_string(value.get());}
 		//!Returns the current value as an integer.
 		int						get_value() const {return value.get();}
 		//!Returns its type. Internal use.
@@ -422,7 +455,7 @@ class options_menu {
 		bool				value; //!< Option value.
 	
 		//!Returns the value as a string.
-		virtual std::string		get_str_value() const {return compat::to_string(value);}
+		virtual std::string		get_str_value() const {return std::to_string(value);}
 		//!Returns the boolean value.
 		bool				get_value() const {return value ? "true" : "false";}
 		//!Returns its type. Internal use.
@@ -503,6 +536,8 @@ class options_menu {
 	}
 
 	public:
+
+	//TODO: These should be overloads, to provide a consistent interface.
 
 	//!Creates an integer option. 
 	void		insert_int(const Tkey& key, const std::string& name, int min, int max, int val) {
@@ -693,24 +728,6 @@ class options_menu {
 		return o->get_str_value();
 	}
 
-	void	assign(const Tkey& _key, int _value) {
-
-		auto& o=entries.at(_key);
-		static_cast<entry_int *>(o.get())->value=_value;
-	}
-
-	void	assign(const Tkey& _key, bool _value) {
-
-		auto& o=entries.at(_key);
-		static_cast<entry_bool *>(o.get())->value=_value;
-	}
-
-	void	assign(const Tkey& _key, const std::string& _value) {
-
-		auto& o=entries.at(_key);
-		static_cast<entry_string *>(o.get())->value=_value;
-	}
-
 	//!Set the value for any key.
 	template<typename tvalue>
 	void	set(const Tkey& _key, tvalue _value) {
@@ -724,7 +741,9 @@ class options_menu {
 			throw options_menu_exception(ss.str());
 		};
 	
-
+		//Values are assigned through private overloads, to avoid the compiler
+		//complaining of invalid assignments (this is compile time, tvalue might
+		//be a string and we might be trying to assign to an integer).
 		switch(o->get_type()) {
 			case types::tstring:
 				if(!std::is_same<tvalue, std::string>::value 
@@ -745,83 +764,34 @@ class options_menu {
 				}
 			break;
 			case types::tchoice:
-				if(!std::is_same<decltype(_value), decltype( entry_choice<tvalue>::choice::value)>::value) {
+{
+				auto choice=static_cast<entry_choice<tvalue>*>(o.get());
+				
+				//TODO: Check if there are values. Directly fail if not.
+				
+				//TODO: Fix the decltype below.
+				if(!std::is_same<decltype(_value), decltype(std::begin(choice->choices)->second.value)>::value) {
 					fail("provided value is not of the intended type");
 				}
-				static_cast<entry_choice<tvalue>*>(o.get())->set_by_value(_value);
+
+				if(std::is_same<decltype(_value), std::string>::value) {
+std::cout<<"value as str "<<_value<<std::endl;
+				}
+
+				if(std::is_same<decltype(_value), const char *>::value) {
+std::cout<<"value as char "<<_value<<std::endl;
+				}
+
+
+
+				choice->set_by_value(_value);
+}
 				return;
 			case types::tvoid:
 				fail("void choice cannot be assigned");
 		}
 
 		assign(_key, _value);
-	}
-
-	//TODO: Should be private.
-	template<typename tvalue>
-	void choice_set(const Tkey& _key, tvalue _value) {
-
-		if(!std::is_same<tvalue, decltype( entry_choice<tvalue>::choice::value)>::value) {
-			throw std::runtime_error("provided value is not of the intended type");
-		}
-
-		auto& o=entries.at(_key);
-		static_cast<entry_choice<tvalue>*>(o.get())->set_by_value(_value);
-	}
-
-
-	void	_set(const Tkey& _key, int _value) {
-
-		check_entry(_key, "key does not exist for set");
-		auto& o=entries.at(_key);
-
-		switch(o->get_type()) {
-			case types::tint:
-				static_cast<entry_int *>(o.get())->value=_value;
-				return;
-
-			case types::tchoice:
-				return choice_set(_key, _value);
-			
-			default:
-				throw std::runtime_error("not an integer type");
-		}
-	}
-
-	void	_set(const Tkey& _key, bool _value) {
-
-		check_entry(_key, "key does not exist for set");
-		auto& o=entries.at(_key);
-
-		switch(o->get_type()) {
-			case types::tbool:
-				static_cast<entry_bool *>(o.get())->value=_value;
-				return;
-
-			case types::tchoice:
-				return choice_set(_key, _value);
-
-			default:
-				throw std::runtime_error("not a boolean type");
-		}
-	}
-
-	void	_set(const Tkey& _key, const std::string& _value) {
-
-		check_entry(_key, "key does not exist for set");
-		auto& o=entries.at(_key);
-
-		switch(o->get_type()) {
-			case types::tstring:
-				static_cast<entry_string *>(o.get())->value=_value;
-				return;
-
-			case types::tchoice:
-				return choice_set(_key, _value);
-
-			default:
-				throw std::runtime_error("not a string type");
-		}
 	}
 
 	//!Returns the option name for the given key.

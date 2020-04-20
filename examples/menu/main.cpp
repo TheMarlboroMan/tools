@@ -40,9 +40,12 @@ int main(int, char **) {
 		menu_str_str.set("27_BACKUP", false);
 
 		//Choice values are not difficult either as long as we assign by value.
+//		menu_str_str.set("20_HELP", false);
+//		menu_str_str.set("40_PERIODICITY", 4);
+std::cout<<"------------"<<std::endl;
+		menu_str_str.set("10_WINDOW", std::string("1200x750"));
+std::cout<<"------------"<<std::endl;
 		menu_str_str.set("10_WINDOW", "1200x750");
-		menu_str_str.set("20_HELP", false);
-		menu_str_str.set("40_PERIODICITY", 4);
 
 		//TODO: Do all sorts of things that would make it throw.
 
