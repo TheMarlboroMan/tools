@@ -18,6 +18,60 @@ void show_menu(const tools::options_menu<T>& _menu) {
 	}
 }
 
+template<typename T>
+bool test_assignment_failures(tools::options_menu<T>& _menu) {
+
+	bool ok=true;
+
+	try {
+		_menu.set("22_NAME", 22);
+		std::cout<<"22_NAME failed"<<std::endl;
+		ok=false;
+	}
+	catch(std::exception& e) {}
+
+	try {
+		_menu.set("25_FILESIZE", "hello");
+		std::cout<<"25_FILESIZE failed"<<std::endl;
+		ok=false;
+	}
+	catch(std::exception& e) {}
+
+	try {
+		//TODO: Interesting... if we use a const char *, an implicit conversion
+		//is made.
+		_menu.set("27_BACKUP", std::string("how are you"));
+		std::cout<<"27_BACKUP failed"<<std::endl;
+		ok=false;
+	}
+	catch(std::exception& e) {}
+
+	try {
+	//TODO: Interesting...
+		_menu.set("20_HELP", std::string("how are you"));
+		std::cout<<"20_HELP failed"<<std::endl;
+		ok=false;
+	}
+	catch(std::exception& e) {}
+
+	try {
+		//TODO: Interesting...
+		_menu.set("40_PERIODICITY", std::string("sir?"));
+		std::cout<<"40_PERIODICITY failed"<<std::endl;
+		ok=false;
+	}
+	catch(std::exception& e) {}
+
+	try {
+		_menu.set("10_WINDOW", false);
+		std::cout<<"10_WINDOW failed"<<std::endl;
+		ok=false;
+	}
+	catch(std::exception& e) {}
+
+	return ok;
+}
+
 int main(int, char **) {
 
 	try {
@@ -25,7 +79,7 @@ int main(int, char **) {
 		auto json_document=tools::parse_json_string(
 			tools::dump_file("menu.json")
 		);
-	
+
 		//Build the menu...
 		tools::options_menu<std::string> menu_str_str;
 		tools::options_menu_from_json(
@@ -33,21 +87,28 @@ int main(int, char **) {
 			menu_str_str
 		);
 
-		//We can se some values right away... string, bool and int values are 
+		//We can se some values right away... string, bool and int values are
 		//straightforward: just use the proper argument type...
-		menu_str_str.set("22_NAME", std::string("Bob Ross"));
+		//TODO: This should fucking work, and it does not.
+		menu_str_str.set("22_NAME", "Bob Ross");
 		menu_str_str.set("25_FILESIZE", 1024);
 		menu_str_str.set("27_BACKUP", false);
 
-		//Choice values are not difficult either as long as we assign by value.
-//		menu_str_str.set("20_HELP", false);
-//		menu_str_str.set("40_PERIODICITY", 4);
-std::cout<<"------------"<<std::endl;
-		menu_str_str.set("10_WINDOW", std::string("1200x750"));
-std::cout<<"------------"<<std::endl;
+		//Choice values are not difficult either as long as we assign by with the
+		//correct type...
+		menu_str_str.set("20_HELP", false);
+		menu_str_str.set("40_PERIODICITY", 4);
 		menu_str_str.set("10_WINDOW", "1200x750");
 
-		//TODO: Do all sorts of things that would make it throw.
+		//Of course, we can make it fail if we assign values of invalid types...
+		if(!test_assignment_failures(menu_str_str)) {
+			std::cout<<"assigments failed..."<<std::endl;
+			return 1;
+		}
+
+		//TODO: Assign by key!
+
+
 
 		//This menu has not been translated, as the following lines shows.
 		std::cout<<"Untranslated menu:"<<std::endl;
@@ -78,11 +139,11 @@ std::cout<<"------------"<<std::endl;
 
 		//This will show that another types of menu will compile...
 		//TODO: Build another menu, int to str, just to see that it compiles.
-	
+
 		return 0;
 	}
 	catch(std::exception& e) {
-	
+
 		std::cout<<"error: "<<e.what()<<std::endl;
 	}
 }

@@ -27,8 +27,8 @@ class options_menu_exception:
 
 //!Data representation of a single depth menu.
 /**
-This class is built to represent a single depth menu with N entries. Entries 
-might have a free typed value (such a string, boolean, integer or even no 
+This class is built to represent a single depth menu with N entries. Entries
+might have a free typed value (such a string, boolean, integer or even no
 type) or a value in a range of N fixed values:
 
 menu:
@@ -37,9 +37,9 @@ menu:
 	timeout: [60]
 	name: [something]
 	fullscreen: [true]
-	back 
+	back
 
-The first level, "menu" is the class itself. Each node (screen_resolution, 
+The first level, "menu" is the class itself. Each node (screen_resolution,
 sound_volume, language and lives) is a "entry" and for each "entry", different
 "values" may be given, so:
 
@@ -51,7 +51,7 @@ menu:
 		value
 	entry...
 
-Entries and values are identified by an unique key. This key must be 
+Entries and values are identified by an unique key. This key must be
 completely unique: if shared between, for example, an entry and a value,
 an exception will be thrown. The key is the typename of the template. The key
 must be printable by streams.
@@ -192,7 +192,7 @@ class options_menu {
 	public:
 
 	enum class browse_dir{next, previous};
-	
+
 	private:
 
 	//Assignment overloads for the "set" function. Read "set" to get it.
@@ -256,21 +256,21 @@ class options_menu {
 		virtual types			get_type() const=0;
 		//!Chooses the next/previous value in the option.
 		virtual void			browse(browse_dir)=0;
-		//!Translates the entry. 
+		//!Translates the entry.
 		virtual void			translate(const translation_struct& t)=0;
 		//Base constructor.
 						base_entry(const std::string& n):name(n){
 		}
 	};
 
-	
+
 	typedef std::unique_ptr<base_entry>	uptr_base;
 
-	//!Structure to represent any type with a string. 
+	//!Structure to represent any type with a string.
 
 	//!Consists of N choices (of type Tvalue), each one represented by a
-	//!different string. For example, the values 0,1 and 2 (int) could 
-	//!repreent "txt", "html" and "latex" output. It is implemented in 
+	//!different string. For example, the values 0,1 and 2 (int) could
+	//!repreent "txt", "html" and "latex" output. It is implemented in
 	//!terms of a std::map.
 	template<typename Tvalue>
 	struct entry_choice:public base_entry {
@@ -301,7 +301,7 @@ class options_menu {
 			return types::tchoice;
 		}
 
-		//!Changes the current selection. 
+		//!Changes the current selection.
 
 		//!The choices wrap around.
 		virtual void 				browse(browse_dir _dir) {
@@ -326,34 +326,25 @@ class options_menu {
 			}
 		}
 
-		//!Sets the selection by its value. 
+		//!Internal value comparison functions.
 
-		//!This is particularly useful if the value is known beforehand.
+		//This is actually fun: if we do "set_by_value" with a const char *
+		//the template code will try to call == on it, which will not do what
+		//we want. However, we can force type conversion with these helpers.
+		bool                    compare_values(bool _a, bool _b) const {return _a==_b;}
+		bool                    compare_values(int _a, int _b) const {return _a==_b;}
+		bool                    compare_values(const std::string& _a, const std::string _b) const {return _a==_b;}
+
+		//!Sets the selection by its value.
 		void 					set_by_value(const Tvalue& _value) {
 
 			for(const auto& s : choices) {
 
-				if(std::is_same<decltype(s.second.value), const char *>::value) {
-std::cout<<"second as char "<<s.second.value<<std::endl;
-				}
-
-				if(std::is_same<decltype(s.second.value), std::string>::value) {
-std::cout<<"second as str "<<s.second.value<<std::endl;
-				}
-
-				if(s.second.value==_value) {
+				if(compare_values(s.second.value, _value)) {
 					current_key=s.first;
 					return;
 				}
 			}
-
-				if(std::is_same<Tvalue, const char *>::value) {
-std::cout<<"inside as char "<<_value<<std::endl;
-				}
-
-				if(std::is_same<Tvalue, std::string>::value) {
-std::cout<<"inside as str "<<_value<<std::endl;
-				}
 
 			std::stringstream ss;
 			ss<<"value does not exist for set_by_value '"<<_value<<"'";
@@ -368,7 +359,7 @@ std::cout<<"inside as str "<<_value<<std::endl;
 			if(!choices.count(key_sel)) {
 				throw options_menu_exception("key does not exist for set_by_key");
 			}
-			
+
 			current_key=key_sel;
 		}
 
@@ -447,13 +438,13 @@ std::cout<<"inside as str "<<_value<<std::endl;
 		//!Constructor of the option.
 		entry_int(const std::string& n, int min, int max, int a)
 			:base_entry(n), value(min, max, a) {
-		} 
+		}
 	};
 
 	//Represents a boolean value.
 	struct entry_bool:public base_entry {
 		bool				value; //!< Option value.
-	
+
 		//!Returns the value as a string.
 		virtual std::string		get_str_value() const {return std::to_string(value);}
 		//!Returns the boolean value.
@@ -467,13 +458,13 @@ std::cout<<"inside as str "<<_value<<std::endl;
 
 		entry_bool(const std::string& n, bool v)
 			:base_entry(n), value(v) {
-		} 
+		}
 	};
 
 	//Structure to represent a string.
 	struct entry_string:public base_entry {
 		std::string			value; //!< String value.
-	
+
 		//!Returns the string value.
 		std::string			get_value() const {return value;}
 		//!Returns the string value.
@@ -487,7 +478,7 @@ std::cout<<"inside as str "<<_value<<std::endl;
 		//!Constructor.
 		entry_string(const std::string& n, const std::string& v)
 			:base_entry(n), value(v) {
-		} 
+		}
 	};
 
 	//Structure with no associated value.
@@ -503,7 +494,7 @@ std::cout<<"inside as str "<<_value<<std::endl;
 		//!Does nothing.
 		virtual void			translate(const translation_struct&){}
 		//!Constructor.
-		entry_void(const std::string& n):base_entry(n) {} 
+		entry_void(const std::string& n):base_entry(n) {}
 	};
 
 	//!Internal use. Checks that the option with the key does not exist.
@@ -539,13 +530,13 @@ std::cout<<"inside as str "<<_value<<std::endl;
 
 	//TODO: These should be overloads, to provide a consistent interface.
 
-	//!Creates an integer option. 
+	//!Creates an integer option.
 	void		insert_int(const Tkey& key, const std::string& name, int min, int max, int val) {
 
 		check_unique_key(key);
 		entries.insert(
 			std::pair<Tkey, uptr_base>(
-				key, 
+				key,
 				uptr_base(new entry_int(name, min, max, val))
 			)
 		);
@@ -557,7 +548,7 @@ std::cout<<"inside as str "<<_value<<std::endl;
 		check_unique_key(key);
 		entries.insert(
 			std::pair<Tkey, uptr_base>(
-				key, 
+				key,
 				uptr_base(new entry_bool(name, val))
 			)
 		);
@@ -569,7 +560,7 @@ std::cout<<"inside as str "<<_value<<std::endl;
 		check_unique_key(key);
 		entries.insert(
 			std::pair<Tkey, uptr_base>(
-				key, 
+				key,
 				uptr_base(new entry_string(name, val))
 			)
 		);
@@ -581,7 +572,7 @@ std::cout<<"inside as str "<<_value<<std::endl;
 		check_unique_key(key);
 		entries.insert(
 			std::pair<Tkey, uptr_base>(
-				key, 
+				key,
 				uptr_base(new entry_void(name))
 			)
 		);
@@ -603,7 +594,7 @@ std::cout<<"inside as str "<<_value<<std::endl;
 		check_unique_key(key);
 		entries.insert(
 			std::pair<Tkey, uptr_base>(
-				key, 
+				key,
 				uptr_base(new entry_choice<Tvalue>(name))
 			)
 		);
@@ -612,9 +603,9 @@ std::cout<<"inside as str "<<_value<<std::endl;
 	//!Inserts a selection with key_sel, value and name for the option identified by "key".
 	template<typename Tvalue>
 	void		insert_choice(
-		const Tkey& key, 
-		const Tkey& key_sel, 
-		const std::string& translation, 
+		const Tkey& key,
+		const Tkey& key_sel,
+		const std::string& translation,
 		const Tvalue value
 	) {
 
@@ -683,7 +674,7 @@ std::cout<<"inside as str "<<_value<<std::endl;
 				static_cast<entry_choice<tvalue>*>(o.get())->get_value();
 			break;
 			case types::tvoid:
-				throw options_menu_exception("void choices are not returnable"); 
+				throw options_menu_exception("void choices are not returnable");
 			break;
 		}
 	}
@@ -708,7 +699,7 @@ std::cout<<"inside as str "<<_value<<std::endl;
 		check_type(o->get_type(), types::tbool, key, "option is not bool");
 		return static_cast<entry_bool *>(o.get())->get_value();
 	}
-	
+
 	//TODO: There's no "get choice"...
 
 	//!Specifically returns string values from a string option.
@@ -740,13 +731,13 @@ std::cout<<"inside as str "<<_value<<std::endl;
 			ss<<_msg<<" for key '"<<_key<<"'";
 			throw options_menu_exception(ss.str());
 		};
-	
+
 		//Values are assigned through private overloads, to avoid the compiler
 		//complaining of invalid assignments (this is compile time, tvalue might
 		//be a string and we might be trying to assign to an integer).
 		switch(o->get_type()) {
 			case types::tstring:
-				if(!std::is_same<tvalue, std::string>::value 
+				if(!std::is_same<tvalue, std::string>::value
 					&& !std::is_same<tvalue, const char *>::value
 				) {
 					fail("not a string type entry");
@@ -764,29 +755,20 @@ std::cout<<"inside as str "<<_value<<std::endl;
 				}
 			break;
 			case types::tchoice:
-{
+			{
 				auto choice=static_cast<entry_choice<tvalue>*>(o.get());
-				
-				//TODO: Check if there are values. Directly fail if not.
-				
-				//TODO: Fix the decltype below.
+
+				if(!choice->size()) {
+					fail("no values in the choide");
+				}
+
 				if(!std::is_same<decltype(_value), decltype(std::begin(choice->choices)->second.value)>::value) {
 					fail("provided value is not of the intended type");
 				}
 
-				if(std::is_same<decltype(_value), std::string>::value) {
-std::cout<<"value as str "<<_value<<std::endl;
-				}
-
-				if(std::is_same<decltype(_value), const char *>::value) {
-std::cout<<"value as char "<<_value<<std::endl;
-				}
-
-
-
 				choice->set_by_value(_value);
-}
 				return;
+			}
 			case types::tvoid:
 				fail("void choice cannot be assigned");
 		}
@@ -802,7 +784,7 @@ std::cout<<"value as char "<<_value<<std::endl;
 	}
 
 	//!Translates the full menu.
-	
+
 	//!The vector must contain all pairs of Tkey and string values for the
 	//!complete menu.
 	template<typename ttranslation_id>
@@ -815,7 +797,7 @@ std::cout<<"value as char "<<_value<<std::endl;
 
 		for(const auto& ts : tsv) {
 			for(auto& o : entries) {
-				ts.replace(o.first, o.second->name); 
+				ts.replace(o.first, o.second->name);
 				o.second->translate(ts);
 			}
 		}
@@ -828,7 +810,7 @@ std::cout<<"value as char "<<_value<<std::endl;
 	}
 
 	//!Gets a vector with the different keys used in entries.
-	
+
 	//!Keys for choices are not returned. This is mostly used to draw the
 	//!menu: all keys are returned and then the options can be queried.
 	std::vector<Tkey>		get_keys() const {
@@ -849,15 +831,15 @@ std::cout<<"value as char "<<_value<<std::endl;
 //!Mounts a previously created menu using a JSON value with rapidjson..
 
 /**The first parameter is a rapidJson value, which is supposed to be of array
-type. The second is the menu and the third is an empty map that will be returned 
-filled with an integer for each key. This integer is meant to represent the 
-translation string used in, for example, the localization class. 
+type. The second is the menu and the third is an empty map that will be returned
+filled with an integer for each key. This integer is meant to represent the
+translation string used in, for example, the localization class.
 
 The translator parameter is only useful when external localization tools
 are used, as it will indicate a translation index for each key. If no use is
 to be found for it, it can be set to nullptr.
 
-There is no way to set names for options and choices from the file, in fact, 
+There is no way to set names for options and choices from the file, in fact,
 every option and names selection will be given placeholder names and must
 be translated later. This is so by design.
 
@@ -991,7 +973,7 @@ void options_menu_from_json(
 				throw std::runtime_error("the values property must be an array");
 			}
 
-			//Bufff... Ese "template" está para que el compilador no se grille: es el "template disambiguator", 
+			//Bufff... Ese "template" está para que el compilador no se grille: es el "template disambiguator",
 			//que ayuda a saber que es un método templatizado y no una propiedad seguida de "menor que".
 			const std::string value_type=properties[k_value_type].GetString();
 
@@ -1030,17 +1012,17 @@ void options_menu_from_json(
 
 				if(value_type=="string") {
 					_target_menu.template insert_choice<std::string>(
-						entry_key, 
+						entry_key,
 						value_key,
-						"#string_value_placeholder#", 
+						"#string_value_placeholder#",
 						choice["value"].GetString()
 					);
 				}
 				else if(value_type=="int") {
 					_target_menu.template insert_choice<int>(
-						entry_key, 
-						value_key, 
-						"#int_value_placeholder", 
+						entry_key,
+						value_key,
+						"#int_value_placeholder",
 						choice["value"].GetInt()
 					);
 				}
@@ -1051,7 +1033,7 @@ void options_menu_from_json(
 					_target_menu.template insert_choice<bool>(
 						entry_key,
 						value_key,
-						"#bool_value_placeholder", 
+						"#bool_value_placeholder",
 						value
 					);
 				}
@@ -1088,10 +1070,10 @@ void options_menu_from_json(
 				maxval=properties[k_max].GetInt();
 
 			_target_menu.insert_int(
-				entry_key, 
-				"#int_placeholder#", 
-				minval, 
-				maxval, 
+				entry_key,
+				"#int_placeholder#",
+				minval,
+				maxval,
 				minval
 			);
 		}
