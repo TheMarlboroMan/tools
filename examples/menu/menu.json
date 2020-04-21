@@ -7,9 +7,9 @@
 			"properties" : {
 				"value_type":"string",
 				"values":[
-					{"key":"10_WINDOW_10", "value": "800x500", "translation":151},
-					{"key":"10_WINDOW_20", "value": "1200x750", "translation":152},
-					{"key":"10_WINDOW_30", "value": "1600x1000", "translation":153}
+					{"value": "800x500", "translation":151},
+					{"value": "1200x750", "translation":152},
+					{"value": "1600x1000", "translation":153}
 				]
 			}
 		},
@@ -20,8 +20,8 @@
 			"properties":{
 				"value_type":"bool",
 				"values":[
-					{"key":"20_HELP_10", "value": true, "translation":161},
-					{"key":"20_HELP_20", "value": false, "translation":162}
+					{"value": true, "translation":161},
+					{"value": false, "translation":162}
 				]
 			}
 		},
@@ -32,10 +32,10 @@
 			"properties":{
 				"value_type":"int",
 				"values":[
-					{"key":"40_PERIODICITY_10", "value": 1, "translation":164},
-					{"key":"40_PERIODICITY_20", "value": 2, "translation":165},
-					{"key":"40_PERIODICITY_30", "value": 4, "translation":166},
-					{"key":"40_PERIODICITY_40", "value": 8, "translation":167}
+					{"value": 1, "translation":164},
+					{"value": 2, "translation":165},
+					{"value": 4, "translation":166},
+					{"value": 8, "translation":167}
 				]
 			}
 		},
