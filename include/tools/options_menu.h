@@ -2,6 +2,7 @@
 
 #include "ranged_value.h"
 #include "json.h"
+#include "algorithm.h"
 
 #include <rapidjson/document.h>
 
@@ -25,25 +26,6 @@ struct options_menu_exception:
 		:std::runtime_error(s) {
 	}
 };
-
-//!Exception with a key at the end of its message.
-template<typename tkey>
-struct key_exception:
-	public options_menu_exception{
-	//!Class constructor.
-	key_exception(const tkey& _key, const std::string& _msg)
-		:options_menu_exception(_msg+" in key '"+key_to_string(_key)+"'") {
-
-	}
-
-	static std::string key_to_string(const Tkey& _k) {
-
-		std::stringstream ss;
-		ss<<_k;
-		return ss.str();
-	}
-};
-
 
 //!Data representation of a single depth menu.
 /**
@@ -94,7 +76,7 @@ Finally, there is a particular exception "options_menu_exception" thrown for
 every error.
 */
 
-template<typename Tkey>
+template<typename tkey>
 class options_menu {
 
 	public:
@@ -102,6 +84,27 @@ class options_menu {
 	enum class browse_dir{next, previous};
 
 	private:
+	
+	struct base_entry; //Forward declaration.
+	using uptr_base=std::unique_ptr<base_entry>;
+	std::vector<uptr_base>	entries;
+	
+	//!Exception with a key at the end of its message.	
+	struct key_exception:
+		public options_menu_exception{
+		//!Class constructor.
+		key_exception(const tkey& _key, const std::string& _msg)
+			:options_menu_exception(_msg+" in key '"+key_to_string(_key)+"'") {
+	
+		}
+	
+		static std::string key_to_string(const tkey& _k) {
+	
+			std::stringstream ss;
+			ss<<_k;
+			return ss.str();
+		}
+	};
 
 	//Compile time assertion that a menu will be created with valid key types.
 	template<typename t_keytype>
@@ -109,11 +112,9 @@ class options_menu {
 		static_assert(
 			std::is_same<int, t_keytype>::value
 			|| std::is_same<std::string, t_keytype>::value,
-//			|| std::is_same<const char *, t_keytype>::value,
 			"only integer and string types are permitted for choices"
 		);
 	}
-
 
 	//Compile time assertion that a choices will be created with valid value types.
 	template<typename Tvalue>
@@ -131,36 +132,34 @@ class options_menu {
 	//!Defines the different types of choices.
 	enum class types {tchoice, tint, tbool, tstring, tvoid};
 
-	
-
 	//!Assignment overloads for the "set" function, so we can work around
 	//templates.
-	void	assign(const Tkey& _key, int _value) {
+	void	assign(const tkey& _key, int _value) {
 		
 		auto& o=get_entry(_key);
 		static_cast<entry_int *>(o.get())->value=_value;
 	}
 
-	void	assign(const Tkey& _key, bool _value) {
+	void	assign(const tkey& _key, bool _value) {
 
 		auto& o=get_entry(_key);
 		static_cast<entry_bool *>(o.get())->value=_value;
 	}
 
-	void	assign(const Tkey& _key, const std::string& _value) {
+	void	assign(const tkey& _key, const std::string& _value) {
 
 		auto& o=get_entry(_key);
 		static_cast<entry_string *>(o.get())->value=_value;
 	}
 
-	void	assign(const Tkey& _key, const char * _value) {
+	void	assign(const tkey& _key, const char * _value) {
 
 		auto& o=get_entry(_key);
 		static_cast<entry_string *>(o.get())->value=std::string{_value};
 	}
 
 	template<typename tvalue>
-	void	assign(const Tkey& _key, tvalue _value, types _value_type) {
+	void	assign(const tkey& _key, tvalue _value, types _value_type) {
 
 		switch(_value_type) {
 			case types::tint:
@@ -208,13 +207,13 @@ class options_menu {
 	//!Base class for all entries.
 	struct base_entry {
 
-		Tkey					key;
+		tkey					key;
 		std::string 			name; //!< All entries have a name string. Will end up being the printable representation of it, like "window size".
 
 		//!Returns the key.
-		const Tkey&				get_key() const {return key;}
+		const tkey&				get_key() const {return key;}
 
-		//TODO: I think this is questionable...
+		//TODO: I think this is questionable and should be done in the menu part...
 		//!Will return a printable value for the current entry (or its equivalent).
 		virtual	std::string		get_str_value() const=0;
 
@@ -229,21 +228,33 @@ class options_menu {
 
 		//Base constructor.
 								base_entry(
-			const TKey& _key,
+			const tkey& _key,
 			const std::string& _name
-		):key(_key), name(_name){
-		}
+		):key(_key), name(_name){}
 	};
 
+	//!Returns the entry by the given key. Throws if the key cannot be found.
+	const uptr_base&		get_entry(const tkey& _key) const {
 
-	using uptr_base=std::unique_ptr<base_entry>;
-	uptr_base		get_entry(const TKey& _key) {
+		auto it=std::find_if(
+			std::begin(entries),
+			std::end(entries),
+			[_key](const uptr_base& _entry) {
+				return _entry->key==_key;
+			}
+		);
 
-		if(!_key_exists(_key)) {
-			throw key_exception(_key, "not found");
+		if(it==std::end(entries)) {
+			throw key_exception(_key, "not found");			
 		}
 
-		//TODO: TODO:
+		return *it;
+	}
+	//!Returns the entry by the given key. Throws if the key cannot be found.
+	uptr_base&		get_entry(const tkey& _key) {
+
+		//That's a mouthful.
+		return const_cast<uptr_base&>(const_cast<const options_menu<tkey>*>(this)->get_entry(_key));
 	}
 
 	//!Structure to represent any type with a string.
@@ -253,17 +264,11 @@ class options_menu {
 	//!represent "txt", "html" and "latex" output. It is implemented in
 	//!terms of a std::map.
 	template<typename Tvalue>
-	struct entry_choice:public base_entry {
+	struct entry_choice
+		:public base_entry {
 
 		types				value_type; //The type of the value (TValue) must be stored in order to be retrieved.
-
-		//!Pair of value and name.
-		struct choice {
-			Tvalue			value;	//!< Stored value.
-			std::string		str_value; 	//!< Display name.
-		};
-
-		std::vector<choice>	choices; //!< Internal option map.
+		std::vector<Tvalue>	choices; //!< Internal option map.
 		std::size_t			current_index=0;	//!< Currently selected key.
 
 		//!Returns the typename value for the current selection (0,1,2 in the example).
@@ -273,7 +278,7 @@ class options_menu {
 				throw options_menu_exception("choice with no values for get_value");
 			}
 
-			return choices.at(current_index).value;
+			return choices.at(current_index);
 		}
 
 		//!Returns the string that represents the current selection ("txt", "html" or "latex" in the example).
@@ -283,7 +288,12 @@ class options_menu {
 				throw options_menu_exception("choice with no values for get_str_value");
 			}
 
-			return choices.at(current_index).str_value;
+
+			//TODO: Shiiit.
+			return "LEL";
+//			return value_type==types::tstring 
+//				? get_value()
+//				: std::to_string(get_value());
 		}
 
 		//!Returns the type of this class.
@@ -324,21 +334,32 @@ class options_menu {
 		bool                    compare_values(int _a, int _b) const {return _a==_b;}
 		bool                    compare_values(const std::string& _a, const std::string _b) const {return _a==_b;}
 
-		//!Sets the selection by its value.
-		void 					set(const Tvalue& _value) {
-
+		bool                    has_value(const Tvalue& _value, int& _distance) {
+		
 			auto it=std::find_if(
 				std::begin(choices),
 				std::end(choices),
-				[&_value, this](const choice& _choice) {return compare_values(_value, _choice.value);}
+				[&_value, this](const Tvalue& _choice) {return compare_values(_value, _choice);}
 			);
-
+			
+			_distance=-1;
 			if(it==std::end(choices)) {
-
-				throw options_menu_exception("value does not exist in choice");
+				return false;			
 			}
 
-			current_index=std::distance(std::begin(choices), it);
+			_distance=std::distance(std::begin(choices), it);
+			return true;
+		}
+
+		//!Sets the selection by its value.
+		void 					set(const Tvalue& _value) {
+
+			int index{0};
+			if(!has_value(_value, index)) {
+				throw options_menu_exception("value does not exist in choice");
+			}
+			
+			current_index=index;
 		}
 
 		//!Returns the number of choices.
@@ -347,34 +368,29 @@ class options_menu {
 		}
 
 		//!Inserts a new selection into the option.
+		void				insert(const Tvalue& _value) {
 
-		//!choices are formed by a Tkey (menu template key), TValue
-		//!(option template key) and std::string (visible name).
-		//TODO: What's with the key parameter? Will we keep that???
-		void				insert(const Tvalue& _value, const std::string& _name) {
+			int dummy{0};
+			if(has_value(_value, dummy)) {
+				throw options_menu_exception("value already exists in choice!");
+			}
 
-			//TODO: Values should be unique!!!!!!
-			//TODO: WFT IS NAME???
-std::cout<<"value: "<<_value<<" name: "<<_name<<std::endl;
-
-			choices.push_back({_value, _name});
+			choices.push_back(_value);
 		}
 
 		//!Removes the selection identified by the given value.
-		//TODO: Identify by value...
-		/*
-		void 				erase(const Tkey& key_sel) {
+		void 				erase(const Tvalue& _value) {
 
-			if(!choices.count(key_sel)) {
-				throw options_menu_exception("key does not exist for erase");
+			int index{0};
+			if(!has_value(_value, index)) {
+				throw options_menu_exception("value does not exist for erase");
 			}
-
-			choices.erase(key_sel);
+			
+			choices.erase(std::begin(choices)+index);
 		}
-		*/
 
 		//!Constructor.
-		entry_choice(const TKey& _key, const std::string& _name)
+		entry_choice(const tkey& _key, const std::string& _name)
 			:base_entry(_key, _name), value_type{types::tvoid} {
 
 			if(std::is_same<int, Tvalue>::value) {
@@ -410,7 +426,7 @@ std::cout<<"value: "<<_value<<" name: "<<_name<<std::endl;
 		}
 
 		//!Constructor of the option.
-		entry_int(const Tkey& _key, const std::string& _name, int min, int max, int a)
+		entry_int(const tkey& _key, const std::string& _name, int min, int max, int a)
 			:base_entry(_key, _name), value(min, max, a) {
 		}
 	};
@@ -432,7 +448,7 @@ std::cout<<"value: "<<_value<<" name: "<<_name<<std::endl;
 		//!Ignores the parameter and just flips the value.
 		virtual void			browse(browse_dir){value=!value;}
 
-		entry_bool(const Tkey& _key, const std::string& _name, bool _value)
+		entry_bool(const tkey& _key, const std::string& _name, bool _value)
 			:base_entry(_key, _name), value(_value) {
 		}
 	};
@@ -455,8 +471,8 @@ std::cout<<"value: "<<_value<<" name: "<<_name<<std::endl;
 		virtual void			browse(browse_dir){}
 
 		//!Constructor.
-		entry_string(const std::string& n, const std::string& v)
-			:base_entry(n), value(v) {
+		entry_string(const tkey& _key, const std::string& _name, const std::string& _value)
+			:base_entry(_key, _name), value(_value) {
 		}
 	};
 
@@ -476,52 +492,53 @@ std::cout<<"value: "<<_value<<" name: "<<_name<<std::endl;
 		virtual void			browse(browse_dir ){}
 
 		//!Constructor.
-		entry_void(const TKey& _key, const std::string& _name)
+		entry_void(const tkey& _key, const std::string& _name)
 			:base_entry(_key, _name) {
 		}
 	};
 
 	//!Internal use. Checks that the option with the key does not exist.
-	void	key_exists(const Tkey& _key) const {
+	bool	key_exists(const tkey& _key) const {
 
 		return std::end(entries)!=std::find_if(
 			std::begin(entries), 
 			std::end(entries), 
-			[_key](const std::unique_ptr<base_entry>& _entry) {
+			[_key](const uptr_base& _entry) {
 				return _entry->key == _key;
+			}
 		);
 	}
-
-	//TODO: Don't really see the use... Plus, the str thing is revolting.
-	//!Validate that types are the same. Throws when they are not. Internal use.
-	void		check_type(types ot, types t, const Tkey& _key, const std::string& _msg) const {
-
-		if(ot!=t) {
-			
-			throw key_exception(_key, _msg);
-		}
-	}
-
+	
 	public:
 
 	//!Erases the entry with the given key.
-	void		erase(const Tkey& _key) {
+	void		erase(const tkey& _key) {
 
-		is_possible_key<Tkey>();
+		is_possible_key<tkey>();
 		if(!key_exists(_key)) {
 			throw key_exception(_key, "key does not exist for erase");
 		}
-		entries.erase(_key);
+		
+		entries.erase(
+			std::remove_if(
+				std::begin(entries),
+				std::end(entries),
+				[_key](const uptr_base& _entry) {
+					return _entry->key==_key;
+				}
+			),
+			std::end(entries)
+		);
 	}
 
-	//TODO: These should be overloads, to provide a consistent interface.
-
 	//!Creates an integer entry
-	void		insert_int(const Tkey& _key, const std::string& _name, int _min, int _max, int _value) {
+	void		insert(const tkey& _key, const std::string& _name, int _min, int _max, int _value) {
 
-		is_possible_key<Tkey>();
+std::cout<<"insert "<<_key<<" as int"<<std::endl;
+
+		is_possible_key<tkey>();
 		if(key_exists(_key)) {
-			throw key_exception(_key, "key already exists for insert_int");
+			throw key_exception(_key, "key already exists for insert");
 		}
 
 		entries.push_back(
@@ -530,23 +547,33 @@ std::cout<<"value: "<<_value<<" name: "<<_name<<std::endl;
 	}
 
 	//!Creates a bool entry.
-	void		insert_bool(const Tkey& _key, const std::string& _name, bool _val) {
+	void		insert(const tkey& _key, const std::string& _name, bool _val) {
 
-		is_possible_key<Tkey>();
+std::cout<<"insert "<<_key<<" as bool"<<std::endl;
+
+		is_possible_key<tkey>();
 		if(key_exists(_key)) {
-			throw key_exception(_key, "key already exists for insert_bool");
+			throw key_exception(_key, "key already exists for insert");
 		}
 		entries.push_back(
 			uptr_base(new entry_bool(_key, _name, _val))
 		);
 	}
 
+	//!Creates a string entry. Disambiguation.
+	void		insert(const tkey& _key, const std::string& _name, const char * _val) {
+	
+		insert(_key, _name, std::string{_val});
+	}
+	
 	//!Creates a string entry.
-	void		insert_string(const Tkey& _key, const std::string& _name, const std::string& _val) {
+	void		insert(const tkey& _key, const std::string& _name, const std::string& _val) {
 
-		is_possible_key<Tkey>();
+std::cout<<"insert "<<_key<<" as string"<<std::endl;
+
+		is_possible_key<tkey>();
 		if(key_exists(_key)) {
-			throw key_exception(_key, "key already exists for insert_string");
+			throw key_exception(_key, "key already exists for insert");
 		}
 
 		entries.push_back(
@@ -555,11 +582,13 @@ std::cout<<"value: "<<_value<<" name: "<<_name<<std::endl;
 	}
 
 	//!Creates a void entry.
-	void		insert_void(const Tkey& _key, const std::string& _name) {
+	void		insert(const tkey& _key, const std::string& _name) {
 
-		is_possible_key<Tkey>();
+std::cout<<"insert "<<_key<<" as void"<<std::endl;
+
+		is_possible_key<tkey>();
 		if(key_exists(_key)) {
-			throw key_exception(_key, "key already exists for insert_void");
+			throw key_exception(_key, "key already exists for insert");
 		}
 		entries.push_back(
 			uptr_base(new entry_void(_key, _name))
@@ -570,15 +599,15 @@ std::cout<<"value: "<<_value<<" name: "<<_name<<std::endl;
 
 	//!Must be called specifying its Tvalue (menu.template insert_choice<std::string>(key, "value");
 	template<typename Tvalue>
-	void		insert_choice(const Tkey& _key, const std::string& _name) {
+	void		insert_choice(const tkey& _key, const std::string& _name) {
 
-		is_possible_key<Tkey>();
+		is_possible_key<tkey>();
 		is_possible_value<Tvalue>();
 		if(key_exists(_key)) {
 			throw key_exception(_key, "key already exists for insert_choice");
 		}
 
-		entries.insert(
+		entries.push_back(
 			uptr_base(new entry_choice<Tvalue>(_key, _name))
 		);
 	}
@@ -586,74 +615,66 @@ std::cout<<"value: "<<_value<<" name: "<<_name<<std::endl;
 	//!Inserts a value with key_sel, value and name for the option identified by "key".
 	template<typename Tvalue>
 	void		insert_choice_value(
-		const Tkey& _key,
-		const std::string& _translation,
+		const tkey& _key,
 		const Tvalue _value
 	) {
 
-	std::cout<<"insert choice with key: "<<_key<<" translation: "<<_translation<<" value: "<<_value<<std::endl;
+		std::cout<<"insert choice value with key: "<<_key<<" value: "<<_value<<std::endl;
 
-		is_possible_key<Tkey>();
+		is_possible_key<tkey>();
 		is_possible_value<Tvalue>();
-
-		if(!key_exists(_key)) {
-
-			throw key_exception(_key, "key does not exist for insert_choice_value");
-		}
 
 		auto& o=get_entry(_key);
-		check_type(o->get_type(), types::tchoice, _key, "entry is not of choice type");
+		if(types::tchoice!=o->get_type()) {
 
-		static_cast<entry_choice<Tvalue> *>(o.get())->insert(_value, _translation);
+			throw key_exception(_key, "entry is not of choice type");
+		}
+
+		static_cast<entry_choice<Tvalue> *>(o.get())->insert(_value);
 	}
 
-	//!Erases a value (key_sel) from a choice option (key).
-	/*
-	TODO: Nope, erase by value.
+	//!Erases a value from a choice entry.
 	template<typename Tvalue>
-	void		erase_choice(const Tkey& key, const Tkey& key_sel) {
+	void		erase_choice(const tkey& _key, const Tvalue& _value) {
 
-		is_possible_key<Tkey>();
+		is_possible_key<tkey>();
 		is_possible_value<Tvalue>();
-		check_entry(key, "key does not exist for erase choice");
-		auto& o=get_entry(key);
-		check_type(o->get_type(), types::tchoice, key, "option is not choice");
+		auto& o=get_entry(_key);
+		if(types::tchoice!=o->get_type()) {
 
-		static_cast<entry_choice<Tvalue> *>(o.get())->erase(key_sel);
-	}
-	*/
+			throw key_exception(_key, "option is not a choice for erase_choice");
+		}
+
+		static_cast<entry_choice<Tvalue> *>(o.get())->erase(_value);
+	}	
 
 	//!Gets the number of choices for a templated option.
 	template<typename Tvalue>
-	size_t		size_choice(const Tkey& _key) const {
+	size_t		size_choice(const tkey& _key) const {
 
-		is_possible_key<Tkey>();
+		is_possible_key<tkey>();
 		is_possible_value<Tvalue>();
-		if(!key_exists(_key)) {
-			throw key_exception(_key, "key does not exist for size choice");
-		}
 		auto& o=get_entry(_key);
-		check_type(o->get_type(), types::tchoice, _key, "entry is not of choice type");
+		if(types::tchoice!=o->get_type()) {
+
+			throw key_exception(_key, "entry is not of choice type for size_choice");
+		}		
 
 		return static_cast<entry_choice<Tvalue> *>(o.get())->size();
 	}
 
 	//!Browses the option key in the direction dir.
-	void		browse(const Tkey& _key, browse_dir _dir) {
+	void		browse(const tkey& _key, browse_dir _dir) {
 
-		is_possible_key<Tkey>();
-		if(!key_exists(_key)) {
-			throw key_exception(_key, "key does not exist for browse");
-		}
+		is_possible_key<tkey>();
 		get_entry(_key)->browse(_dir);
 	}
 
 /*
 	template<typename tvalue>
-	value	get(const TKey& key) const {
+	tvalue	get(const tkey& key) const {
 
-		is_possible_key<Tkey>();
-		check_entry(_key, "key does not exist for get");
+		is_possible_key<tkey>();
 		auto& o=get_entry(_key);
 
 		switch(o->get_type()) {
@@ -667,6 +688,7 @@ std::cout<<"value: "<<_value<<" name: "<<_name<<std::endl;
 				return static_cast<entry_string *>(o.get())->value;
 			break;
 			case types::tchoice:
+				//TODO: Nope, can be int, bool or str again.
 				static_cast<entry_choice<tvalue>*>(o.get())->get_value();
 			break;
 			case types::tvoid:
@@ -679,59 +701,66 @@ std::cout<<"value: "<<_value<<" name: "<<_name<<std::endl;
 
 	//!Specifically returns integer values from an integer option.
 	//TODO: These should be only get.
-	int		get_int(const Tkey& key) const {
+	int		get_int(const tkey& _key) const {
 
-		is_possible_key<Tkey>();
-		check_entry(key, "key does not exist for get_int");
-		const auto& o=get_entry(key);
-		check_type(o->get_type(), types::tint, key, "option is not int");
+		is_possible_key<tkey>();
+		const auto& o=get_entry(_key);
+		if(types::tint != o->get_type()) {
+
+			throw key_exception(_key, "choice is not int for get_int");
+		}
 		return static_cast<entry_int *>(o.get())->get_value();
 	}
 
 	//!Specifically returns bool values from an bool option.
-	bool	get_bool(const Tkey& key) const {
+	bool	get_bool(const tkey& _key) const {
 
-		is_possible_key<Tkey>();
-		check_entry(key, "key does not exist for get_bool");
+		is_possible_key<tkey>();
 		const auto& o=get_entry(key);
-		check_type(o->get_type(), types::tbool, key, "option is not bool");
+		if(types::tbool != o->get_type()) {
+
+			throw key_exception(_key, "choice is not bool for get_bool");
+		}		
 		return static_cast<entry_bool *>(o.get())->get_value();
 	}
 
 	//!Specifically returns string values from a string option.
-	std::string	get_string(const Tkey& key) const {
+	std::string	get_string(const tkey& _key) const {
 
-		is_possible_key<Tkey>();
-		check_entry(key, "key does not exist for get_string");
+		is_possible_key<tkey>();		
 		const auto& o=get_entry(key);
-		check_type(o->get_type(), types::tstring, key, "option is not string");
+		if(tstring != o->get_type()) {
+			
+			throw key_exception(_key, "choice is not string for get_string");
+		}		
 		return static_cast<entry_string *>(o.get())->get_value();
 	}
 
 	//TODO: There's no "get choice" template.
 
 	//!Returns the string value representation for the current selection in the option.
-	std::string	get_str_value(const Tkey& key) const {
+	std::string	get_str_value(const tkey& key) const {
 
-		is_possible_key<Tkey>();
-		check_entry(key, "key does not exist for get_str_value");
+		is_possible_key<tkey>();
 		const auto& o=get_entry(key);
 		return o->get_str_value();
 	}
 */
 	//!Set the value for any key.
 	template<typename tvalue>
-	void	set(const Tkey& _key, tvalue _value) {
+	void	set(const tkey& _key, tvalue _value) {
 
-		is_possible_key<Tkey>();
+		is_possible_key<tkey>();
 		is_possible_value<tvalue>();
 
-		check_entry(_key, "key does not exist for set");
 		auto& o=get_entry(_key);
 
 		//Values are assigned through private overloads, to avoid the compiler
 		//complaining of invalid assignments (this is compile time, tvalue might
 		//be a string and we might be trying to assign to an integer).
+		
+std::cout<<"call set on "<<_key<<" with "<<_value<<std::endl;
+
 		switch(o->get_type()) {
 			case types::tstring:
 				if(!std::is_same<tvalue, std::string>::value
@@ -765,15 +794,10 @@ std::cout<<"value: "<<_value<<" name: "<<_name<<std::endl;
 		}
 	}
 
-
-
 	//!Returns the option name for the given key.
-	std::string	get_name(const Tkey& _key) const {
+	std::string	get_name(const tkey& _key) const {
 
-		is_possible_key<Tkey>();
-		if(!_key_exists(_key)) {
-			throw key_exception(_key, "key does not exist for get_name");
-		}
+		is_possible_key<tkey>();
 		return get_entry(_key)->name;
 	}
 
@@ -784,25 +808,19 @@ std::cout<<"value: "<<_value<<" name: "<<_name<<std::endl;
 	}
 
 	//!Gets a vector with the different keys used in entries.
+	std::vector<tkey>		get_keys() const {
 
-	//!Keys for choices are not returned. This is mostly used to draw the
-	//!menu: all keys are returned and then the options can be queried.
-	std::vector<Tkey>		get_keys() const {
-
-		//TODO: We could do some reduce magic.
-		std::vector<Tkey> res; //Cannot directly return "keys", as these contain the choices too.
+		std::vector<tkey> res; //Cannot directly return "keys", as these contain the choices too.
 		for(const auto& o : entries) {
-			res.push_back(o.get_key());
+			res.push_back(o->get_key());
 		}
 		return res;
 	}
-
-	private:
-
-	std::vector<std::unique_ptr<base_entry>>	entries;
 };
 
 //!Mounts a previously created menu using a JSON value with rapidjson..
+
+//TODO: Update docs, translation is not provided anymore.
 
 /**The first parameter is a rapidJson value, which is supposed to be of array
 type. The second is the menu and the third is an empty map that will be returned
@@ -977,14 +995,12 @@ void options_menu_from_json(
 				if(value_type=="string") {
 					_target_menu.template insert_choice_value<std::string>(
 						entry_key,
-						"#string_value_placeholder#",
 						choice["value"].GetString()
 					);
 				}
 				else if(value_type=="int") {
 					_target_menu.template insert_choice_value<int>(
 						entry_key,
-						"#int_value_placeholder",
 						choice["value"].GetInt()
 					);
 				}
@@ -994,7 +1010,6 @@ void options_menu_from_json(
 
 					_target_menu.template insert_choice_value<bool>(
 						entry_key,
-						"#bool_value_placeholder",
 						value
 					);
 				}
@@ -1030,7 +1045,7 @@ void options_menu_from_json(
 			int minval=properties[k_min].GetInt(),
 				maxval=properties[k_max].GetInt();
 
-			_target_menu.insert_int(
+			_target_menu.insert(
 				entry_key,
 				"#int_placeholder#",
 				minval,
@@ -1040,15 +1055,15 @@ void options_menu_from_json(
 		}
 		else if(entry_type=="bool") {
 
-			_target_menu.insert_bool(entry_key, "#bool_placeholder#", true);
+			_target_menu.insert(entry_key, "#bool_placeholder#", true);
 		}
 		else if(entry_type=="string") {
 
-			_target_menu.insert_string(entry_key, "#string_placeholder#", "#string_placeholder_value#");
+			_target_menu.insert(entry_key, "#string_placeholder#", "#string_placeholder_value#");
 		}
 		else if(entry_type=="void") {
 
-			_target_menu.insert_void(entry_key, "#void_placeholder#");
+			_target_menu.insert(entry_key, "#void_placeholder#");
 		}
 		else {
 

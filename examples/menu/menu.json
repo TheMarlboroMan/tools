@@ -3,51 +3,46 @@
 		{
 			"type":"choice",
 			"key":"10_WINDOW",
-			"translation":150,
 			"properties" : {
 				"value_type":"string",
 				"values":[
-					{"value": "800x500", "translation":151},
-					{"value": "1200x750", "translation":152},
-					{"value": "1600x1000", "translation":153}
+					{"value": "800x500"},
+					{"value": "1200x750"},
+					{"value": "1600x1000"}
 				]
 			}
 		},
 		{
 			"type":"choice",
 			"key":"20_HELP",
-			"translation":160,
 			"properties":{
 				"value_type":"bool",
 				"values":[
-					{"value": true, "translation":161},
-					{"value": false, "translation":162}
+					{"value": true},
+					{"value": false}
 				]
 			}
 		},
 		{
 			"type":"choice",
 			"key":"40_PERIODICITY",
-			"translation":163,
 			"properties":{
 				"value_type":"int",
 				"values":[
-					{"value": 1, "translation":164},
-					{"value": 2, "translation":165},
-					{"value": 4, "translation":166},
-					{"value": 8, "translation":167}
+					{"value": 1},
+					{"value": 2},
+					{"value": 4},
+					{"value": 8}
 				]
 			}
 		},
 		{
 			"type":"string",
-			"key":"22_NAME",
-			"translation":210
+			"key":"22_NAME"
 		},
 		{
 			"type":"int",
 			"key":"25_FILESIZE",
-			"translation":215,
 			"properties": {
 				"min": 1,
 				"max": 9999
@@ -55,13 +50,11 @@
 		},
 		{
 			"type":"bool",
-			"key":"27_BACKUP",
-			"translation":216
+			"key":"27_BACKUP"
 		},
 		{
 			"type":"void",
-			"key":"30_EXIT",
-			"translation":170
+			"key":"30_EXIT"
 		}
 	],
 	"translation_pairs_english":[

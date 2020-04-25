@@ -76,12 +76,14 @@ int main(int, char **) {
 		);
 
 		//Build the menu...
+		std::cout<<"Testing menu building..."<<std::endl;
 		tools::options_menu<std::string> menu_str_str;
 		tools::options_menu_from_json(
 			json_document["string_string_menu"],
 			menu_str_str
 		);
 
+		std::cout<<"Testing assignment..."<<std::endl;
 		//We can se some values right away... string, bool and int values are
 		//straightforward: just use the proper argument type...
 		menu_str_str.set("22_NAME", "Bob Ross");
@@ -95,6 +97,7 @@ int main(int, char **) {
 		menu_str_str.set("10_WINDOW", std::string("1200x750")); //we could also use const char *.
 
 		//Of course, we can make it fail if we assign values of invalid types...
+		std::cout<<"Testing invalid assignment..."<<std::endl;
 		if(!test_assignment_failures(menu_str_str)) {
 			std::cout<<"assigments failed..."<<std::endl;
 			return 1;
