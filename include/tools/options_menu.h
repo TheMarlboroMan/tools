@@ -27,37 +27,47 @@ struct options_menu_exception:
 	}
 };
 
+//Anonymous namespace, makes this stuff invisible to the outside world.
+namespace {
 
-//TODO: Can I make this visible only in this translation unit???
-//!Compile time assertion that a menu will be created with valid key types.
-template<typename t> struct possible_key{static const bool value=false;};
-template<> struct possible_key<int>{static const bool value=true;};
-template<> struct possible_key<std::string>{static const bool value=true;};
-template<typename t> void assert_valid_key() {
-	static_assert(possible_key<t>::value, "only integer and string keys are allowed");
-}	
-//TODO: Can I make this visible only in this translation unit???
-//!Compile time assertion that a choices will be created with valid value types.
-template<typename t> struct possible_value{static const bool value=false;};
-template<> struct possible_value<bool>{static const bool value=true;};
-template<> struct possible_value<int>{static const bool value=true;};
-template<> struct possible_value<std::string>{static const bool value=true;};
-template<> struct possible_value<const char *>{static const bool value=true;};
-template<typename t> void assert_valid_value() {
-	static_assert(possible_value<t>::value, "only integer, string and boolean types are permitted for choices");
+	//!Compile time assertion that a menu will be created with valid key types.
+	template<typename t> struct possible_key{static const bool value=false;};
+	template<> struct possible_key<int>{static const bool value=true;};
+	template<> struct possible_key<std::string>{static const bool value=true;};
+	template<typename t> void assert_valid_key() {
+		static_assert(possible_key<t>::value, "only integer and string keys are allowed");
+	}	
+
+	//!Compile time assertion that a choices will be created with valid value types.
+	template<typename t> struct possible_value{static const bool value=false;};
+	template<> struct possible_value<bool>{static const bool value=true;};
+	template<> struct possible_value<int>{static const bool value=true;};
+	template<> struct possible_value<std::string>{static const bool value=true;};
+	template<> struct possible_value<const char *>{static const bool value=true;};
+	template<typename t> void assert_valid_value() {
+		static_assert(possible_value<t>::value, "only integer, string and boolean types are permitted for choices");
+	}
+
+	//!Defines the different types of choices.
+	enum class types {tchoice, tint, tbool, tstring, tvoid};
+
+	//!Tag dispatching.
+	//TODO: Document.
+	template<typename t> struct type_for{static const types value=types::tvoid;};
+	template<> struct type_for<int>{static const types value=types::tint;};
+	template<> struct type_for<bool>{static const types value=types::tbool;};
+	template<> struct type_for<std::string>{static const types value=types::tstring;};
+	template<> struct type_for<const char *>{static const types value=types::tstring;};
+
+	//So close... but does not work with enum types :(.
+/*
+	struct invalid_value_type{};
+	template<typename t> struct value_type_for{static const invalid_value_type value;};
+	template<> struct value_type_for<types::tint>{static const int value=0;};
+	template<> struct value_type_for<types::tbool>{static const bool value=false;};
+	template<> struct value_type_for<types::tstring>{static const std::string value{};};
+*/
 }
-//TODO: Can I make this visible only in this translation unit???
-//!Defines the different types of choices.
-enum class types {tchoice, tint, tbool, tstring, tvoid};
-
-//!Tag dispatching.
-//TODO: Can I make this visible only in this translation unit???
-//TODO: Document.
-template<typename t> struct type_for{static const types value=types::tvoid;};
-template<> struct type_for<int>{static const types value=types::tint;};
-template<> struct type_for<bool>{static const types value=types::tbool;};
-template<> struct type_for<std::string>{static const types value=types::tstring;};
-template<> struct type_for<const char *>{static const types value=types::tstring;};
 
 //!Data representation of a single depth menu.
 /**
@@ -220,6 +230,10 @@ class options_menu {
 		//!The choices wrap around.
 		virtual void 				browse(browse_dir _dir) {
 
+			if(!choices.size()) {
+				throw options_menu_exception("choice with no values for browse");
+			}
+
 			if(_dir==browse_dir::previous) {
 
 				--current_index;
@@ -280,7 +294,6 @@ class options_menu {
 			choices.push_back(_value);
 		}
 
-		//TODO: This surely does not work with const char *
 		//!Removes the selection identified by the given value.
 		void 				erase(const tvalue& _value) {
 
@@ -389,18 +402,6 @@ class options_menu {
 		}
 	};
 
-	//!Internal use. Checks that the option with the key does not exist.
-	bool	key_exists(const tkey& _key) const {
-
-		return std::end(entries)!=std::find_if(
-			std::begin(entries), 
-			std::end(entries), 
-			[_key](const uptr_base& _entry) {
-				return _entry->key == _key;
-			}
-		);
-	}
-
 	//!Assignment overloads for the "set" function...
 	void	assign(const tkey& _key, int _value) {
 		
@@ -409,7 +410,6 @@ class options_menu {
 
 	void	assign(const tkey& _key, bool _value) {
 
-std::cout<<"assign bool "<<_key<<" to "<<_value<<std::endl;
 		static_cast<entry_bool *>(get_entry(_key).get())->value=_value;
 	}
 
@@ -429,8 +429,6 @@ std::cout<<"assign bool "<<_key<<" to "<<_value<<std::endl;
 
 	void	assign(const tkey& _key, bool _value, types _value_type) {
 
-std::cout<<"assign choice bool "<<_key<<" to "<<_value<<std::endl;
-
 		if(types::tbool != _value_type) {
 			throw key_exception(_key, "type must be boolean for choice");
 		}
@@ -445,6 +443,38 @@ std::cout<<"assign choice bool "<<_key<<" to "<<_value<<std::endl;
 		}
 
 		static_cast<entry_choice<std::string>*>(get_entry(_key).get())->set(_value);
+	}
+
+	//!Overloads for erase_choice.
+	void	erase_choice_impl(const tkey& _key, int _value) {
+
+		auto& o=get_entry(_key);
+		if(types::tint != o->get_value_type()) {
+
+			throw key_exception(_key, "parameter type does not match for erase_choice_impl");
+		}
+		static_cast<entry_choice<int> *>(o.get())->erase(_value);
+	}
+
+	void	erase_choice_impl(const tkey& _key, bool _value) {
+
+		auto& o=get_entry(_key);
+		if(types::tbool != o->get_value_type()) {
+
+			throw key_exception(_key, "parameter type does not match for erase_choice_impl");
+		}
+		static_cast<entry_choice<bool> *>(o.get())->erase(_value);
+	}
+
+	void	erase_choice_impl(const tkey& _key, const std::string& _value) {
+
+		auto& o=get_entry(_key);
+		if(types::tstring != o->get_value_type()) {
+
+			throw key_exception(_key, "parameter type does not match for erase_choice_impl");
+
+		}
+		static_cast<entry_choice<std::string> *>(o.get())->erase(_value);
 	}
 
 	//!Returns a printable representation of the possible types for key and
@@ -486,6 +516,18 @@ std::cout<<"assign choice bool "<<_key<<" to "<<_value<<std::endl;
 	}
 
 	public:
+
+	//!Checks that the option with the key does not exist.
+	bool	key_exists(const tkey& _key) const {
+
+		return std::end(entries)!=std::find_if(
+			std::begin(entries), 
+			std::end(entries), 
+			[_key](const uptr_base& _entry) {
+				return _entry->key == _key;
+			}
+		);
+	}
 
 	//!Creates an integer entry
 	void		insert(const tkey& _key, int _value, int _min, int _max) {
@@ -563,7 +605,6 @@ std::cout<<"assign choice bool "<<_key<<" to "<<_value<<std::endl;
 		);
 	}
 
-	//TODO: Untested.
 	//!Erases the entry with the given key.
 	void		erase(const tkey& _key) {
 
@@ -584,7 +625,7 @@ std::cout<<"assign choice bool "<<_key<<" to "<<_value<<std::endl;
 		);
 	}
 
-	//!Inserts a value with key_sel, value and name for the option identified by "key".
+	//!Inserts a value for the choice option identified by "key".
 	template<typename tvalue>
 	void		add(const tkey& _key, tvalue _value) {
 
@@ -595,7 +636,10 @@ std::cout<<"assign choice bool "<<_key<<" to "<<_value<<std::endl;
 			throw key_exception(_key, "entry is not of choice type");
 		}
 
-		//TODO: We should check the type here!!!!
+		if(o->get_value_type()!=type_for<tvalue>::value) {
+			throw key_exception(_key, "value type does not match");
+		}
+
 		static_cast<entry_choice<tvalue> *>(o.get())->insert(_value);
 	}
 
@@ -604,49 +648,53 @@ std::cout<<"assign choice bool "<<_key<<" to "<<_value<<std::endl;
 		add<std::string>(_key, std::string{_value});
 	}
 
-	//TODO: Untested.
 	//!Erases a value from a choice entry.
-	template<typename Tvalue>
-	void		erase_choice(const tkey& _key, const Tvalue& _value) {
+	template<typename tvalue>
+	void		erase_choice(const tkey& _key, const tvalue& _value) {
 
 		assert_valid_key<tkey>();
-		assert_valid_value<Tvalue>();
+		assert_valid_value<tvalue>();
 		auto& o=get_entry(_key);
 		if(types::tchoice!=o->get_type()) {
 
 			throw key_exception(_key, "option is not a choice for erase_choice");
 		}
 
-		//TODO: We should check the type here!!!!
-		static_cast<entry_choice<Tvalue> *>(o.get())->erase(_value);
-	}	
+		auto value_type=o->get_value_type();
+		if(value_type!=type_for<tvalue>::value) {
 
-	//TODO: Untested.
+			throw key_exception(_key, "value type does not match for erase_choice");
+		}
+
+		erase_choice_impl(_key, _value);
+	}
+
 	//!Disambiguate...
 	void		erase_choice(const tkey& _key, const char * _value) {
 		erase_choice<std::string>(_key, std::string{_value});
 	}
 
 	//!Gets the number of choices for a templated option.
-/*	//TODO: Untested.
-
-	//TODO: Can this even be done???
-	template<typename Tvalue>
 	size_t		size_choice(const tkey& _key) const {
 
 		assert_valid_key<tkey>();
-		assert_valid_value<Tvalue>();
 		auto& o=get_entry(_key);
 		if(types::tchoice!=o->get_type()) {
 
 			throw key_exception(_key, "entry is not of choice type for size_choice");
-		}		
+		}
 
-		return static_cast<entry_choice<Tvalue> *>(o.get())->size();
+		switch(o->get_value_type()) {
+			case types::tint:		return static_cast<entry_choice<int> *>(o.get())->size();
+			case types::tstring:	return static_cast<entry_choice<std::string> *>(o.get())->size();
+			case types::tbool:		return static_cast<entry_choice<bool> *>(o.get())->size();
+			default:
+				throw key_exception(_key, "type mismatch for size_choice");
+		}
 	}
-*/
 
 	//!Browses the option key in the direction dir.
+//TODO: untested.
 	void		browse(const tkey& _key, browse_dir _dir) {
 
 		assert_valid_key<tkey>();
@@ -659,15 +707,17 @@ std::cout<<"assign choice bool "<<_key<<" to "<<_value<<std::endl;
 		assert_valid_key<tkey>();
 		const auto& o=get_entry(_key);
 
-//TODO: It must either be an int or a choice, which is... shameful.
-
-		if(types::tint != o->get_type()) {
-
+		if(o->get_value_type()!=types::tint) {
 			throw key_exception(_key, "choice is not int for get_int");
 		}
 
+		//A pure int...
+		if(o->get_type()==types::tint) {
+			return static_cast<entry_int *>(o.get())->get_value();
+		}
 
-		return static_cast<entry_int *>(o.get())->get_value();
+		//A choice int...
+		return static_cast<entry_choice<int> *>(o.get())->get_value();
 	}
 
 	//!Specifically returns bool values from an bool option.
@@ -675,11 +725,16 @@ std::cout<<"assign choice bool "<<_key<<" to "<<_value<<std::endl;
 
 		assert_valid_key<tkey>();
 		const auto& o=get_entry(_key);
-		if(types::tbool != o->get_type()) {
+		if(types::tbool != o->get_value_type()) {
 
 			throw key_exception(_key, "choice is not bool for get_bool");
 		}		
-		return static_cast<entry_bool *>(o.get())->get_value();
+
+		if(types::tbool==o->get_type()) {
+			return static_cast<entry_bool *>(o.get())->get_value();
+		}
+
+		return static_cast<entry_choice<bool> *>(o.get())->get_value();
 	}
 
 	//!Specifically returns string values from a string option.
@@ -687,11 +742,16 @@ std::cout<<"assign choice bool "<<_key<<" to "<<_value<<std::endl;
 
 		assert_valid_key<tkey>();
 		const auto& o=get_entry(_key);
-		if(types::tstring != o->get_type()) {
+		if(types::tstring != o->get_value_type()) {
 			
 			throw key_exception(_key, "choice is not string for get_string");
 		}		
-		return static_cast<entry_string *>(o.get())->get_value();
+
+		if(types::tstring==o->get_type()) {
+			return static_cast<entry_string *>(o.get())->get_value();
+		}
+
+		return static_cast<entry_choice<std::string> *>(o.get())->get_value();
 	}
 
 	//!Returns the string value representation for the current selection in the option.
@@ -729,8 +789,6 @@ std::cout<<"assign choice bool "<<_key<<" to "<<_value<<std::endl;
 				if(!std::is_same<tvalue, bool>::value) {
 					throw key_exception(_key, "not a boolean type entry");
 				}
-
-std::cout<<"generic set to "<<_key<<" with "<<_value<<std::endl;
 
 				return assign(_key, _value);
 

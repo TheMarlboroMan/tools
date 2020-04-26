@@ -115,7 +115,7 @@ bool test_recovery(tools::options_menu<T>& _menu) {
 			return false;
 		}
 
-		if(false!=_menu.get_int("40_PERIODICITY")) {
+		if(4!=_menu.get_int("40_PERIODICITY")) {
 			std::cout<<"int choice recovery failed"<<std::endl;
 			return false;
 		}
@@ -125,7 +125,7 @@ bool test_recovery(tools::options_menu<T>& _menu) {
 			return false;
 		}
 
-		if(_menu.get_string("15_FILER")!="anisotropic") {
+		if(_menu.get_string("15_FILTER")!="anisotropic") {
 			std::cout<<"string choice recovery failed with std string"<<std::endl;
 			return false;
 		}
@@ -138,6 +138,140 @@ bool test_recovery(tools::options_menu<T>& _menu) {
 	}
 }
 
+template<typename T>
+bool test_erase(tools::options_menu<T>& _menu) {
+
+	try {
+		if(!_menu.key_exists("35_DELETE")) {
+			throw std::runtime_error("key should exist before deletion");
+		}
+
+		_menu.erase("35_DELETE");
+
+		if(_menu.key_exists("35_DELETE")) {
+			throw std::runtime_error("key should not exist before deletion");
+		}
+
+		if(8!=_menu.size()) {
+			throw std::runtime_error("size should have adapted");
+		}
+
+		return true;
+	}
+	catch(std::exception& e) {
+		std::cout<<"error: "<<e.what()<<std::endl;
+		return false;
+	}
+}
+
+template<typename t>
+bool test_choice_manipulation(tools::options_menu<t>& _menu) {
+
+	try {
+		if(3!=_menu.size_choice("10_WINDOW")) {
+			throw std::runtime_error("invalid size for 10_WINDOW");
+		}
+
+		if(5!=_menu.size_choice("15_FILTER")) {
+			throw std::runtime_error("invalid size for 15_FILTER");
+		}
+
+		if(2!=_menu.size_choice("20_HELP")) {
+			throw std::runtime_error("invalid size for 20_HELP");
+		}
+
+		if(4!=_menu.size_choice("40_PERIODICITY")) {
+			throw std::runtime_error("invalid size for 40_PERIODICITY");
+		}
+
+		//Try some invalid erases: these should fail because of type mismatches.
+		try {
+			_menu.erase_choice("40_PERIODICITY", "invalid");
+			std::cout<<"error: invalid erase"<<std::endl;
+			return false;
+		}
+		catch(std::exception& e) {}
+
+		try {
+			_menu.erase_choice("40_PERIODICITY", false);
+			std::cout<<"error: invalid erase"<<std::endl;
+			return false;
+		}
+		catch(std::exception& e) {}
+
+		try {
+			_menu.erase_choice("20_HELP", 33);
+			std::cout<<"error: invalid erase"<<std::endl;
+			return false;
+		}
+		catch(std::exception& e) {}
+
+		//Empty an option
+		_menu.erase_choice("40_PERIODICITY", 1);
+		_menu.erase_choice("40_PERIODICITY", 2);
+		_menu.erase_choice("40_PERIODICITY", 4);
+		_menu.erase_choice("40_PERIODICITY", 8);
+
+		if(0!=_menu.size_choice("40_PERIODICITY")) {
+			throw std::runtime_error("option should be empty...");
+		}
+
+		//Try some invalid operations with empty choices.
+		try {
+			_menu.get_str_value("40_PERIODICITY");
+			std::cout<<"error: empty choice should not allow str_value to be retrieved"<<std::endl;
+			return false;
+		}
+		catch(std::exception& e) {}
+		
+		try {
+			_menu.get_int("40_PERIODICITY");
+			std::cout<<"error: empty choice should not allow value to be retrieved"<<std::endl;
+			return false;
+		}
+		catch(std::exception& e) {}
+
+		try {
+			_menu.browse("40_PERIODICITY", tools::options_menu<t>::browse_dir::next);
+			std::cout<<"error: empty choice should not allow value to be retrieved"<<std::endl;
+			return false;
+		}
+		catch(std::exception& e) {}
+
+		//Try adding invalid types...
+		try {
+			_menu.add("40_PERIODICITY", false);
+			std::cout<<"error: invalid add"<<std::endl;
+			return false;
+		}
+		catch(std::exception& e) {}
+
+		try {
+			_menu.add("40_PERIODICITY", "test");
+			std::cout<<"error: invalid add"<<std::endl;
+			return false;
+		}
+		catch(std::exception& e) {}
+
+		try {
+			_menu.add("20_HELP", 33);
+			std::cout<<"error: invalid add"<<std::endl;
+			return false;
+		}
+		catch(std::exception& e) {}
+
+		//Adding real values to recompose the menu
+		for(int _val : std::vector<int>{1,2,4,8}) {
+			_menu.add("40_PERIODICITY", _val);
+		}
+
+		return true;
+	}
+	catch(std::exception& e) {
+		std::cout<<"error: "<<e.what()<<std::endl;
+		return false;
+	}
+}
 
 int main(int, char **) {
 
@@ -149,35 +283,45 @@ int main(int, char **) {
 
 		//Build the menu...
 		std::cout<<"Testing menu building..."<<std::endl;
-		tools::options_menu<std::string> menu_str_str;
+		tools::options_menu<std::string> menu_str;
 		tools::options_menu_from_json(
 			json_document["string_string_menu"],
-			menu_str_str
+			menu_str
 		);
 
-		if(8!=menu_str_str.size()) {
+		std::cout<<"testing size..."<<std::endl;
+		if(9!=menu_str.size()) {
 			std::cout<<"size failed..."<<std::endl;
 			return 1;
 		}
-		//TODO: Test size for options
 
-		//TODO: Manipulate options.
+		std::cout<<"testing erase..."<<std::endl;
+		if(!test_erase(menu_str)) {
+			std::cout<<"erase failed..."<<std::endl;
+			return 1;
+		}
+
+		std::cout<<"testing choice manipulation..."<<std::endl;
+		if(!test_choice_manipulation(menu_str)) {
+			std::cout<<"choice manipulation failed..."<<std::endl;
+			return 1;
+		}
 
 		std::cout<<"Testing assignment..."<<std::endl;
-		if(!test_assignment(menu_str_str)) {
+		if(!test_assignment(menu_str)) {
 			std::cout<<"assigments failed..."<<std::endl;
 			return 1;
 		}
 
 		//Of course, we can make it fail if we assign values of invalid types...
 		std::cout<<"Testing invalid assignment..."<<std::endl;
-		if(!test_assignment_failures(menu_str_str)) {
+		if(!test_assignment_failures(menu_str)) {
 			std::cout<<"invalid assigments succeded..."<<std::endl;
 			return 1;
 		}
 
 		std::cout<<"Testing recovery..."<<std::endl;
-		if(!test_recovery(menu_str_str)) {
+		if(!test_recovery(menu_str)) {
 			std::cout<<"recovery failed..."<<std::endl;
 			return 1;
 		}
@@ -186,13 +330,13 @@ int main(int, char **) {
 
 		//This menu has not been translated, as the following lines shows.
 		std::cout<<"Untranslated menu:"<<std::endl;
-		show_menu(menu_str_str);
+		show_menu(menu_str);
 /*
 
 		//Now we can do some sort of interactive demo...
 		while(true) {
 			std::cout<<"use wasd + enter to navigate:"<<std::endl;
-			show_menu(menu_str_str);
+			show_menu(menu_str);
 			break;
 		}
 

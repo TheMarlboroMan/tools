@@ -20,7 +20,9 @@
 				"values":[
 					{"value": "linear"},
 					{"value": "bilinear"},
-					{"value": "anisotropic"}
+					{"value": "trilinear"},
+					{"value": "anisotropic"},
+					{"value": "just_trippy"}
 				]
 			}
 		},
@@ -67,6 +69,10 @@
 		{
 			"type":"void",
 			"key":"30_EXIT"
+		},
+		{
+			"type":"void",
+			"key":"35_DELETE"
 		}
 	],
 	"translation_pairs_english":[
