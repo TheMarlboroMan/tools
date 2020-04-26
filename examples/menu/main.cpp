@@ -14,7 +14,7 @@ void show_menu(const tools::options_menu<T>& _menu) {
 
 	for(const auto& key : _menu.get_keys()) {
 
-		std::cout<<_menu.get_name(key)<<" : "<<std::endl; //<<_menu.get_str_value(key)<<std::endl;
+		std::cout<<key<<" : "<<_menu.get_str_value(key)<<std::endl;
 	}
 }
 
@@ -66,6 +66,78 @@ bool test_assignment_failures(tools::options_menu<T>& _menu) {
 	return true;
 }
 
+template<typename T>
+bool test_assignment(tools::options_menu<T>& _menu) {
+
+	try {
+		//We can set some values right away... string, bool and int values are
+		//straightforward: just use the proper argument type...
+		_menu.set("22_NAME", "Bob Ross");
+		_menu.set("25_FILESIZE", 1024);
+		_menu.set("27_BACKUP", false);
+
+		//Choice values are not difficult either as long as we assign by with the
+		//correct type...
+		_menu.set("20_HELP", false);
+		_menu.set("40_PERIODICITY", 4);
+		_menu.set("10_WINDOW", "1200x750");
+		_menu.set("15_FILTER", std::string("anisotropic"));
+
+		return true;
+	}
+	catch(std::exception& e) {
+		std::cout<<"error: "<<e.what()<<std::endl;
+		return false;
+	}
+}
+
+template<typename T>
+bool test_recovery(tools::options_menu<T>& _menu) {
+
+	try {
+		if(_menu.get_string("22_NAME")!="Bob Ross") {
+			std::cout<<"string recovery failed"<<std::endl;
+			return false;
+		}
+
+		if(1024!=_menu.get_int("25_FILESIZE")) {
+			std::cout<<"int recovery failed"<<std::endl;
+			return false;
+		}
+
+		if(false!=_menu.get_bool("27_BACKUP")) {
+			std::cout<<"bool recovery failed "<<std::endl;
+			return false;
+		}
+
+		if(false!=_menu.get_bool("20_HELP")) {
+			std::cout<<"bool choice recovery failed"<<std::endl;
+			return false;
+		}
+
+		if(false!=_menu.get_int("40_PERIODICITY")) {
+			std::cout<<"int choice recovery failed"<<std::endl;
+			return false;
+		}
+
+		if(_menu.get_string("10_WINDOW")!="1200x750") {
+			std::cout<<"string choice recovery failed with std string"<<std::endl;
+			return false;
+		}
+
+		if(_menu.get_string("15_FILER")!="anisotropic") {
+			std::cout<<"string choice recovery failed with std string"<<std::endl;
+			return false;
+		}
+
+		return true;
+	}
+	catch(std::exception& e) {
+		std::cout<<"error: "<<e.what()<<std::endl;
+		return false;
+	}
+}
+
 
 int main(int, char **) {
 
@@ -83,25 +155,34 @@ int main(int, char **) {
 			menu_str_str
 		);
 
-		std::cout<<"Testing assignment..."<<std::endl;
-		//We can se some values right away... string, bool and int values are
-		//straightforward: just use the proper argument type...
-		menu_str_str.set("22_NAME", "Bob Ross");
-		menu_str_str.set("25_FILESIZE", 1024);
-		menu_str_str.set("27_BACKUP", false);
+		if(8!=menu_str_str.size()) {
+			std::cout<<"size failed..."<<std::endl;
+			return 1;
+		}
+		//TODO: Test size for options
 
-		//Choice values are not difficult either as long as we assign by with the
-		//correct type...
-		menu_str_str.set("20_HELP", false);
-		menu_str_str.set("40_PERIODICITY", 4);
-		menu_str_str.set("10_WINDOW", std::string("1200x750")); //we could also use const char *.
+		//TODO: Manipulate options.
+
+		std::cout<<"Testing assignment..."<<std::endl;
+		if(!test_assignment(menu_str_str)) {
+			std::cout<<"assigments failed..."<<std::endl;
+			return 1;
+		}
 
 		//Of course, we can make it fail if we assign values of invalid types...
 		std::cout<<"Testing invalid assignment..."<<std::endl;
 		if(!test_assignment_failures(menu_str_str)) {
-			std::cout<<"assigments failed..."<<std::endl;
+			std::cout<<"invalid assigments succeded..."<<std::endl;
 			return 1;
 		}
+
+		std::cout<<"Testing recovery..."<<std::endl;
+		if(!test_recovery(menu_str_str)) {
+			std::cout<<"recovery failed..."<<std::endl;
+			return 1;
+		}
+
+		//TODO: Test browsing.
 
 		//This menu has not been translated, as the following lines shows.
 		std::cout<<"Untranslated menu:"<<std::endl;

@@ -14,6 +14,18 @@
 		},
 		{
 			"type":"choice",
+			"key":"15_FILTER",
+			"properties" : {
+				"value_type":"string",
+				"values":[
+					{"value": "linear"},
+					{"value": "bilinear"},
+					{"value": "anisotropic"}
+				]
+			}
+		},
+		{
+			"type":"choice",
 			"key":"20_HELP",
 			"properties":{
 				"value_type":"bool",
