@@ -5,6 +5,7 @@
 			"key":"10_WINDOW",
 			"properties" : {
 				"value_type":"string",
+				"wrap":true,
 				"values":[
 					{"value": "800x500"},
 					{"value": "1200x750"},
@@ -17,6 +18,7 @@
 			"key":"15_FILTER",
 			"properties" : {
 				"value_type":"string",
+				"wrap":true,
 				"values":[
 					{"value": "linear"},
 					{"value": "bilinear"},
@@ -31,6 +33,7 @@
 			"key":"20_HELP",
 			"properties":{
 				"value_type":"bool",
+				"wrap":false,
 				"values":[
 					{"value": true},
 					{"value": false}
@@ -42,6 +45,7 @@
 			"key":"40_PERIODICITY",
 			"properties":{
 				"value_type":"int",
+				"wrap":true,
 				"values":[
 					{"value": 1},
 					{"value": 2},
@@ -58,13 +62,26 @@
 			"type":"int",
 			"key":"25_FILESIZE",
 			"properties": {
+				"wrap":true,
 				"min": 1,
 				"max": 9999
 			}
 		},
 		{
+			"type":"int",
+			"key":"26_COUNT",
+			"properties": {
+				"wrap":false,
+				"min": 10,
+				"max": 15
+			}
+		},
+		{
 			"type":"bool",
-			"key":"27_BACKUP"
+			"key":"27_BACKUP",
+			"properties": {
+				"wrap":false
+			}
 		},
 		{
 			"type":"void",
@@ -74,26 +91,5 @@
 			"type":"void",
 			"key":"35_DELETE"
 		}
-	],
-	"translation_pairs_english":[
-		{"index":150, "value": "Window size"},
-		{"index":151, "value": "800x500"},
-		{"index":152, "value": "1200x750"},
-		{"index":153, "value": "1600x100"},
-		{"index":160, "value": "Show help"},
-		{"index":161, "value": "Yes"},
-		{"index":162, "value": "No"},
-		{"index":163, "value": "Periodicity"},
-		{"index":164, "value": "Each hour"},
-		{"index":165, "value": "Each two hours"},
-		{"index":166, "value": "Each four hours"},
-		{"index":167, "value": "Each eight hours"},
-		{"index":170, "value": "Exit"},
-		{"index":210, "value": "Username"},
-		{"index":215, "value": "Max filesize"},
-		{"index":216, "value": "Auto backup"}
 	]
 }
-
-
-

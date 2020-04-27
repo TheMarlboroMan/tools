@@ -152,7 +152,7 @@ bool test_erase(tools::options_menu<T>& _menu) {
 			throw std::runtime_error("key should not exist before deletion");
 		}
 
-		if(8!=_menu.size()) {
+		if(9!=_menu.size()) {
 			throw std::runtime_error("size should have adapted");
 		}
 
@@ -280,7 +280,7 @@ bool test_browse(tools::options_menu<t>& _menu) {
 	catch(std::exception) {}
 
 	//test empty browse
-	_menu.insert("60_TEST", std::vector<int>{});
+	_menu.insert("60_TEST", std::vector<int>{}, false);
 	try {
 		_menu.browse("60_TEST", m::browse_dir::next);
 		std::cout<<"error: empty choice should not allow value to be browsed"<<std::endl;
@@ -309,8 +309,8 @@ bool test_browse(tools::options_menu<t>& _menu) {
 		_menu.browse("40_PERIODICITY", m::browse_dir::previous);
 	}
 
-	_menu.set("27_BACKUP", true);
-	for(const bool val : std::vector<bool>{true, false, true}) {
+	_menu.set("27_BACKUP", false);
+	for(const bool val : std::vector<bool>{false, true, true}) {
 		if(val!=_menu.get_bool("27_BACKUP")) {
 			throw std::runtime_error("unexpected browse result in bool forward motion");
 		}
@@ -319,7 +319,7 @@ bool test_browse(tools::options_menu<t>& _menu) {
 	}
 
 	_menu.set("27_BACKUP", true);
-	for(const bool val : std::vector<bool>{true, false, true}) {
+	for(const bool val : std::vector<bool>{true, false, false}) {
 		if(val!=_menu.get_bool("27_BACKUP")) {
 			throw std::runtime_error("unexpected browse result in bool backwards motion");
 		}
@@ -327,10 +327,8 @@ bool test_browse(tools::options_menu<t>& _menu) {
 		_menu.browse("27_BACKUP", m::browse_dir::previous);
 	}
 
-	//TODO: Perhaps this is counter intuitive and we should allow for
-	//wrap around or not...right???
 	_menu.set("25_FILESIZE", 9998);
-	for(const int val : std::vector<int>{9998, 9999, 9999, 9999}) {
+	for(const int val : std::vector<int>{9998, 9999, 1, 2}) {
 		if(val!=_menu.get_int("25_FILESIZE")) {
 			throw std::runtime_error("unexpected browse result in int forward motion");
 		}
@@ -339,12 +337,29 @@ bool test_browse(tools::options_menu<t>& _menu) {
 	}
 
 	_menu.set("25_FILESIZE", 2);
-	for(const int val : std::vector<int>{2, 1, 1, 1}) {
+	for(const int val : std::vector<int>{2, 1, 9999, 9998}) {
 		if(val!=_menu.get_int("25_FILESIZE")) {
 			throw std::runtime_error("unexpected browse result in int backwards motion");
 		}
 
 		_menu.browse("25_FILESIZE", m::browse_dir::previous);
+	}
+
+	_menu.set("26_COUNT", 10);
+	for(const int val : std::vector<int>{10, 11, 12, 13, 14, 15, 15}) {
+		if(val!=_menu.get_int("26_COUNT")) {
+			throw std::runtime_error("unexpected browse result in bound int forward motion");
+		}
+
+		_menu.browse("26_COUNT", m::browse_dir::next);
+	}
+
+	for(const int val : std::vector<int>{15, 14, 13, 12, 11, 10, 10}) {
+		if(val!=_menu.get_int("26_COUNT")) {
+			throw std::runtime_error("unexpected browse result in bound int backwards motion");
+		}
+
+		_menu.browse("26_COUNT", m::browse_dir::previous);
 	}
 
 	return true;
@@ -367,7 +382,7 @@ int main(int, char **) {
 		);
 
 		std::cout<<"testing size..."<<std::endl;
-		if(9!=menu_str.size()) {
+		if(10!=menu_str.size()) {
 			std::cout<<"size failed..."<<std::endl;
 			return 1;
 		}

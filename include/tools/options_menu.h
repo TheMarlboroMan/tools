@@ -147,8 +147,6 @@ class options_menu {
 	};
 
 	//!Base class for all entries.
-	//TODO: Add some sort of shit in which we can implement callbacks to 
-	//foreign entities and dispatch our values.
 	struct base_entry {
 
 		tkey					key;
@@ -179,6 +177,7 @@ class options_menu {
 		types				value_type; //The type of the value (tvalue) must be stored in order to be retrieved.
 		std::vector<tvalue>	choices; //!< Internal option map.
 		std::size_t			current_index=0;	//!< Currently selected key.
+		bool 				allow_wrap;
 
 		//!Returns the typename value for the current selection (0,1,2 in the example).
 		tvalue				get_value() const {
@@ -200,9 +199,6 @@ class options_menu {
 		}
 
 		//!Changes the current selection.
-
-		//!The choices wrap around.
-		//TODO: Make the wrapround be optional.
 		virtual void 				browse(browse_dir _dir) {
 
 			if(!choices.size()) {
@@ -212,17 +208,29 @@ class options_menu {
 			if(_dir==browse_dir::previous) {
 
 				if(0==current_index) {
+
+					if(!allow_wrap) {
+						return;
+					}
+
 					current_index=choices.size()-1;
+					return;
 				}
-				else {
-					--current_index;
-				}
+
+				--current_index;
 			}
 			else {
-				++current_index;
-				if(current_index == choices.size()) {
+
+				if(current_index == choices.size()-1) {
+					if(!allow_wrap) {
+						return;
+					}
+
 					current_index=0;
+					return;
 				}
+				
+				++current_index;
 			}
 		}
 
@@ -283,8 +291,8 @@ class options_menu {
 		}
 
 		//!Constructor.
-		entry_choice(const tkey& _key, types _type)
-			:base_entry(_key), value_type{_type} {
+		entry_choice(const tkey& _key, types _type, bool _wrap)
+			:base_entry(_key), value_type{_type}, allow_wrap{_wrap} {
 
 		}
 	};
@@ -294,6 +302,7 @@ class options_menu {
 		:public base_entry {
 
 		ranged_value<int>		value; //!< Ranged value for the option.
+		bool					allow_wrap;
 
 		//!Returns the current value as an integer.
 		int						get_value() const {return value.get();}
@@ -301,14 +310,33 @@ class options_menu {
 		virtual types			get_type() const {return types::tint;}
 		//!Adds or substracts from the value.
 
-		//TODO: Allow for optional wrap around.
 		virtual void			browse(browse_dir _dir){
-			value+=_dir==browse_dir::next ? 1 : -1;
+
+			if(!allow_wrap) {
+				value+=_dir==browse_dir::next ? 1 : -1;
+				return;
+			}
+
+			if(_dir==browse_dir::next) {
+				if(value.get() == value.max()) {
+					value=value.min();
+					return;
+				}
+				++value;
+			}
+			else {
+				if(value.get() == value.min()) {
+					value=value.max();
+					return;
+				}
+
+				--value;
+			}
 		}
 
 		//!Constructor of the option.
-		entry_int(const tkey& _key, int _value, int _min, int _max)
-			:base_entry(_key), value(_min, _max, _value) {
+		entry_int(const tkey& _key, int _value, int _min, int _max, bool _wrap)
+			:base_entry(_key), value(_min, _max, _value), allow_wrap(_wrap) {
 		}
 	};
 
@@ -316,6 +344,7 @@ class options_menu {
 	struct entry_bool
 		:public base_entry {
 		bool				value; //!< Option value.
+		bool				allow_wrap;
 
 		//!Returns the boolean value.
 		bool				get_value() const {return value;}
@@ -323,11 +352,26 @@ class options_menu {
 		//!Returns its type. Internal use.
 		virtual types			get_type() const {return types::tbool;}
 
-		//!Ignores the parameter and just flips the value.
-		virtual void			browse(browse_dir){value=!value;}
+		//!False is assumed to be "before" true.
+		virtual void			browse(browse_dir _dir){
 
-		entry_bool(const tkey& _key, bool _value)
-			:base_entry(_key), value(_value) {
+			if(allow_wrap) {
+				value=!value;
+				return;
+			}
+
+			if(_dir==browse_dir::next && false==value) {
+				value=true;
+				return;
+			}
+			else if(_dir==browse_dir::previous && true==value) {
+				value=false;
+				return;
+			}
+		}
+
+		entry_bool(const tkey& _key, bool _value, bool _wrap)
+			:base_entry{_key}, value{_value}, allow_wrap{_wrap} {
 		}
 	};
 
@@ -503,7 +547,7 @@ class options_menu {
 	}
 
 	//!Creates an integer entry
-	void		insert(const tkey& _key, int _value, int _min, int _max) {
+	void		insert(const tkey& _key, int _value, int _min, int _max, bool _wrap) {
 
 		assert_valid_key<tkey>();
 		if(key_exists(_key)) {
@@ -511,19 +555,20 @@ class options_menu {
 		}
 
 		entries.push_back(
-			uptr_base(new entry_int(_key, _value, _min, _max))
+			uptr_base(new entry_int(_key, _value, _min, _max, _wrap))
 		);
 	}
 
 	//!Creates a bool entry.
-	void		insert(const tkey& _key, bool _val) {
+	void		insert(const tkey& _key, bool _val, bool _wrap) {
 
 		assert_valid_key<tkey>();
 		if(key_exists(_key)) {
 			throw key_exception(_key, "key already exists for insert");
 		}
+
 		entries.push_back(
-			uptr_base(new entry_bool(_key, _val))
+			uptr_base(new entry_bool(_key, _val, _wrap))
 		);
 	}
 
@@ -560,7 +605,7 @@ class options_menu {
 
 	//Inserts a choice option.
 	template<typename tvalue>
-	void		insert(const tkey& _key, const std::vector<tvalue>& _values) {
+	void		insert(const tkey& _key, const std::vector<tvalue>& _values, bool _wrap) {
 
 		assert_valid_key<tkey>();
 		assert_valid_value<tvalue>();
@@ -568,7 +613,7 @@ class options_menu {
 			throw key_exception(_key, "key already exists for insert_choice");
 		}
 
-		entry_choice<tvalue> * new_choice=new entry_choice<tvalue>(_key, type_for<tvalue>::value);
+		entry_choice<tvalue> * new_choice=new entry_choice<tvalue>(_key, type_for<tvalue>::value, _wrap);
 		for(const auto& value : _values) {
 			new_choice->insert(value);
 		}
@@ -867,7 +912,8 @@ void options_menu_from_json(
 				* k_max="max",
 				* k_value_type="value_type",
 				* k_values="values",
-				* k_value="value";
+				* k_value="value",
+				* k_wrap="wrap";
 
 	if(!_root.IsArray()) {
 		throw std::runtime_error("options_menu_from_json: root node must be an array");
@@ -917,6 +963,14 @@ void options_menu_from_json(
 				throw std::runtime_error("options_menu_from_json: value_type must be a string");
 			}
 
+			if(!properties.HasMember(k_wrap)) {
+				throw std::runtime_error("options_menu_from_json: the properties node must have a wrap property");
+			}
+
+			if(!properties[k_wrap].IsBool()) {
+				throw std::runtime_error("options_menu_from_json: wrap must be a boolean");
+			}
+
 			if(!properties.HasMember(k_values)) {
 				throw std::runtime_error("options_menu_from_json: the properties node must have a values property");
 			}
@@ -929,15 +983,16 @@ void options_menu_from_json(
 			//everything in one go.
 
 			const std::string value_type=properties[k_value_type].GetString();
+			const bool wrap=properties[k_wrap].GetBool();
 
 			if(value_type=="string") {
-				_target_menu.insert(entry_key, std::vector<std::string>{});
+				_target_menu.insert(entry_key, std::vector<std::string>{}, wrap);
 			}
 			else if(value_type=="int") {
-				_target_menu.insert(entry_key, std::vector<int>{});
+				_target_menu.insert(entry_key, std::vector<int>{}, wrap);
 			}
 			else if(value_type=="bool") {
-				_target_menu.insert(entry_key, std::vector<bool>{});
+				_target_menu.insert(entry_key, std::vector<bool>{}, wrap);
 			}
 			else {
 				throw std::runtime_error("options_menu_from_json: unknown choice type "+value_type);
@@ -987,6 +1042,14 @@ void options_menu_from_json(
 				throw std::runtime_error("options_menu_from_json: the properties node must be an object");
 			}
 
+			if(!properties.HasMember(k_wrap)) {
+				throw std::runtime_error("options_menu_from_json: the properties node must have a wrap property");
+			}
+
+			if(!properties[k_wrap].IsBool()) {
+				throw std::runtime_error("options_menu_from_json: wrap must be a boolean");
+			}
+
 			if(!properties.HasMember(k_min)) {
 				throw std::runtime_error("options_menu_from_json: the properties node must have a min property");
 			}
@@ -1006,16 +1069,38 @@ void options_menu_from_json(
 			int minval=properties[k_min].GetInt(),
 				maxval=properties[k_max].GetInt();
 
+			const bool wrap=properties[k_wrap].GetBool();
+
 			_target_menu.insert(
 				entry_key,
 				minval,
 				minval,
-				maxval
+				maxval,
+				wrap
 			);
 		}
 		else if(entry_type=="bool") {
 
-			_target_menu.insert(entry_key, true);
+			if(!entry.HasMember(k_properties)) {
+				throw std::runtime_error("options_menu_from_json: bool entry must have a properties node");
+			}
+
+			const auto& properties=entry[k_properties];
+			if(!properties.IsObject()) {
+				throw std::runtime_error("options_menu_from_json: the properties node must be an object");
+			}
+
+			if(!properties.HasMember(k_wrap)) {
+				throw std::runtime_error("options_menu_from_json: the properties node must have a wrap property");
+			}
+
+			if(!properties[k_wrap].IsBool()) {
+				throw std::runtime_error("options_menu_from_json: wrap must be a boolean");
+			}
+
+			const bool wrap=properties[k_wrap].GetBool();
+
+			_target_menu.insert(entry_key, true, wrap);
 		}
 		else if(entry_type=="string") {
 
