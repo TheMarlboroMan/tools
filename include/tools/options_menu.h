@@ -51,8 +51,7 @@ namespace {
 	//!Defines the different types of choices.
 	enum class types {tchoice, tint, tbool, tstring, tvoid};
 
-	//!Tag dispatching.
-	//TODO: Document.
+	//!Tag dispatching. Returns the type (of type types) that corresponds to a primitive (or string).
 	template<typename t> struct type_for{static const types value=types::tvoid;};
 	template<> struct type_for<int>{static const types value=types::tint;};
 	template<> struct type_for<bool>{static const types value=types::tbool;};
@@ -148,15 +147,14 @@ class options_menu {
 	};
 
 	//!Base class for all entries.
+	//TODO: Add some sort of shit in which we can implement callbacks to 
+	//foreign entities and dispatch our values.
 	struct base_entry {
 
 		tkey					key;
 
 		//!Returns the key.
 		const tkey&				get_key() const {return key;}
-
-		//!Will return a printable value for the current entry (or its equivalent).
-		virtual	std::string		get_str_value() const=0;
 
 		//!Returns its type. Internal use.
 		virtual types			get_type() const=0;
@@ -192,30 +190,6 @@ class options_menu {
 			return choices.at(current_index);
 		}
 
-		std::string				printable_value(int _val) const {
-			return std::to_string(_val);
-		}
-
-		std::string				printable_value(bool _val) const {
-			return _val ? "true" : "false";
-		}
-
-		std::string				printable_value(const std::string& _val) const {
-			return _val;
-		}
-
-		//!Returns the string that represents the current value.
-
-		//!Boolean values are converted as true-false.
-		virtual std::string		get_str_value() const {
-
-			if(!choices.size()) {
-				throw options_menu_exception("choice with no values for get_str_value");
-			}
-
-			return printable_value(get_value());
-		}
-
 		//!Returns the type of this class.
 		virtual types				get_type() const {
 			return types::tchoice;
@@ -228,6 +202,7 @@ class options_menu {
 		//!Changes the current selection.
 
 		//!The choices wrap around.
+		//TODO: Make the wrapround be optional.
 		virtual void 				browse(browse_dir _dir) {
 
 			if(!choices.size()) {
@@ -236,9 +211,11 @@ class options_menu {
 
 			if(_dir==browse_dir::previous) {
 
-				--current_index;
-				if(current_index < 0) {
+				if(0==current_index) {
 					current_index=choices.size()-1;
+				}
+				else {
+					--current_index;
 				}
 			}
 			else {
@@ -318,13 +295,13 @@ class options_menu {
 
 		ranged_value<int>		value; //!< Ranged value for the option.
 
-		//!Returns the current value as a string.
-		virtual std::string		get_str_value() const {return std::to_string(value.get());}
 		//!Returns the current value as an integer.
 		int						get_value() const {return value.get();}
 		//!Returns its type. Internal use.
 		virtual types			get_type() const {return types::tint;}
 		//!Adds or substracts from the value.
+
+		//TODO: Allow for optional wrap around.
 		virtual void			browse(browse_dir _dir){
 			value+=_dir==browse_dir::next ? 1 : -1;
 		}
@@ -339,9 +316,6 @@ class options_menu {
 	struct entry_bool
 		:public base_entry {
 		bool				value; //!< Option value.
-
-		//!Returns the value as a string.
-		virtual std::string		get_str_value() const {return value ? "true" : "false";}
 
 		//!Returns the boolean value.
 		bool				get_value() const {return value;}
@@ -365,14 +339,13 @@ class options_menu {
 		//!Returns the string value.
 		std::string			get_value() const {return value;}
 
-		//!Returns the string value.
-		virtual std::string		get_str_value() const {return value;}
-
 		//!Returns its type. Internal use.
 		virtual types			get_type() const {return types::tstring;}
 
-		//!Has no effect. Values of this type are manually set.
-		virtual void			browse(browse_dir){}
+		//!Cannot be done.
+		virtual void			browse(browse_dir){
+			throw key_exception(this->key, "is not browsable");
+		}
 
 		//!Constructor.
 		entry_string(const tkey& _key, const std::string& _value)
@@ -386,15 +359,15 @@ class options_menu {
 		//!Does nothing.
 		void				get_value() const {}
 
-		//!Returns an empty string.
-		virtual std::string		get_str_value() const {return "";}
-
 		//!Returns its type. Internal use only.
 		virtual types			get_type() const {return types::tvoid;}
 
 
-		//!Does nothing.
-		virtual void			browse(browse_dir ){}
+		//!Cannot be done.
+		virtual void			browse(browse_dir ){
+
+			throw key_exception(this->key, "is not browsable");
+		}
 
 		//!Constructor.
 		entry_void(const tkey& _key)
@@ -694,7 +667,6 @@ class options_menu {
 	}
 
 	//!Browses the option key in the direction dir.
-//TODO: untested.
 	void		browse(const tkey& _key, browse_dir _dir) {
 
 		assert_valid_key<tkey>();
@@ -752,14 +724,6 @@ class options_menu {
 		}
 
 		return static_cast<entry_choice<std::string> *>(o.get())->get_value();
-	}
-
-	//!Returns the string value representation for the current selection in the option.
-	std::string	get_str_value(const tkey& _key) const {
-
-		assert_valid_key<tkey>();
-		const auto& o=get_entry(_key);
-		return o->get_str_value();
 	}
 
 	//!Set the value for any key.
@@ -989,7 +953,6 @@ void options_menu_from_json(
 					throw std::runtime_error("options_menu_from_json: choice in 'values' must have a value property");
 				}
 
-				//TODO: ur fu}{ored.
 				if(value_type=="string") {
 					_target_menu.add(
 						entry_key,

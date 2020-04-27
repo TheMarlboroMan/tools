@@ -14,7 +14,7 @@ void show_menu(const tools::options_menu<T>& _menu) {
 
 	for(const auto& key : _menu.get_keys()) {
 
-		std::cout<<key<<" : "<<_menu.get_str_value(key)<<std::endl;
+		std::cout<<key<<" : "<<std::endl;
 	}
 }
 
@@ -218,21 +218,7 @@ bool test_choice_manipulation(tools::options_menu<t>& _menu) {
 
 		//Try some invalid operations with empty choices.
 		try {
-			_menu.get_str_value("40_PERIODICITY");
-			std::cout<<"error: empty choice should not allow str_value to be retrieved"<<std::endl;
-			return false;
-		}
-		catch(std::exception& e) {}
-		
-		try {
 			_menu.get_int("40_PERIODICITY");
-			std::cout<<"error: empty choice should not allow value to be retrieved"<<std::endl;
-			return false;
-		}
-		catch(std::exception& e) {}
-
-		try {
-			_menu.browse("40_PERIODICITY", tools::options_menu<t>::browse_dir::next);
 			std::cout<<"error: empty choice should not allow value to be retrieved"<<std::endl;
 			return false;
 		}
@@ -271,6 +257,97 @@ bool test_choice_manipulation(tools::options_menu<t>& _menu) {
 		std::cout<<"error: "<<e.what()<<std::endl;
 		return false;
 	}
+}
+
+template<typename t>
+bool test_browse(tools::options_menu<t>& _menu) {
+
+	using m=tools::options_menu<t>;
+
+	//test non browsable
+	try {
+		_menu.browse("22_NAME", m::browse_dir::next);
+		std::cout<<"error: string should not be browsable"<<std::endl;
+		return false;
+	}
+	catch(std::exception) {}
+
+	try {
+		_menu.browse("30_EXIT", m::browse_dir::next);
+		std::cout<<"error: void should not be browsable"<<std::endl;
+		return false;
+	}
+	catch(std::exception) {}
+
+	//test empty browse
+	_menu.insert("60_TEST", std::vector<int>{});
+	try {
+		_menu.browse("60_TEST", m::browse_dir::next);
+		std::cout<<"error: empty choice should not allow value to be browsed"<<std::endl;
+		return false;
+	}
+	catch(std::exception& e) {
+		_menu.erase("60_TEST");
+	}
+
+	//test browse.
+	_menu.set("40_PERIODICITY", 1);
+	for(const int val : std::vector<int>{1,2,4,8,1}) {
+		if(val!=_menu.get_int("40_PERIODICITY")) {
+			throw std::runtime_error("unexpected browse result in choice forward motion");
+		}
+
+		_menu.browse("40_PERIODICITY", m::browse_dir::next);
+	}
+
+	_menu.set("40_PERIODICITY", 1);
+	for(const int val : std::vector<int>{1,8,4,2,1}) {
+		if(val!=_menu.get_int("40_PERIODICITY")) {
+			throw std::runtime_error("unexpected browse result in choice backwards motion");
+		}
+
+		_menu.browse("40_PERIODICITY", m::browse_dir::previous);
+	}
+
+	_menu.set("27_BACKUP", true);
+	for(const bool val : std::vector<bool>{true, false, true}) {
+		if(val!=_menu.get_bool("27_BACKUP")) {
+			throw std::runtime_error("unexpected browse result in bool forward motion");
+		}
+
+		_menu.browse("27_BACKUP", m::browse_dir::next);
+	}
+
+	_menu.set("27_BACKUP", true);
+	for(const bool val : std::vector<bool>{true, false, true}) {
+		if(val!=_menu.get_bool("27_BACKUP")) {
+			throw std::runtime_error("unexpected browse result in bool backwards motion");
+		}
+
+		_menu.browse("27_BACKUP", m::browse_dir::previous);
+	}
+
+	//TODO: Perhaps this is counter intuitive and we should allow for
+	//wrap around or not...right???
+	_menu.set("25_FILESIZE", 9998);
+	for(const int val : std::vector<int>{9998, 9999, 9999, 9999}) {
+		if(val!=_menu.get_int("25_FILESIZE")) {
+			throw std::runtime_error("unexpected browse result in int forward motion");
+		}
+
+		_menu.browse("25_FILESIZE", m::browse_dir::next);
+	}
+
+	_menu.set("25_FILESIZE", 2);
+	for(const int val : std::vector<int>{2, 1, 1, 1}) {
+		if(val!=_menu.get_int("25_FILESIZE")) {
+			throw std::runtime_error("unexpected browse result in int backwards motion");
+		}
+
+		_menu.browse("25_FILESIZE", m::browse_dir::previous);
+	}
+
+	return true;
 }
 
 int main(int, char **) {
@@ -326,10 +403,12 @@ int main(int, char **) {
 			return 1;
 		}
 
-		//TODO: Test browsing.
+		std::cout<<"Testing browse..."<<std::endl;
+		if(!test_browse(menu_str)) {
+			std::cout<<"browse failed..."<<std::endl;
+			return 1;
+		}
 
-		//This menu has not been translated, as the following lines shows.
-		std::cout<<"Untranslated menu:"<<std::endl;
 		show_menu(menu_str);
 /*
 
@@ -347,6 +426,6 @@ int main(int, char **) {
 	}
 	catch(std::exception& e) {
 
-		std::cout<<"error: "<<e.what()<<std::endl;
+		std::cout<<"unexpected error: "<<e.what()<<std::endl;
 	}
 }
