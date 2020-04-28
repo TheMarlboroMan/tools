@@ -36,7 +36,7 @@ namespace {
 	template<> struct possible_key<std::string>{static const bool value=true;};
 	template<typename t> void assert_valid_key() {
 		static_assert(possible_key<t>::value, "only integer and string keys are allowed");
-	}	
+	}
 
 	//!Compile time assertion that a choices will be created with valid value types.
 	template<typename t> struct possible_value{static const bool value=false;};
@@ -126,8 +126,9 @@ class options_menu {
 	struct base_entry; //Forward declaration.
 	using uptr_base=std::unique_ptr<base_entry>;
 	std::vector<uptr_base>	entries;
-	
-	//!Exception with a key at the end of its message.	
+	bool                    allow_wrap;
+
+	//!Exception with a key at the end of its message.
 	struct key_exception:
 		public options_menu_exception{
 		//!Class constructor.
@@ -139,7 +140,7 @@ class options_menu {
 		private:
 
 		static std::string key_to_string(const tkey& _k) {
-	
+
 			std::stringstream ss;
 			ss<<_k;
 			return ss.str();
@@ -229,19 +230,19 @@ class options_menu {
 					current_index=0;
 					return;
 				}
-				
+
 				++current_index;
 			}
 		}
 
 		bool                    has_value(const tvalue& _value, int& _distance) {
-		
+
 			auto it=std::find(
 				std::begin(choices),
 				std::end(choices),
 				_value
 			);
-			
+
 			_distance=-1;
 			if(it==std::end(choices)) {
 				return false;
@@ -258,7 +259,7 @@ class options_menu {
 			if(!has_value(_value, index)) {
 				throw options_menu_exception("value does not exist in choice");
 			}
-			
+
 			current_index=index;
 		}
 
@@ -286,7 +287,7 @@ class options_menu {
 			if(!has_value(_value, index)) {
 				throw options_menu_exception("value does not exist for erase");
 			}
-			
+
 			choices.erase(std::begin(choices)+index);
 		}
 
@@ -421,7 +422,7 @@ class options_menu {
 
 	//!Assignment overloads for the "set" function...
 	void	assign(const tkey& _key, int _value) {
-		
+
 		static_cast<entry_int *>(get_entry(_key).get())->value=_value;
 	}
 
@@ -538,8 +539,8 @@ class options_menu {
 	bool	key_exists(const tkey& _key) const {
 
 		return std::end(entries)!=std::find_if(
-			std::begin(entries), 
-			std::end(entries), 
+			std::begin(entries),
+			std::end(entries),
 			[_key](const uptr_base& _entry) {
 				return _entry->key == _key;
 			}
@@ -574,10 +575,10 @@ class options_menu {
 
 	//!Creates a string entry. Disambiguation.
 	void		insert(const tkey& _key, const char * _val) {
-	
+
 		insert(_key, std::string{_val});
 	}
-	
+
 	//!Creates a string entry.
 	void		insert(const tkey& _key, const std::string& _val) {
 
@@ -630,7 +631,7 @@ class options_menu {
 		if(!key_exists(_key)) {
 			throw key_exception(_key, "key does not exist for erase");
 		}
-		
+
 		entries.erase(
 			std::remove_if(
 				std::begin(entries),
@@ -745,7 +746,7 @@ class options_menu {
 		if(types::tbool != o->get_value_type()) {
 
 			throw key_exception(_key, "choice is not bool for get_bool");
-		}		
+		}
 
 		if(types::tbool==o->get_type()) {
 			return static_cast<entry_bool *>(o.get())->get_value();
@@ -760,9 +761,9 @@ class options_menu {
 		assert_valid_key<tkey>();
 		const auto& o=get_entry(_key);
 		if(types::tstring != o->get_value_type()) {
-			
+
 			throw key_exception(_key, "choice is not string for get_string");
-		}		
+		}
 
 		if(types::tstring==o->get_type()) {
 			return static_cast<entry_string *>(o.get())->get_value();
@@ -783,7 +784,7 @@ class options_menu {
 		//Values are assigned through private overloads, to avoid the compiler
 		//complaining of invalid assignments (this is compile time, tvalue might
 		//be a string and we might be trying to assign to an integer).
-		
+
 		switch(o->get_type()) {
 			case types::tstring:
 				if(!std::is_same<tvalue, std::string>::value
@@ -828,6 +829,51 @@ class options_menu {
 		return entries.size();
 	}
 
+	//!Returns the next/previous key.
+	tkey        adjacent_key(const tkey& _key, browse_dir _dir) const {
+
+		assert_valid_key<tkey>();
+
+		if(!key_exists(_key)) {
+
+			throw key_exception(_key, "key does not exist for adjacent key");
+		}
+
+		auto it=std::find_if(
+			std::begin(entries),
+			std::end(entries),
+			[_key](const uptr_base& _entry) {return _entry->get_key()==_key;}
+		);
+
+		size_t distance=std::distance(std::begin(entries), it);
+		if(_dir==browse_dir::next) {
+
+			if(distance==entries.size()-1) {
+
+				return allow_wrap
+					? entries.front()->get_key()
+					: entries.back()->get_key();
+			}
+
+			return entries.at(distance+1)->get_key();
+		}
+		else {
+
+			if(distance==0) {
+				return allow_wrap
+					? entries.back()->get_key()
+					: entries.front()->get_key();
+			}
+
+			return entries.at(distance-1)->get_key();
+		}
+	}
+
+	void                    set_wrap(bool _wrap) {
+
+		allow_wrap=_wrap;
+	}
+
 	//!Gets a vector with the different keys used in entries.
 	std::vector<tkey>		get_keys() const {
 
@@ -836,6 +882,11 @@ class options_menu {
 			res.push_back(o->get_key());
 		}
 		return res;
+	}
+
+							options_menu()
+		:allow_wrap{true}{
+
 	}
 };
 
@@ -849,55 +900,8 @@ translation string used in, for example, the localization class.
 The examples/menu code includes an example of the menu loaded and working
 in text mode.
 
-The structure of the json must be rigid, lest this function will throw.
-
-[			//This is the root key, with an array value.
-	{		//An object.
-		"type":"choice",	//A templated option
-		"key":"10_WINDOW",	//its key is "10_WINDOW!
-		"properties" : {
-			"value_type":"string",	//with the internal type string
-			"values":[		//The choices, their keys and values follow.
-				{"value": "800x500"},
-				{"value": "1200x750"},
-				{"value": "1600x1000"}
-			]
-		}
-	},
-	{
-		"type":"choice",  //A templated option
-		"key":"20_HELP",	//with this key
-		"properties":{
-			"value_type":"bool",	//internally represented by a boolean
-			"values":[		//These are the mapped choices.
-				{"value": true},
-				{"value": false}
-			]
-		}
-	},
-	//Choice options can also represent int values, not seen in this example.
-
-	{
-		"type":"string",	//A string option.
-		"key":"33_NAME"	//With a key
-	},
-	{
-		"type":"int",		//An integer option
-		"key":"25_FILESIZE",	//With a key
-		"properties": {
-			"min": 1,		//Min value (set by default)
-			"max": 9999		//And max value.
-		}
-	},
-	{
-		"type":"bool",		//An bool option. By default its value is "true".
-		"key":"27_BACKUP"		//With a key
-	},
-	{
-		"type":"void",		//A void option
-		"key":"30_EXIT"
-	}
-]
+The structure of the json must be rigid, lest this function will throw. Check
+the json example in the menu.
 **/
 
 template<typename tkey>
@@ -905,7 +909,8 @@ void options_menu_from_json(
 	const rapidjson::Value& _root,
 	options_menu<tkey>& _target_menu
 ) {
-	const char 	* k_key="key",
+	const char 	* k_entries="entries",
+				* k_key="key",
 				* k_type="type",
 				* k_properties="properties",
 				* k_min="min",
@@ -915,11 +920,37 @@ void options_menu_from_json(
 				* k_value="value",
 				* k_wrap="wrap";
 
-	if(!_root.IsArray()) {
-		throw std::runtime_error("options_menu_from_json: root node must be an array");
+	if(!_root.IsObject()) {
+		throw std::runtime_error("options_menu_from_json: root node must be an object");
 	}
 
-	for(const auto& entry : _root.GetArray()) {
+	if(!_root.HasMember(k_entries)) {
+		throw std::runtime_error("options_menu_from_json: root node must have an entries property");
+	}
+
+	if(!_root[k_entries].IsArray()) {
+		throw std::runtime_error("options_menu_from_json: entries property must be an array");
+	}
+
+	if(!_root.HasMember(k_properties)) {
+		throw std::runtime_error("options_menu_from_json: entries property must be an object");
+	}
+
+	if(!_root[k_properties].IsObject()) {
+		throw std::runtime_error("options_menu_from_json: root node must be an object");
+	}
+
+	if(!_root[k_properties].HasMember(k_wrap)) {
+		throw std::runtime_error("options_menu_from_json: properties node must have a wrap member");
+	}
+
+	if(!_root[k_properties][k_wrap].IsBool()) {
+		throw std::runtime_error("options_menu_from_json: wrap member must be a boolean");
+	}
+
+	_target_menu.set_wrap(_root[k_properties][k_wrap].GetBool());
+
+	for(const auto& entry : _root[k_entries].GetArray()) {
 
 		if(!entry.IsObject()) {
 			throw std::runtime_error("options_menu_from_json: entry must be an object");

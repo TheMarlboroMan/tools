@@ -8,13 +8,55 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <functional>
 
 template<typename T>
-void show_menu(const tools::options_menu<T>& _menu) {
+void show_menu(const tools::options_menu<T>& _menu, T _current_key) {
+
+	//The menu does not provide any type of translation for keys...
+	//Client code must provide its own.
+
+	std::map<T, std::string> key_to_title {
+		{"10_WINDOW", "window size"},
+		{"15_FILTER", "texture filtering"},
+		{"20_HELP", "help blurbs"},
+		{"40_PERIODICITY", "backup periodicity"},
+		{"22_NAME", "process username"},
+		{"25_FILESIZE", "max filesize of data file (in MB)"},
+		{"26_COUNT", "warning countdown (in seconds)"},
+		{"27_BACKUP", "backup active"},
+		{"30_EXIT", "save and exit"},
+	};
+
+	auto from_int=[&_menu](const T& _key) -> std::string {return std::to_string(_menu.get_int(_key));};
+	auto from_bool=[&_menu](const T& _key) -> std::string {return _menu.get_bool(_key) ? "yes" : "no";};
+	auto from_string=[&_menu](const T& _key) -> std::string {return _menu.get_string(_key);};
+	auto from_void=[&_menu](const T&) -> std::string {return "";};
+
+	//Translations of values are not provided either!
+	std::map<T, std::function<std::string(const T&)>> key_to_value {
+		{"10_WINDOW", from_string},
+		{"15_FILTER", from_string},
+		{"20_HELP", from_bool},
+		{"40_PERIODICITY", from_int},
+		{"22_NAME", from_string},
+		{"25_FILESIZE", from_int},
+		{"26_COUNT", from_int},
+		{"27_BACKUP", from_bool},
+		{"30_EXIT", from_void},
+	};
 
 	for(const auto& key : _menu.get_keys()) {
 
-		std::cout<<key<<" : "<<std::endl;
+		auto title=key_to_title[key];
+		auto value=key_to_value[key](key);
+
+		if(key==_current_key) {
+			std::cout<<"["<<title<<"] : "<<value<<std::endl;
+		}
+		else {
+			std::cout<<" "<<title<<"  : "<<value<<std::endl;
+		}
 	}
 }
 
@@ -94,6 +136,8 @@ bool test_assignment(tools::options_menu<T>& _menu) {
 template<typename T>
 bool test_recovery(tools::options_menu<T>& _menu) {
 
+	//Recovering values is done through get_#type. The value must be of the
+	//same type. So far there's no way to inspect an entry and get its type.
 	try {
 		if(_menu.get_string("22_NAME")!="Bob Ross") {
 			std::cout<<"string recovery failed"<<std::endl;
@@ -365,6 +409,103 @@ bool test_browse(tools::options_menu<t>& _menu) {
 	return true;
 }
 
+template<typename t>
+bool test_adjacent_keys(tools::options_menu<t>& _menu) {
+
+	try {
+
+		//These are the remanining keys...
+		std::vector<std::string> keys={
+			"10_WINDOW",
+			"15_FILTER",
+			"20_HELP",
+			"40_PERIODICITY",
+			"22_NAME",
+			"25_FILESIZE",
+			"26_COUNT",
+			"27_BACKUP",
+			"30_EXIT"
+		};
+
+		//...should be the same as the menu keys.
+		if(keys!=_menu.get_keys()) {
+
+			throw std::runtime_error("keys do not match");
+		}
+
+		using m=tools::options_menu<t>;
+
+		//Try first non bounding mode.
+		_menu.set_wrap(false);
+		if(keys.front()!=_menu.adjacent_key("10_WINDOW", m::browse_dir::previous)) {
+
+			throw std::runtime_error("keys do not match when retrieving previous key (first) in bounding mode");
+		}
+
+		if(keys.front()!=_menu.adjacent_key("15_FILTER", m::browse_dir::previous)) {
+
+			throw std::runtime_error("keys do not match when retrieving previous key (second) in bounding mode");
+		}
+
+		if(keys.back()!=_menu.adjacent_key("30_EXIT", m::browse_dir::next)) {
+
+			throw std::runtime_error("keys do not match when retrieving next key (last) in bounding mode");
+		}
+
+		if(keys.back()!=_menu.adjacent_key("27_BACKUP", m::browse_dir::next)) {
+
+			throw std::runtime_error("keys do not match when retrieving next key (previous to last) in bounding mode");
+		}
+
+		//Try restore bounding mode.
+		_menu.set_wrap(true);
+		int i=0;
+		for(; i < (int)keys.size(); i++) {
+
+			const auto current_key=keys[i];
+
+			if(i==0) {
+				if(keys.back()!=_menu.adjacent_key(current_key, m::browse_dir::previous)) {
+					throw std::runtime_error("keys do not match when retrieving key previous to first in non-bounding mode");
+				}
+
+				if(keys[1]!=_menu.adjacent_key(current_key, m::browse_dir::next)) {
+					throw std::runtime_error("keys do not match when retrieving key next to first in non-bounding mode");
+				}
+			}
+			else if(i==8) {
+
+				if(keys[7]!=_menu.adjacent_key(current_key, m::browse_dir::previous)) {
+					throw std::runtime_error("keys do not match when retrieving key previous to last in non-bounding mode");
+				}
+
+				if(keys.front()!=_menu.adjacent_key(current_key, m::browse_dir::next)) {
+					throw std::runtime_error("keys do not match when retrieving key next to last in non-bounding mode");
+				}
+			}
+			else {
+
+				if(keys[i-1]!=_menu.adjacent_key(current_key, m::browse_dir::previous)) {
+
+					throw std::runtime_error("keys do not match when retrieving next key in non-bounding mode");
+				}
+
+				if(keys[i+1]!=_menu.adjacent_key(current_key, m::browse_dir::next)) {
+
+					throw std::runtime_error("keys do not match when retrieving previous key in non-bounding mode");
+				}
+			}
+		}
+
+		return true;
+	}
+	catch(std::exception& e) {
+
+		std::cout<<"error: "<<e.what()<<std::endl;
+		return false;
+	}
+}
+
 int main(int, char **) {
 
 	try {
@@ -377,7 +518,7 @@ int main(int, char **) {
 		std::cout<<"Testing menu building..."<<std::endl;
 		tools::options_menu<std::string> menu_str;
 		tools::options_menu_from_json(
-			json_document["string_string_menu"],
+			json_document["string_menu"],
 			menu_str
 		);
 
@@ -424,19 +565,72 @@ int main(int, char **) {
 			return 1;
 		}
 
-		show_menu(menu_str);
-/*
+		std::cout<<"Testing adjacent keys..."<<std::endl;
+		if(!test_adjacent_keys(menu_str)) {
+			std::cout<<"adjacent keys failed..."<<std::endl;
+			return 1;
+		}
 
 		//Now we can do some sort of interactive demo...
-		while(true) {
+
+		std::string current_key{"10_WINDOW"};
+		bool running=true;
+		while(running) {
 			std::cout<<"use wasd + enter to navigate:"<<std::endl;
-			show_menu(menu_str);
-			break;
+
+			show_menu(menu_str, current_key);
+			std::cout<<">>";
+
+			char user_input=0;
+			std::cin>>user_input;
+			if(std::cin.fail()) {
+
+				std::cin.clear();
+				std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+			}
+
+			switch(user_input) {
+				case 'w':
+					current_key=menu_str.adjacent_key(current_key, decltype(menu_str)::browse_dir::previous);
+				break;
+				case 's':
+					current_key=menu_str.adjacent_key(current_key, decltype(menu_str)::browse_dir::next);
+				break;
+				case 'a':
+					if(current_key=="30_EXIT") {
+						running=false;
+						break;
+					}
+
+					if(current_key=="22_NAME") {
+						break;
+					}
+
+					menu_str.browse(current_key, decltype(menu_str)::browse_dir::previous);
+
+				break;
+				case 'd':
+					if(current_key=="30_EXIT") {
+						running=false;
+						break;
+					}
+
+					if(current_key=="22_NAME") {
+						break;
+					}
+
+					menu_str.browse(current_key, decltype(menu_str)::browse_dir::next);
+				break;
+				default:
+					std::cout<<"[invalid input]"<<std::endl;
+				break;
+			}
+
 		}
 
 		//This will show that another types of menu will compile...
 		//TODO: Build another menu, int to str, just to see that it compiles.
-*/
+
 		return 0;
 	}
 	catch(std::exception& e) {

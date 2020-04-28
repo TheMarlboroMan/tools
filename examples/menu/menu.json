@@ -1,95 +1,101 @@
 {
-	"string_string_menu": [
+	"string_menu":
 		{
-			"type":"choice",
-			"key":"10_WINDOW",
-			"properties" : {
-				"value_type":"string",
-				"wrap":true,
-				"values":[
-					{"value": "800x500"},
-					{"value": "1200x750"},
-					{"value": "1600x1000"}
-				]
-			}
-		},
-		{
-			"type":"choice",
-			"key":"15_FILTER",
-			"properties" : {
-				"value_type":"string",
-				"wrap":true,
-				"values":[
-					{"value": "linear"},
-					{"value": "bilinear"},
-					{"value": "trilinear"},
-					{"value": "anisotropic"},
-					{"value": "just_trippy"}
-				]
-			}
-		},
-		{
-			"type":"choice",
-			"key":"20_HELP",
 			"properties":{
-				"value_type":"bool",
-				"wrap":false,
-				"values":[
-					{"value": true},
-					{"value": false}
-				]
+				"wrap": true
+			},
+			"entries":[
+			{
+				"type":"choice",
+				"key":"10_WINDOW",
+				"properties" : {
+					"value_type":"string",
+					"wrap":true,
+					"values":[
+						{"value": "800x500"},
+						{"value": "1200x750"},
+						{"value": "1600x1000"}
+					]
+				}
+			},
+			{
+				"type":"choice",
+				"key":"15_FILTER",
+				"properties" : {
+					"value_type":"string",
+					"wrap":true,
+					"values":[
+						{"value": "linear"},
+						{"value": "bilinear"},
+						{"value": "trilinear"},
+						{"value": "anisotropic"},
+						{"value": "just_trippy"}
+					]
+				}
+			},
+			{
+				"type":"choice",
+				"key":"20_HELP",
+				"properties":{
+					"value_type":"bool",
+					"wrap":true,
+					"values":[
+						{"value": true},
+						{"value": false}
+					]
+				}
+			},
+			{
+				"type":"choice",
+				"key":"40_PERIODICITY",
+				"properties":{
+					"value_type":"int",
+					"wrap":true,
+					"values":[
+						{"value": 1},
+						{"value": 2},
+						{"value": 4},
+						{"value": 8}
+					]
+				}
+			},
+			{
+				"type":"string",
+				"key":"22_NAME"
+			},
+			{
+				"type":"int",
+				"key":"25_FILESIZE",
+				"properties": {
+					"wrap":true,
+					"min": 1,
+					"max": 9999
+				}
+			},
+			{
+				"type":"int",
+				"key":"26_COUNT",
+				"properties": {
+					"wrap":false,
+					"min": 10,
+					"max": 15
+				}
+			},
+			{
+				"type":"bool",
+				"key":"27_BACKUP",
+				"properties": {
+					"wrap":false
+				}
+			},
+			{
+				"type":"void",
+				"key":"30_EXIT"
+			},
+			{
+				"type":"void",
+				"key":"35_DELETE"
 			}
-		},
-		{
-			"type":"choice",
-			"key":"40_PERIODICITY",
-			"properties":{
-				"value_type":"int",
-				"wrap":true,
-				"values":[
-					{"value": 1},
-					{"value": 2},
-					{"value": 4},
-					{"value": 8}
-				]
-			}
-		},
-		{
-			"type":"string",
-			"key":"22_NAME"
-		},
-		{
-			"type":"int",
-			"key":"25_FILESIZE",
-			"properties": {
-				"wrap":true,
-				"min": 1,
-				"max": 9999
-			}
-		},
-		{
-			"type":"int",
-			"key":"26_COUNT",
-			"properties": {
-				"wrap":false,
-				"min": 10,
-				"max": 15
-			}
-		},
-		{
-			"type":"bool",
-			"key":"27_BACKUP",
-			"properties": {
-				"wrap":false
-			}
-		},
-		{
-			"type":"void",
-			"key":"30_EXIT"
-		},
-		{
-			"type":"void",
-			"key":"35_DELETE"
-		}
-	]
+		]
+	}
 }
