@@ -629,7 +629,11 @@ int main(int, char **) {
 		}
 
 		//This will show that another types of menu will compile...
-		//TODO: Build another menu, int to str, just to see that it compiles.
+		tools::options_menu<int> menu_int;
+		tools::options_menu_from_json(
+			json_document["int_menu"],
+			menu_int
+		);
 
 		return 0;
 	}

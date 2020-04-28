@@ -97,5 +97,25 @@
 				"key":"35_DELETE"
 			}
 		]
+	},
+	"int_menu":{
+		"properties":{
+			"wrap":false
+		},
+		"entries":[
+			{
+				"type":"choice",
+				"key":1,
+				"properties":{
+					"value_type":"string",
+					"wrap":true,
+					"values":[
+						{"value" : "a"},
+						{"value" : "b"},
+						{"value" : "c"}
+					]
+				}
+			}
+		]
 	}
 }
