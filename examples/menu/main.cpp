@@ -314,14 +314,14 @@ bool test_browse(tools::options_menu<t>& _menu) {
 		std::cout<<"error: string should not be browsable"<<std::endl;
 		return false;
 	}
-	catch(std::exception) {}
+	catch(std::exception&) {}
 
 	try {
 		_menu.browse("30_EXIT", m::browse_dir::next);
 		std::cout<<"error: void should not be browsable"<<std::endl;
 		return false;
 	}
-	catch(std::exception) {}
+	catch(std::exception&) {}
 
 	//test empty browse
 	_menu.insert("60_TEST", std::vector<int>{}, false);
