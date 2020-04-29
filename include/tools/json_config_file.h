@@ -3,6 +3,8 @@
 #include <rapidjson/document.h>
 
 #include <iostream>
+#include <vector>
+#include <string>
 
 namespace tools{
 
@@ -37,9 +39,21 @@ class json_config_file {
 	rapidjson::Value&		token_from_path(const std::string& c);
 
 	//!Generic function to set the value for a given path. Will throw if there is no token in the path or the value is not assignable.
-	template <typename T>	void 	set(const std::string& k, const T& v) {
+	template <typename T>
+	void 	set(const std::string& k, const T& v) {
 
-		token_from_path(k)=v;		
+		token_from_path(k)=v;
+	}
+
+	template <typename T>
+	void 	set_vector(const std::string& k, const std::vector<T>& _v) {
+
+		rapidjson::Value arr{rapidjson::kArrayType};
+		for(const auto& t : _v) {
+//			arr.PushBack(t, document.GetAllocator());
+		}
+
+		token_from_path(k)=arr;
 	}
 
 	//!Reopens the configuration file and assigns the internal token map.
