@@ -18,7 +18,7 @@ int main(int /*argc*/, char ** /*argv*/) {
 		const std::string json_data="{\
 	\"nested_int\": {\"integer\": 999},\
 	\"int\": 1,\
-	\"float\": 1.0,\
+	\"float\co": 1.0,\
 	\"double\": 1.0,\
 	\"string\":\"this is a string\",\
 	\"array\": [1,2,3,4],\
