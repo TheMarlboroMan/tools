@@ -39,8 +39,8 @@ if(${BUILD_EXAMPLES})
 	add_executable(system examples/system/main.cpp)
 	target_link_libraries(system tools)
 
-	add_executable(json examples/json/main.cpp)
-	target_link_libraries(json tools)
+	add_executable(json_config_file examples/json_config_file/main.cpp)
+	target_link_libraries(json_config_file tools)
 
 	add_executable(file_utils examples/file_utils/main.cpp)
 	target_link_libraries(file_utils tools)
