@@ -50,7 +50,8 @@ class json_config_file {
 
 		rapidjson::Value arr{rapidjson::kArrayType};
 		for(const auto& t : _v) {
-//			arr.PushBack(t, document.GetAllocator());
+			
+			arr.PushBack(t, document.GetAllocator());
 		}
 
 		token_from_path(k)=arr;
