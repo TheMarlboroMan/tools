@@ -30,63 +30,106 @@ void pager::calculate_page_info() {
 	}
 }
 
-bool pager::set_page(int val, bool forzar) {
+void pager::turn_page(pager::dir _dir, bool forzar) {
 
-	if(val > 0) {
-		if(current_page < pages_count) {
+	status_flags=0;
+
+	if(_dir==dir::next) {
+
+		if(current_page < pages_count-1) {
+
 			++current_page;
+			status_flags|=status::page_turned;
+
 			if(forzar) {
+
 				current_index+=items_per_page;
+
+				if(current_index>=item_count) {
+					current_index=item_count-1;
+				}
+				status_flags|=status::item_cycled;
 			}
 		}
-		else if(current_page == pages_count) {
+		//Try to set the last item...
+		else if(current_index!=item_count-1) {
+
 			current_index=item_count-1;
+			status_flags|=status::item_cycled;
 		}
-
-		return true;
 	}
-	else if(val < 0) {
+	else {
+
 		if(current_page > 0) {
+
 			--current_page;
+			status_flags|=status::page_turned;
+
 			if(forzar) {
+
 				current_index-=items_per_page;
+				status_flags|=status::item_cycled;
 			}
 		}
-		else {
-			current_index=0;
-		}
+		//Try to set the last item...
+		else if(0!=current_index) {
 
-		return true;
+			current_index=0;
+			status_flags|=status::item_cycled;
+		}
 	}
-	else return false;
 }
 
-bool pager::set_item(int val) {
-	bool resultado=false;
+void pager::cycle_item(pager::dir _val) {
 
-	if(val > 0 && current_index + 1 < item_count) {
+	status_flags=0;
+
+	if(_val==dir::next) {
+
+		if(current_index+1 >= item_count) {
+			return;
+		}
+
 		++current_index;
-		resultado=true;
 	}
-	else if(val < 0 && current_index > 0) {
+	else {
+
+		if(0==current_index) {
+			return;
+		}
+
 		--current_index;
-		resultado=true;
-	}
-	
-	if(resultado) {
-		//Detectar si vamos a cambiar de página... Se hace en dos direcciones...
-		size_t indice=current_index % (items_per_page);
-		if(val > 0) {
-			if(!indice) {
-				set_page(val, false);
-			}
-		}
-		else if(val < 0) {
-			if(indice==items_per_page - 1) {
-				set_page(val, false);
-			}
-		}
 	}
 
-	return resultado;
+	status_flags|=status::item_cycled;
+
+	//Detectar si vamos a cambiar de página... Se hace en dos direcciones...
+	size_t indice=current_index % (items_per_page);
+	if(_val==dir::next) {
+		if(!indice) {
+			status_flags|=status::page_turned;
+			turn_page(_val, false);
+		}
+	}
+	else {
+		if(indice==items_per_page - 1) {
+			status_flags|=status::page_turned;
+			turn_page(_val, false);
+		}
+	}
+}
+
+void pager::reset() {
+
+	status_flags=0;
+
+	if(0!=current_page) {
+		status_flags|=status::page_turned;
+		current_page=0;
+	}
+
+	if(0!=current_index) {
+		status_flags|=status::item_cycled;
+		current_index=0;
+	}
 }
