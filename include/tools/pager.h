@@ -24,6 +24,9 @@ class pager {
 	//!Returns the current index value.
 	size_t						get_current_index() const {return current_index;}
 
+	//!Returns the zero-indexed index of the item selected on the current page.
+	size_t                      get_relative_index() const {return current_index % items_per_page;}
+
 	//!Returns the current page count value.
 	size_t						get_pages_count() const {return pages_count;}
 

@@ -104,7 +104,7 @@ void pager::cycle_item(pager::dir _val) {
 	status_flags|=status::item_cycled;
 
 	//Detectar si vamos a cambiar de página... Se hace en dos direcciones...
-	size_t indice=current_index % (items_per_page);
+	size_t indice=current_index % items_per_page;
 	if(_val==dir::next) {
 		if(!indice) {
 			status_flags|=status::page_turned;
