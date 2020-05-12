@@ -45,9 +45,10 @@ class pager {
 	//!Advances-decreases the current page. If already in the first-last page,
 	//!will try to set the pointer to the first-last item on it. If the second
 	//!parameter is set to false, the current index will not change to reflect
-	//!a item in the new page. This is a flag setting operation, meaning the the
-	//!current flags can change.
-	void						turn_page(dir, bool=true);
+	//!a item in the new page. The third parameter is reserved for internal
+	//!use. This is a flag setting operation, meaning the the current flags can
+	//!change.
+	void						turn_page(dir, bool=true, bool=true);
 
 	//!Selects the next / previous item depending. Automatically handles page
 	//!turning. This is a flag setting operation, meaning the the current flags

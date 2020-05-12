@@ -7,6 +7,7 @@ using namespace tools;
 pager::pager(size_t rpp, size_t pitem_count)
 	:items_per_page(rpp), item_count(pitem_count), current_page(0),
 	pages_count(0), current_index(0) {
+
 	//Prevenir una división por 0...
 	if(items_per_page && item_count) {
 		calculate_page_info();
@@ -26,13 +27,16 @@ void pager::set_items_per_page(size_t val) {
 void pager::calculate_page_info() {
 
 	if(items_per_page) {
-		pages_count=ceil(item_count / items_per_page);
+
+		pages_count=ceil((double)item_count / (double)items_per_page);
 	}
 }
 
-void pager::turn_page(pager::dir _dir, bool forzar) {
+void pager::turn_page(pager::dir _dir, bool forzar, bool _clear_flags) {
 
-	status_flags=0;
+	if(_clear_flags) {
+		status_flags=0;
+	}
 
 	if(_dir==dir::next) {
 
@@ -107,14 +111,12 @@ void pager::cycle_item(pager::dir _val) {
 	size_t indice=current_index % items_per_page;
 	if(_val==dir::next) {
 		if(!indice) {
-			status_flags|=status::page_turned;
-			turn_page(_val, false);
+			turn_page(_val, false, false);
 		}
 	}
 	else {
 		if(indice==items_per_page - 1) {
-			status_flags|=status::page_turned;
-			turn_page(_val, false);
+			turn_page(_val, false, false);
 		}
 	}
 }
