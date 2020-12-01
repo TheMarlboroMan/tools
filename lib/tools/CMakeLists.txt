@@ -7,6 +7,7 @@ set(SOURCE
 	${CMAKE_CURRENT_SOURCE_DIR}/pager.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/pair_file_parser.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/text_reader.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/string_reader.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/localization_base.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/file_utils.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/number_utils.cpp

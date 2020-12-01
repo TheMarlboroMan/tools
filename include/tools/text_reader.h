@@ -12,7 +12,7 @@ class text_reader {
 	public:
 
 	enum		flags{
-		none=0, 
+		none=0,
 		ltrim=1, //left trim each line
 		rtrim=2, //right trim each line
 		ignorewscomment=4 //ignores whitespace when looking for the comment character. Has no effect it ltrim is active.
@@ -58,9 +58,9 @@ class text_reader {
 	//!Returns true if the line is a comment. Assumes that the line has length.
 	bool            is_comment(const std::string&);
 
-	unsigned int    line_number;		//!< Current line number.
-	char            comment;		//!< Current comment char.
-	std::ifstream   file;			//!< File data.
+	unsigned int    line_number;    //!< Current line number.
+	char            comment;        //!< Current comment char.
+	std::ifstream   file;           //!< File data.
 	int				flags;
 };
 

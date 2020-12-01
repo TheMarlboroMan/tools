@@ -7,20 +7,20 @@
 
 using namespace tools;
 
-text_reader::text_reader() 
+text_reader::text_reader()
 :
-	line_number{0}, 
-	comment{'#'}, 
+	line_number{0},
+	comment{'#'},
 	flags{none} {
 
 }
 
 text_reader::text_reader(
-	const std::string& path, 
+	const std::string& path,
 	const char c,
 	int _flags)
 :
-	line_number(0), 
+	line_number(0),
 	comment(c),
 	flags{_flags} {
 
