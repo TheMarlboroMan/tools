@@ -25,9 +25,5 @@ std::string tools::dump_file(const std::string& _path) {
 		res+=lin+"\n";
 	}
 
-	if(res.size()) {
-		res.pop_back();
-	}
-
 	return res;
 }
