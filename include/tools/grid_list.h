@@ -25,15 +25,15 @@ class grid_list:
 		margin_w(0), margin_h(0),
 		reg_row(floor(available_w / item_w)),
 		reg_column(floor(available_h / item_h)) {
-		this->pager.set_items_per_page(reg_row * reg_column);
+		this->pager_instance.set_items_per_page(reg_row * reg_column);
 	}
 
 
 	//!Seems that it returns the currently selected item. TODO: Where is this used? What does it do?.
 	const Item				current_line() const {
 
-		size_t	index=this->pager.get_current_index(),
-			rpp=this->pager.get_registers_per_page(),
+		size_t	index=this->pager_instance.get_current_index(),
+			rpp=this->pager_instance.get_registers_per_page(),
 			rel=index % rpp;
 
 		size_t	y=floor(rel / reg_row),
@@ -48,8 +48,8 @@ class grid_list:
 	std::vector<Item>			get_page() const {
 		std::vector<Item> res;
 
-		size_t rpp=this->pager.get_registers_per_page(),
-			pa=this->pager.get_current_page();
+		size_t rpp=this->pager_instance.get_registers_per_page(),
+			pa=this->pager_instance.get_current_page();
 
 		auto	ini=std::begin(this->data)+(pa * rpp),
 			fin=ini+rpp;
@@ -95,7 +95,7 @@ class grid_list:
 	bool					set_row(int v) {
 		bool result=false;
 		for(size_t i=0; i < reg_row ; ++i) {
-			result=this->pager.set_item(v) || result;
+			result=this->pager_instance.set_item(v) || result;
 		}
 		return result;
 	}
