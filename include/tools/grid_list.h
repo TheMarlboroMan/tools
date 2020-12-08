@@ -28,6 +28,21 @@ class grid_list:
 		this->pager_instance.set_items_per_page(reg_row * reg_column);
 	}
 
+	//!Selects the next item...
+	void					next_row() {
+
+		for(int i=0; i<reg_row; i++) {
+			this->next();
+		}
+	}
+
+	//!Selects the next item...
+	void					previous_row() {
+
+		for(int i=0; i<reg_row; i++) {
+			this->previous();
+		}
+	}
 
 	//!Seems that it returns the currently selected item. TODO: Where is this used? What does it do?.
 	const Item				current_line() const {
