@@ -33,7 +33,7 @@ class grid_list:
 	const Item				current_line() const {
 
 		size_t	index=this->pager_instance.get_current_index(),
-			rpp=this->pager_instance.get_registers_per_page(),
+			rpp=this->pager_instance.get_items_per_page(),
 			rel=index % rpp;
 
 		size_t	y=floor(rel / reg_row),
@@ -48,7 +48,7 @@ class grid_list:
 	std::vector<Item>			get_page() const {
 		std::vector<Item> res;
 
-		size_t rpp=this->pager_instance.get_registers_per_page(),
+		size_t rpp=this->pager_instance.get_items_per_page(),
 			pa=this->pager_instance.get_current_page();
 
 		auto	ini=std::begin(this->data)+(pa * rpp),
