@@ -62,12 +62,6 @@ class base_list
 	//!Passthrough for pager.set_index().
 	void					set_index(size_t v)	{pager_instance.set_index(v);}
 
-	//!Passthrough for pager.set_page().
-	bool					set_page(int v) 	{return pager_instance.set_page(v);}
-
-	//!Passthrough for pager.set_item().
-	bool					set_item(int v)	{return pager_instance.set_item(v);}
-
 	//!Passthrough for pager.get_current_page().
 	size_t					get_current_page() const {return pager_instance.get_current_page();}
 

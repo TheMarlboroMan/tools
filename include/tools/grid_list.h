@@ -125,7 +125,7 @@ class grid_list:
 						item_w, 	//!< Fixed width for each item.
 						item_h,		//!< Fixed height for each item.
 						margin_w, 	//!< Fixed horizontal distance between items.
-						margin_h;	//!< Fixed vertical distance between items.
+						margin_h,	//!< Fixed vertical distance between items.
 						reg_row, 	//!< Max items per row.
 						reg_column;	//!< Max items per column.
 };
