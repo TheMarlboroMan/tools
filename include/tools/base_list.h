@@ -34,13 +34,13 @@ class base_list
 	//!Selects the next item...
 	void					next() {
 
-		pager_instance->cycle_item(pager::dir::next);
+		pager_instance.cycle_item(pager::dir::next);
 	}
 
 	//!Selects the next item...
 	void					previous() {
 
-		pager_instance->cycle_item(pager::dir::previous);
+		pager_instance.cycle_item(pager::dir::previous);
 	}
 	
 	//!Returns the size of the list.
