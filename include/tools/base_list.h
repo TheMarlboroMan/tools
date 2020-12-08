@@ -31,6 +31,18 @@ class base_list
 		pager_instance.set_item_count(pager_instance.get_item_count()+1);
 	}
 
+	//!Selects the next item...
+	void					next() {
+
+		pager_instance->cycle_item(pager::dir::next);
+	}
+
+	//!Selects the next item...
+	void					previous() {
+
+		pager_instance->cycle_item(pager::dir::previous);
+	}
+	
 	//!Returns the size of the list.
 	size_t					size() const {
 		return data.size();
