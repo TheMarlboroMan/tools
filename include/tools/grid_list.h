@@ -112,6 +112,12 @@ class grid_list:
 	//!Returns the vertical margin between items.
 	size_t					get_margin_h() const {return margin_h;}
 
+	//!Returns the available width.
+	std::size_t				get_available_w() const {return available_w;}
+
+	//!Returns the available height.
+	std::size_t				get_available_h() const {return available_h;}
+
 	//!Sets the horizontal margin between items.
 	void					set_margin_w(size_t v) {margin_w=v;}
 
