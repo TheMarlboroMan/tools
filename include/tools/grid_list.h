@@ -147,22 +147,62 @@ class grid_list:
 	//!Returns the available height.
 	std::size_t				get_available_h() const {return available_h;}
 
+	//!Sets the width of each item.
+	grid_list<T>&           set_item_w(std::size_t v) {
+
+		item_w=v;
+		this->recalculate();
+		return *this;
+	}
+
+	//!Sets the height of each item.
+	grid_list<T>&           set_item_h(std::size_t v) {
+
+		item_h=v;
+		this->recalculate();
+		return *this;
+	}
+
+	//!Sets the available horizontal spacing
+	grid_list<T>&           set_available_w(std::size_t v) {
+
+		available_w=v;
+		this->recalculate();
+		return *this;
+	}
+
+	//!Sets the available vertical spacing
+	grid_list<T>&           set_available_h(std::size_t v) {
+
+		available_h=v;
+		this->recalculate();
+		return *this;
+	}
+
 	//!Sets the horizontal margin between items.
-	void					set_margin_w(std::size_t v) {
+	grid_list<T>&           set_margin_w(std::size_t v) {
 
 		margin_w=v;
-		reg_row=floor(available_w / (item_w+margin_w));
+		this->recalculate();
+		return *this;
 	}
 
 	//!Sets the vertical margin between items.
-	void					set_margin_h(std::size_t v) {
+	grid_list<T>&           set_margin_h(std::size_t v) {
 
 		margin_h=v;
-		reg_column=floor(available_h / (item_h+margin_h));
+		this->recalculate();
+		return *this;
 	}
 
 	private:
 
+	void                   recalculate() {
+
+		reg_row=floor(available_w / (item_w+margin_w));
+		reg_column=floor(available_h / (item_h+margin_h));
+	}
+	
 	std::size_t				available_w,	//!< Available width the for list.
 						available_h,	//!< Available height the for list.
 						item_w, 	//!< Fixed width for each item.
