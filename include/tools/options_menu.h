@@ -799,25 +799,29 @@ class options_menu {
 					throw key_exception(_key, "not a string type entry");
 				}
 
-				return assign(_key, _value);
+				assign(_key, _value);
+				return;
 
 			case types::tbool:
 				if(!std::is_same<tvalue, bool>::value) {
 					throw key_exception(_key, "not a boolean type entry");
 				}
 
-				return assign(_key, _value);
+				assign(_key, _value);
+				return;
 
 			case types::tint:
 				if(!std::is_same<tvalue, int>::value) {
 					throw key_exception(_key, "not an int type entry");
 				}
 
-				return assign(_key, _value);
+				assign(_key, _value);
+				return;
 			break;
 			case types::tchoice:
 
-				return assign(_key, _value, o->get_value_type());
+				assign(_key, _value, o->get_value_type());
+				return;
 
 			case types::tvoid:
 				throw key_exception(_key, "void choice cannot be assigned");
