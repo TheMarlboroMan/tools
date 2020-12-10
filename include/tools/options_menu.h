@@ -420,6 +420,12 @@ class options_menu {
 		}
 	};
 
+	//!Removes all data from the menu.
+	void	clear() {
+
+		entries.clear();
+	}
+
 	//!Assignment overloads for the "set" function...
 	void	assign(const tkey& _key, int _value) {
 
@@ -884,6 +890,7 @@ class options_menu {
 		return res;
 	}
 
+	//!Class constructor.
 							options_menu()
 		:allow_wrap{true}{
 
