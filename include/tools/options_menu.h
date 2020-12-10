@@ -291,6 +291,12 @@ class options_menu {
 			choices.erase(std::begin(choices)+index);
 		}
 
+		//!Clears all choices.
+		void                clear() {
+
+			choices.clear();
+		}
+
 		//!Constructor.
 		entry_choice(const tkey& _key, types _type, bool _wrap)
 			:base_entry(_key), value_type{_type}, allow_wrap{_wrap} {
@@ -608,6 +614,24 @@ class options_menu {
 		entries.push_back(
 			uptr_base(new entry_void(_key))
 		);
+	}
+
+	//!Erases all choices for a choice entry...
+	void   clear_choice(const tkey& _key) {
+
+		auto& o=get_entry(_key);
+		if(types::tchoice!=o->get_type()) {
+
+			throw key_exception(_key, "entry is not of choice type");
+		}
+
+		switch(o->get_value_type()) {
+			case types::tint:		return static_cast<entry_choice<int> *>(o.get())->clear();
+			case types::tstring:	return static_cast<entry_choice<std::string> *>(o.get())->clear();
+			case types::tbool:		return static_cast<entry_choice<bool> *>(o.get())->clear();
+			default:
+				throw key_exception(_key, "type mismatch for clear_choice");
+		}
 	}
 
 	//Inserts a choice option.
