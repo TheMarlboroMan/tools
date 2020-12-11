@@ -1,5 +1,6 @@
 #pragma once
 #include "base_list.h"
+#include <functional>
 
 namespace tools{
 
@@ -20,16 +21,16 @@ class grid_list:
 
 		//!Class constructor. Takes the available size and item size.
 						grid_list(
-			std::size_t available_w, 
-			std::size_t available_h, 
-			std::size_t item_w, 
+			std::size_t available_w,
+			std::size_t available_h,
+			std::size_t item_w,
 			std::size_t item_h
 		)
-			:available_w(available_w), 
+			:available_w(available_w),
 			available_h(available_h),
-			item_w(item_w), 
+			item_w(item_w),
 			item_h(item_h),
-			margin_w(0), 
+			margin_w(0),
 			margin_h(0),
 			reg_row{floor(available_w / (item_w+margin_w) )},
 			reg_column{floor(available_h / (item_h+margin_h))} {
@@ -102,8 +103,8 @@ class grid_list:
 	//!was an element in the position, false if not.
 	template<typename E>
 	bool 					topological_select(
-		std::size_t rx, 
-		std::size_t ry, 
+		std::size_t rx,
+		std::size_t ry,
 		E f
 	) {
 		const auto& pag=get_page();
@@ -117,9 +118,9 @@ class grid_list:
 			}
 		}
 		return false;
-	}	
+	}
 
-	//!Seems to return true if the current page contains the item v. 
+	//!Seems to return true if the current page contains the item v.
 	//TODO: I really don't know what this does.
 	bool					set_row(int v) {
 		bool result=false;
@@ -202,7 +203,7 @@ class grid_list:
 		reg_row=floor(available_w / (item_w+margin_w));
 		reg_column=floor(available_h / (item_h+margin_h));
 	}
-	
+
 	std::size_t				available_w,	//!< Available width the for list.
 						available_h,	//!< Available height the for list.
 						item_w, 	//!< Fixed width for each item.
