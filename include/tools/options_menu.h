@@ -42,6 +42,7 @@ namespace {
 	template<typename t> struct possible_value{static const bool value=false;};
 	template<> struct possible_value<bool>{static const bool value=true;};
 	template<> struct possible_value<int>{static const bool value=true;};
+	template<> struct possible_value<double>{static const bool value=true;};
 	template<> struct possible_value<std::string>{static const bool value=true;};
 	template<> struct possible_value<const char *>{static const bool value=true;};
 	template<typename t> void assert_valid_value() {
@@ -49,11 +50,12 @@ namespace {
 	}
 
 	//!Defines the different types of choices.
-	enum class types {tchoice, tint, tbool, tstring, tvoid};
+	enum class types {tchoice, tint, tbool, tstring, tdouble, tvoid};
 
 	//!Tag dispatching. Returns the type (of type types) that corresponds to a primitive (or string).
 	template<typename t> struct type_for{static const types value=types::tvoid;};
 	template<> struct type_for<int>{static const types value=types::tint;};
+	template<> struct type_for<double>{static const types value=types::tdouble;};
 	template<> struct type_for<bool>{static const types value=types::tbool;};
 	template<> struct type_for<std::string>{static const types value=types::tstring;};
 	template<> struct type_for<const char *>{static const types value=types::tstring;};
@@ -347,6 +349,49 @@ class options_menu {
 		}
 	};
 
+	//!Represents a double value within a given range.
+	struct entry_double
+		:public base_entry {
+
+		ranged_value<double>	value; //!< Ranged value for the option.
+		bool					allow_wrap;
+
+		//!Returns the current value as an integer.
+		double					get_value() const {return value.get();}
+		//!Returns its type. Internal use.
+		virtual types			get_type() const {return types::tdouble;}
+		//!Adds or substracts from the value.
+
+		virtual void			browse(browse_dir _dir){
+
+			if(!allow_wrap) {
+				value+=_dir==browse_dir::next ? 1. : -1.;
+				return;
+			}
+
+			if(_dir==browse_dir::next) {
+				if(value.get() == value.max()) {
+					value=value.min();
+					return;
+				}
+				++value;
+			}
+			else {
+				if(value.get() == value.min()) {
+					value=value.max();
+					return;
+				}
+
+				--value;
+			}
+		}
+
+		//!Constructor of the option.
+		entry_double(const tkey& _key, double _value, double _min, double _max, bool _wrap)
+			:base_entry(_key), value(_min, _max, _value), allow_wrap(_wrap) {
+		}
+	};
+
 	//Represents a boolean value.
 	struct entry_bool
 		:public base_entry {
@@ -432,6 +477,11 @@ class options_menu {
 		static_cast<entry_int *>(get_entry(_key).get())->value=_value;
 	}
 
+	void	assign(const tkey& _key, double _value) {
+
+		static_cast<entry_double *>(get_entry(_key).get())->value=_value;
+	}
+
 	void	assign(const tkey& _key, bool _value) {
 
 		static_cast<entry_bool *>(get_entry(_key).get())->value=_value;
@@ -480,6 +530,16 @@ class options_menu {
 		static_cast<entry_choice<int> *>(o.get())->erase(_value);
 	}
 
+	void	erase_choice_impl(const tkey& _key, double _value) {
+
+		auto& o=get_entry(_key);
+		if(types::tdouble != o->get_value_type()) {
+
+			throw key_exception(_key, "parameter type does not match for erase_choice_impl");
+		}
+		static_cast<entry_choice<double> *>(o.get())->erase(_value);
+	}
+
 	void	erase_choice_impl(const tkey& _key, bool _value) {
 
 		auto& o=get_entry(_key);
@@ -507,6 +567,7 @@ class options_menu {
 		switch(_t) {
 			case types::tchoice:	return "choice";
 			case types::tint:		return "int";
+			case types::tdouble:	return "double";
 			case types::tbool:		return "bool";
 			case types::tstring:	return "string";
 			case types::tvoid:		return "void";
@@ -572,6 +633,19 @@ class options_menu {
 		);
 	}
 
+	//!Creates a double entry
+	void		insert(const tkey& _key, double _value, double _min, double _max, bool _wrap) {
+
+		assert_valid_key<tkey>();
+		if(key_exists(_key)) {
+			throw key_exception(_key, "key already exists for insert");
+		}
+
+		entries.push_back(
+			uptr_base(new entry_double(_key, _value, _min, _max, _wrap))
+		);
+	}
+
 	//!Creates a bool entry.
 	void		insert(const tkey& _key, bool _val, bool _wrap) {
 
@@ -627,6 +701,7 @@ class options_menu {
 
 		switch(o->get_value_type()) {
 			case types::tint:		return static_cast<entry_choice<int> *>(o.get())->clear();
+			case types::tdouble:	return static_cast<entry_choice<double> *>(o.get())->clear();
 			case types::tstring:	return static_cast<entry_choice<std::string> *>(o.get())->clear();
 			case types::tbool:		return static_cast<entry_choice<bool> *>(o.get())->clear();
 			default:
@@ -735,6 +810,7 @@ class options_menu {
 
 		switch(o->get_value_type()) {
 			case types::tint:		return static_cast<entry_choice<int> *>(o.get())->size();
+			case types::tdouble:	return static_cast<entry_choice<double> *>(o.get())->size();
 			case types::tstring:	return static_cast<entry_choice<std::string> *>(o.get())->size();
 			case types::tbool:		return static_cast<entry_choice<bool> *>(o.get())->size();
 			default:
@@ -766,6 +842,25 @@ class options_menu {
 
 		//A choice int...
 		return static_cast<entry_choice<int> *>(o.get())->get_value();
+	}
+
+	//!Specifically returns double values from an integer option.
+	double		get_double(const tkey& _key) const {
+
+		assert_valid_key<tkey>();
+		const auto& o=get_entry(_key);
+
+		if(o->get_value_type()!=types::tdouble) {
+			throw key_exception(_key, "choice is not double for get_double");
+		}
+
+		//A pure double...
+		if(o->get_type()==types::tdouble) {
+			return static_cast<entry_double *>(o.get())->get_value();
+		}
+
+		//A choice double...
+		return static_cast<entry_choice<double> *>(o.get())->get_value();
 	}
 
 	//!Specifically returns bool values from an bool option.
@@ -837,6 +932,14 @@ class options_menu {
 			case types::tint:
 				if(!std::is_same<tvalue, int>::value) {
 					throw key_exception(_key, "not an int type entry");
+				}
+
+				assign(_key, _value);
+				return;
+
+			case types::tdouble:
+				if(!std::is_same<tvalue, double>::value) {
+					throw key_exception(_key, "not an double type entry");
 				}
 
 				assign(_key, _value);
@@ -1057,6 +1160,9 @@ void options_menu_from_json(
 			else if(value_type=="int") {
 				_target_menu.insert(entry_key, std::vector<int>{}, wrap);
 			}
+			else if(value_type=="double") {
+				_target_menu.insert(entry_key, std::vector<double>{}, wrap);
+			}
 			else if(value_type=="bool") {
 				_target_menu.insert(entry_key, std::vector<bool>{}, wrap);
 			}
@@ -1084,6 +1190,12 @@ void options_menu_from_json(
 					_target_menu.add(
 						entry_key,
 						choice["value"].GetInt()
+					);
+				}
+				else if(value_type=="double") {
+					_target_menu.add(
+						entry_key,
+						choice["value"].GetDouble()
 					);
 				}
 				else if(value_type=="bool") {
@@ -1125,7 +1237,7 @@ void options_menu_from_json(
 			}
 
 			if(!properties.HasMember(k_max)) {
-				throw std::runtime_error("options_menu_from_json: the properties node must have a min property");
+				throw std::runtime_error("options_menu_from_json: the properties node must have a max property");
 			}
 
 			if(!properties[k_max].IsInt()) {
@@ -1134,6 +1246,54 @@ void options_menu_from_json(
 
 			int minval=properties[k_min].GetInt(),
 				maxval=properties[k_max].GetInt();
+
+			const bool wrap=properties[k_wrap].GetBool();
+
+			_target_menu.insert(
+				entry_key,
+				minval,
+				minval,
+				maxval,
+				wrap
+			);
+		}
+		else if(entry_type=="double") {
+
+			if(!entry.HasMember(k_properties)) {
+				throw std::runtime_error("options_menu_from_json: double entry must have a properties node");
+			}
+
+			const auto& properties=entry[k_properties];
+			if(!properties.IsObject()) {
+				throw std::runtime_error("options_menu_from_json: the properties node must be an object");
+			}
+
+			if(!properties.HasMember(k_wrap)) {
+				throw std::runtime_error("options_menu_from_json: the properties node must have a wrap property");
+			}
+
+			if(!properties[k_wrap].IsBool()) {
+				throw std::runtime_error("options_menu_from_json: wrap must be a boolean");
+			}
+
+			if(!properties.HasMember(k_min)) {
+				throw std::runtime_error("options_menu_from_json: the properties node must have a min property");
+			}
+
+			if(!properties[k_min].IsDouble()) {
+				throw std::runtime_error("options_menu_from_json: min property must be a double");
+			}
+
+			if(!properties.HasMember(k_max)) {
+				throw std::runtime_error("options_menu_from_json: the properties node must have a max property");
+			}
+
+			if(!properties[k_max].IsDouble()) {
+				throw std::runtime_error("options_menu_from_json: max property must be an double");
+			}
+
+			double  minval=properties[k_min].GetDouble(),
+			        maxval=properties[k_max].GetDouble();
 
 			const bool wrap=properties[k_wrap].GetBool();
 
