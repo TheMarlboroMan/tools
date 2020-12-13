@@ -426,12 +426,6 @@ class options_menu {
 		}
 	};
 
-	//!Removes all data from the menu.
-	void	clear() {
-
-		entries.clear();
-	}
-
 	//!Assignment overloads for the "set" function...
 	void	assign(const tkey& _key, int _value) {
 
@@ -546,6 +540,12 @@ class options_menu {
 	}
 
 	public:
+
+	//!Removes all data from the menu.
+	void	clear() {
+
+		entries.clear();
+	}
 
 	//!Checks that the option with the key does not exist.
 	bool	key_exists(const tkey& _key) const {
