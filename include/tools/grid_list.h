@@ -10,17 +10,16 @@ class grid_list:
 	public base_list<T> {
 	public:
 
-
 	//!Each item of the list: encapsulates position, index and represented value.
 	struct Item {
-		std::size_t 		x, 	//!< X position.
-				y, 	//!< Y position.
-				index;	//!< Zero-based index.
-		const T& item;		//!< Represented value.
+		std::size_t             x, 	//!< X position.
+		                        y, 	//!< Y position.
+								index;	//!< Zero-based index.
+		const T&                item;//!< Represented value.
 	};
 
 		//!Class constructor. Takes the available size and item size.
-						grid_list(
+	                            grid_list(
 			std::size_t available_w,
 			std::size_t available_h,
 			std::size_t item_w,
@@ -38,7 +37,7 @@ class grid_list:
 	}
 
 	//!Selects the next item...
-	void					next_row() {
+	void                        next_row() {
 
 		for(int i=0; i<reg_row; i++) {
 			this->next();
@@ -46,7 +45,7 @@ class grid_list:
 	}
 
 	//!Selects the next item...
-	void					previous_row() {
+	void                        previous_row() {
 
 		for(int i=0; i<reg_row; i++) {
 			this->previous();
@@ -54,7 +53,7 @@ class grid_list:
 	}
 
 	//!Seems that it returns the currently selected item. TODO: Where is this used? What does it do?.
-	const Item				current_line() const {
+	const Item                  current_line() const {
 
 		std::size_t	index=this->pager_instance.get_current_index(),
 			rpp=this->pager_instance.get_items_per_page(),
@@ -69,7 +68,8 @@ class grid_list:
 
 	//!Returns a vector of items that represent the current page, as per
 	//!the internal pager class.
-	std::vector<Item>			get_page() const {
+	std::vector<Item>           get_page() const {
+
 		std::vector<Item> res;
 
 		std::size_t rpp=this->pager_instance.get_items_per_page(),
@@ -102,7 +102,7 @@ class grid_list:
 	//!Applies f to the element in the given position. Returns true if there
 	//!was an element in the position, false if not.
 	template<typename E>
-	bool 					topological_select(
+	bool                    topological_select(
 		std::size_t rx,
 		std::size_t ry,
 		E f
@@ -122,7 +122,7 @@ class grid_list:
 
 	//!Seems to return true if the current page contains the item v.
 	//TODO: I really don't know what this does.
-	bool					set_row(int v) {
+	bool                    set_row(int v) {
 		bool result=false;
 		for(std::size_t i=0; i < reg_row ; ++i) {
 			result=this->pager_instance.set_item(v) || result;
@@ -131,22 +131,22 @@ class grid_list:
 	}
 
 	//!Returns the fixed width for each item.
-	std::size_t					get_item_w() const {return item_w;}
+	std::size_t             get_item_w() const {return item_w;}
 
 	//!Returns the fixed height for each item.
-	std::size_t					get_item_h() const {return item_h;}
+	std::size_t             get_item_h() const {return item_h;}
 
 	//!Returns the horizontal margin between items.
-	std::size_t					get_margin_w() const {return margin_w;}
+	std::size_t             get_margin_w() const {return margin_w;}
 
 	//!Returns the vertical margin between items.
-	std::size_t					get_margin_h() const {return margin_h;}
+	std::size_t             get_margin_h() const {return margin_h;}
 
 	//!Returns the available width.
-	std::size_t				get_available_w() const {return available_w;}
+	std::size_t             get_available_w() const {return available_w;}
 
 	//!Returns the available height.
-	std::size_t				get_available_h() const {return available_h;}
+	std::size_t             get_available_h() const {return available_h;}
 
 	//!Sets the width of each item.
 	grid_list<T>&           set_item_w(std::size_t v) {
