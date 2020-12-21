@@ -47,6 +47,17 @@ class base_list
 		pager_instance.cycle_item(pager::dir::previous);
 	}
 
+	void                    next_page() {
+
+		pager_instance.turn_page(pager::dir::next);
+	}
+
+	void                    previous_page() {
+
+		pager_instance.turn_page(pager::dir::previous);
+	}
+
+
 	//!Returns the size of the list.
 	std::size_t             size() const {
 		return data.size();
