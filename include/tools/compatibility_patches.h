@@ -6,7 +6,7 @@
 namespace compat
 {
 
-#ifdef WINCOMPIL
+#ifdef WINBUILD
 
 template <typename T> std::string to_string(const T& n)
 {

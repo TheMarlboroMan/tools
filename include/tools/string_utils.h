@@ -6,7 +6,7 @@
 
 namespace tools{
 
-#ifdef WINCOMPIL
+#ifdef WINBUILD
 
 const std::string			newline="\r\n";
 

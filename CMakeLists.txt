@@ -31,6 +31,13 @@ install(TARGETS tools_static DESTINATION lib)
 install(TARGETS tools_shared DESTINATION lib)
 install(DIRECTORY include/ DESTINATION include)
 
+IF(WIN32)
+	include_directories("${CMAKE_CURRENT_LIST_DIR}/../rapidjson/include/")
+	target_compile_definitions(tools_static PUBLIC -DWINBUILD)
+	target_compile_definitions(tools_shared PUBLIC -DWINBUILD)
+ENDIF()
+
+
 if(${BUILD_EXAMPLES})
 	add_executable(i8n examples/i8n/main.cpp)
 	target_link_libraries(i8n tools_shared)

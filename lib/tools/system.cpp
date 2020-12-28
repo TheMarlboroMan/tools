@@ -4,7 +4,10 @@
 #include <iostream>
 #include <memory>
 #include <cstring>
+
+#ifndef WINBUILD
 #include <sys/wait.h>
+#endif
 
 using namespace tools;
 
@@ -14,7 +17,7 @@ exec_exception::exec_exception(const std::string& _msg)
 }
 
 exec_result tools::exec(const char * _command, size_t _bufsize) {
-#ifdef WINCOMPIL
+#ifdef WINBUILD
 
 	return {0, "this does not work under windows"};
 #else

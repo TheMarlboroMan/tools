@@ -9,7 +9,7 @@ namespace tools
 class int_generator {
 	public:
 
-#ifdef WINCOMPIL
+#ifdef WINBUILD
 	//!Constructs the generator with the min and max values (inclusive).
 			int_generator(int vmin, int vmax):vmin(vmin), vmax(vmax){
 	}
@@ -34,7 +34,7 @@ class int_generator {
 #endif
 	private:
 
-#ifdef WINCOMPIL
+#ifdef WINBUILD
 	int 		vmin,		//!Minimal value (inclusive).
 			vmax;		//!Maximum value (inclusive).
 #else
