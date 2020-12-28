@@ -32,6 +32,9 @@ install(TARGETS tools_shared DESTINATION lib)
 install(DIRECTORY include/ DESTINATION include)
 
 IF(WIN32)
+	target_compile_definitions(tools_static PUBLIC -DWINBUILD)
+	target_compile_definitions(tools_shared PUBLIC -DWINBUILD)
+
 	include_directories("${CMAKE_CURRENT_LIST_DIR}/../rapidjson/include/")
 	target_compile_definitions(tools_static PUBLIC -DWINBUILD)
 	target_compile_definitions(tools_shared PUBLIC -DWINBUILD)
