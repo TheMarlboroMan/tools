@@ -146,7 +146,14 @@ void tools::i8n::lexicalize_file(const std::string& _path, std::map<std::string,
 
 void tools::i8n::set(const substitution& _sub) {
 
-	auto it=std::find(std::begin(substitutions), std::end(substitutions), _sub);
+	auto it=std::find_if(
+		std::begin(substitutions), 
+		std::end(substitutions), 
+		[&_sub](const substitution& _substitution) {
+
+			return _substitution.key==_sub.key;
+	});
+
 	if(std::end(substitutions)==it) {
 		substitutions.push_back(_sub);
 	}
