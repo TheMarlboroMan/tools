@@ -202,6 +202,7 @@ class grid_list:
 
 		reg_row=floor(available_w / (item_w+margin_w));
 		reg_column=floor(available_h / (item_h+margin_h));
+		this->pager_instance.set_items_per_page(floor(available_h / (item_h+margin_h)));
 	}
 
 	std::size_t				available_w,	//!< Available width the for list.
