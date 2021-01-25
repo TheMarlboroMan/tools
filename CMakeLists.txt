@@ -58,4 +58,7 @@ if(${BUILD_EXAMPLES})
 	add_executable(menu examples/menu/main.cpp)
 	target_link_libraries(menu tools_shared)
 	add_custom_command(TARGET menu POST_BUILD COMMAND cp -r ../examples/menu/menu.json ./)
+
+	add_executable(chrono examples/chrono/main.cpp)
+	target_link_libraries(chrono tools_shared)
 endif()

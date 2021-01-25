@@ -4,13 +4,13 @@ using namespace tools;
 
 void chrono::start() {
 
-	begin=std::chrono::high_resolution_clock::now();
+	begin=std::chrono::system_clock::now();
 	running=true;
 }
 
 void chrono::stop() {
 
-	end=std::chrono::high_resolution_clock::now();
+	end=std::chrono::system_clock::now();
 	running=false;
 }
 
@@ -22,7 +22,7 @@ void chrono::pause() {
 	}
 
 	paused=true;
-	pause_point=std::chrono::high_resolution_clock::now();
+	pause_point=std::chrono::system_clock::now();
 }
 
 void chrono::resume() {
@@ -32,10 +32,13 @@ void chrono::resume() {
 		return;
 	}
 
+	auto now=std::chrono::system_clock::now();
+	int ms_elapsed_since_pause=std::chrono::duration_cast<std::chrono::milliseconds>(now-pause_point).count();
+	begin+=std::chrono::milliseconds(ms_elapsed_since_pause);
 	paused=false;
 }
 
-int chrono::get_milliseconds() {
+unsigned long int chrono::get_milliseconds() {
 
 	if(running) {
 
@@ -44,7 +47,7 @@ int chrono::get_milliseconds() {
 		}
 		else {
 
-			return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - begin).count();
+			return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - begin).count();
 		}
 	}
 	else {
@@ -52,14 +55,14 @@ int chrono::get_milliseconds() {
 	}
 }
 
-int chrono::get_seconds() {
+unsigned long int chrono::get_seconds() {
 	if(running) {
 
 		if(paused) {
 			return std::chrono::duration_cast<std::chrono::milliseconds>(pause_point - begin).count();
 		}
 		else {
-			return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - begin).count();
+			return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - begin).count();
 		}
 	}
 	else {
@@ -72,10 +75,11 @@ chrono_data chrono::get_full() {
 	auto t=get_milliseconds();
 
 	//Hyper lazy.
-	int ms=t % 1000;
-	int seconds=(ms/1000) % 60;
-	int minutes=((ms/1000) % 60) % 60;
-	int hours=(((ms/1000) % 60) % 60) % 60;
+	auto ms=t % 1000;
 
-	return {hours, minutes, seconds, ms};
+	auto seconds=(t / 1000) % 60;
+	auto minutes=(t / (1000*60)) % 60;
+	auto hours=(t / (1000*60*60)) % 24;
+
+	return {(unsigned)hours, (unsigned)minutes, (unsigned)seconds, (unsigned)ms};
 }

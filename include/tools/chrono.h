@@ -8,10 +8,10 @@ namespace tools{
 //!of time.
 
 struct chrono_data {
-	int	hours,		//!< Hours elapsed.
-		minutes,	//!< Minutes elapsed.
-		seconds,	//!< Seconds elapsed.
-		milliseconds;	//!< Milliseconds elapsed.
+	unsigned    hours,		//!< Hours elapsed.
+	            minutes,	//!< Minutes elapsed.
+	            seconds,	//!< Seconds elapsed.
+	            milliseconds;	//!< Milliseconds elapsed.
 };
 
 //!Simple chronometer.
@@ -38,10 +38,10 @@ class chrono {
 	void            resume();
 
 	//!Returns the total of ms elapsed.
-	int             get_milliseconds();
+	unsigned long int get_milliseconds();
 
 	//!Returns the total of seconds elapsed.
-	int             get_seconds();
+	unsigned long int get_seconds();
 
 	//!Gets a full structure of hours, minutes, seconds and milliseconds.
 	chrono_data     get_full();
@@ -54,13 +54,13 @@ class chrono {
 
 	private:
 
-	using tp=std::chrono::high_resolution_clock::time_point;
+	using tp=std::chrono::system_clock::time_point;
 
 	tp              begin,		//!< Internal starting time point.
 	                end,		//!< Internal end time point.
 	                pause_point;      //!< Internal pause moment.
-	bool            running=false,
-	                paused;	//!< State flag.
+	bool            running{false},
+	                paused{false}; //!< State flag.
 };
 
 }
