@@ -83,3 +83,12 @@ chrono_data chrono::get_full() {
 
 	return {(unsigned)hours, (unsigned)minutes, (unsigned)seconds, (unsigned)ms};
 }
+
+void chrono::reset() {
+
+	begin=tp{};
+	end=tp{};
+	pause_point=tp{};
+	running=false;
+	paused=false;
+}

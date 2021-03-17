@@ -52,6 +52,8 @@ class chrono {
 	//!Returns true if paused.
 	bool            is_paused() const {return paused;}
 
+	void            reset();
+
 	private:
 
 	using tp=std::chrono::system_clock::time_point;
