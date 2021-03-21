@@ -38,7 +38,7 @@ void chrono::resume() {
 	paused=false;
 }
 
-unsigned long int chrono::get_milliseconds() {
+unsigned long int chrono::get_milliseconds() const {
 
 	if(running) {
 
@@ -55,7 +55,8 @@ unsigned long int chrono::get_milliseconds() {
 	}
 }
 
-unsigned long int chrono::get_seconds() {
+unsigned long int chrono::get_seconds() const {
+
 	if(running) {
 
 		if(paused) {

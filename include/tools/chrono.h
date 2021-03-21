@@ -38,10 +38,10 @@ class chrono {
 	void            resume();
 
 	//!Returns the total of ms elapsed.
-	unsigned long int get_milliseconds();
+	unsigned long int get_milliseconds() const;
 
 	//!Returns the total of seconds elapsed.
-	unsigned long int get_seconds();
+	unsigned long int get_seconds() const;
 
 	//!Gets a full structure of hours, minutes, seconds and milliseconds.
 	chrono_data     get_full();
