@@ -12,7 +12,7 @@
 #include <memory>
 
 #include "valor_limitado.h"
-#include "dnot_parser.h"
+#include "../class/dnot_parser.h"
 
 #ifdef WINCOMPIL
 //Localización del parche mingw32... Esto debería estar en otro lado, supongo.
@@ -30,21 +30,21 @@ menu:
 	cantidad: [un número entre 1 y 99]
 
 El menu sería el primer nivel. El segundo nivel "resolución de pantalla",
-"volumen_audio" e "idioma" serían "opciones" y el último nivel serían 
+"volumen_audio" e "idioma" serían "opciones" y el último nivel serían
 "selecciones"
 
 Cada opción y selección están identificados por una clave que no debe repetirse.
-En caso de que se repita tendremos una excepción. Ojo, no debe repetirse en 
+En caso de que se repita tendremos una excepción. Ojo, no debe repetirse en
 general, no sólo entre opciones y selecciones!!!.
 
-A la hora de insertar tanto una opción como una clave se ordenarán por el tipo 
+A la hora de insertar tanto una opción como una clave se ordenarán por el tipo
 Tclave especificado en el template.
 
-Es perfectamente posible tener selecciones dentro de una opción con el mismo 
+Es perfectamente posible tener selecciones dentro de una opción con el mismo
 valor.
 
 Va acompañado de un método "traducir" que hace una pasada simple por todos los
-"nombres" para reemplazarlos por otro, de forma que podamos hacer menús 
+"nombres" para reemplazarlos por otro, de forma que podamos hacer menús
 en múltiples idiomas.
 
 Al final de este archivo hay un ejemplo de uso.
@@ -79,7 +79,7 @@ class Menu_opciones
 
 		void reemplazar(const Tclave& clave, std::string& cad) const
 		{
-			if(clave==busca) 
+			if(clave==busca)
 			{
 				cad=reemplaza;
 			}
@@ -110,20 +110,20 @@ class Menu_opciones
 	{
 		//El tipo de una selección de menú de tipo string.
 		struct Seleccion_menu_templated
-		{		
+		{
 			Tvalor				valor;
-			std::string			nombre; 
+			std::string			nombre;
 		};
 
 		std::map<Tclave, Seleccion_menu_templated>	selecciones;
 		Tclave					clave_actual;
 
-		Tvalor					obtener_valor() const 
+		Tvalor					obtener_valor() const
 		{
 			comprobar_opciones_existen("La opción no tiene selecciones para valor_string");
 			return selecciones.at(clave_actual).valor;
 		}
-		virtual std::string			valor_visible() const 
+		virtual std::string			valor_visible() const
 		{
 			comprobar_opciones_existen("La opción no tiene selecciones para valor_visible");
 			return selecciones.at(clave_actual).nombre;
@@ -166,7 +166,7 @@ class Menu_opciones
 		{
 			for(auto& seleccion : selecciones)
 			{
-				if(seleccion.second.valor==valor_seleccion) 
+				if(seleccion.second.valor==valor_seleccion)
 				{
 					clave_actual=seleccion.first;
 					return;
@@ -178,7 +178,7 @@ class Menu_opciones
 
 		void					seleccionar_opcion(const Tclave& clave_seleccion)
 		{
-			if(!selecciones.count(clave_seleccion)) 
+			if(!selecciones.count(clave_seleccion))
 			{
 				throw Menu_opciones_exception("La clave no existe al asignar selección");
 			}
@@ -223,7 +223,7 @@ class Menu_opciones
 	{
 		Valor_limitado<int>		val;
 
-		virtual std::string		valor_visible() const 
+		virtual std::string		valor_visible() const
 		{
 			#ifdef WINCOMPIL
 			using namespace parche_mingw;
@@ -238,15 +238,15 @@ class Menu_opciones
 		virtual void			rotar(int d){val+=d;}
 		virtual void			traducir(const struct_traduccion& t){}
 
-		Opcion_menu_int(const std::string& n, int min, int max, int a):Base_seleccion(n), val(min, max, a) {} 
+		Opcion_menu_int(const std::string& n, int min, int max, int a):Base_seleccion(n), val(min, max, a) {}
 	};
 
 	//Estructura para la selección de un valor booleano.
 	struct Opcion_menu_bool:public Base_seleccion
 	{
-		bool				valor;	
-	
-		virtual std::string		valor_visible() const 
+		bool				valor;
+
+		virtual std::string		valor_visible() const
 		{
 			#ifdef WINCOMPIL
 			using namespace parche_mingw;
@@ -261,21 +261,21 @@ class Menu_opciones
 		virtual void			rotar(int d){valor=!valor;}
 		virtual void			traducir(const struct_traduccion& t){}
 
-		Opcion_menu_bool(const std::string& n, bool v):Base_seleccion(n), valor(v) {} 
+		Opcion_menu_bool(const std::string& n, bool v):Base_seleccion(n), valor(v) {}
 	};
 
 	//Estructura para la selección de un valor string abierto.
 	struct Opcion_menu_string:public Base_seleccion
 	{
 		std::string			valor;
-	
+
 		std::string			obtener_valor() const {return valor;}
 		virtual std::string		valor_visible() const {return valor;}
 		virtual tipos			tipo() const {return tipos::tstring;}
 		virtual void			rotar(int d){}
 		virtual void			traducir(const struct_traduccion& t){}
 
-		Opcion_menu_string(const std::string& n, const std::string& v):Base_seleccion(n), valor(v) {} 
+		Opcion_menu_string(const std::string& n, const std::string& v):Base_seleccion(n), valor(v) {}
 	};
 
 	//Estructura para la selección de una entrada sin valor.
@@ -287,12 +287,12 @@ class Menu_opciones
 		virtual void			rotar(int d){}
 		virtual void			traducir(const struct_traduccion& t){}
 
-		Opcion_menu_void(const std::string& n):Base_seleccion(n) {} 
+		Opcion_menu_void(const std::string& n):Base_seleccion(n) {}
 	};
 
 	void	comprobar_opcion_existe(const Tclave& clave, const std::string& msj) const
 	{
-		if(!opciones.count(clave)) 
+		if(!opciones.count(clave))
 			throw Menu_opciones_exception(msj);
 	}
 
@@ -479,7 +479,7 @@ class Menu_opciones
 
 	void		traducir(const std::vector<struct_traduccion>& v)
 	{
-		for(const auto& t : v) 
+		for(const auto& t : v)
 		{
 			for(auto& opcion : opciones)
 			{
@@ -492,9 +492,9 @@ class Menu_opciones
 	size_t		size() const
 	{
 		return opciones.size();
-	}	
+	}
 
-	std::vector<Tclave>		obtener_claves() const 
+	std::vector<Tclave>		obtener_claves() const
 	{
 		//No podemos usar "claves" puesto que contiene también las claves de las selecciones...
 		std::vector<Tclave> res;
@@ -510,9 +510,9 @@ class Menu_opciones
 
 template<typename Tclave>
 void menu_opciones_desde_dnot(
-	const std::string& filename, 
-	const std::string& root, 
-	Menu_opciones<Tclave>& opciones_menu, 
+	const std::string& filename,
+	const std::string& root,
+	Menu_opciones<Tclave>& opciones_menu,
 	std::map<Tclave, int>& mapa_traducciones)
 {
 	const auto parser=parsear_dnot(filename);
@@ -527,7 +527,7 @@ void menu_opciones_desde_dnot(
 
 		if(tipo_menu=="templated")
 		{
-			//Bufff... Ese "template" está para que el compilador no se grille: es el "template disambiguator", 
+			//Bufff... Ese "template" está para que el compilador no se grille: es el "template disambiguator",
 			//que ayuda a saber que es un método templatizado y no una propiedad seguida de "menor que".
 
 			const std::string mt=opcion["mt"];
@@ -543,7 +543,7 @@ void menu_opciones_desde_dnot(
 				mapa_traducciones[k_seleccion]=seleccion["t"];
 
 				if(mt=="string") opciones_menu.template insertar_seleccion_templated<std::string>(k_opcion, k_seleccion, "-", seleccion["v"]);
-				else if(mt=="int") opciones_menu.template insertar_seleccion_templated<int>(k_opcion, k_seleccion, "-", seleccion["v"]); 
+				else if(mt=="int") opciones_menu.template insertar_seleccion_templated<int>(k_opcion, k_seleccion, "-", seleccion["v"]);
 				else if(mt=="bool") opciones_menu.template insertar_seleccion_templated<bool>(k_opcion, k_seleccion, "-", seleccion["v"]);
 			}
 		}
@@ -591,11 +591,11 @@ int main(int argc, char ** argv)
 	menu.insertar_seleccion_en_opcion(3, 105, "--VALOR 3.1", "1 VALOR 3");
 	menu.insertar_seleccion_en_opcion(3, 106, "--VALOR 3.2", "2 VALOR 3");
 
-	std::vector<Menu_opciones<std::string, int>::struct_traduccion > trad={ 
-		{1, "TAMAÑO PANTALLA"}, {2, "VOLUMEN SONIDO"}, {3, "IDIOMA"}, 
+	std::vector<Menu_opciones<std::string, int>::struct_traduccion > trad={
+		{1, "TAMAÑO PANTALLA"}, {2, "VOLUMEN SONIDO"}, {3, "IDIOMA"},
 		{100, "300x200"}, {101, "600x400"}, {102, "1200x800"},
-		{103, "Medio"}, {104, "Alto"}, 
-		{105, "Español"}, {106, "Inglés"} 
+		{103, "Medio"}, {104, "Alto"},
+		{105, "Español"}, {106, "Inglés"}
 	};
 	menu.traducir(trad);
 
