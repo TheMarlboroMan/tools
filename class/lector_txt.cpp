@@ -18,7 +18,10 @@ Lector_txt::Lector_txt(const std::string& ruta, const char c)
 
 Lector_txt::~Lector_txt()
 {
-	if(archivo) archivo.close();
+	if(archivo.is_open()) {
+
+		archivo.close();
+	}
 }
 
 /**
@@ -30,12 +33,12 @@ Lector_txt::~Lector_txt()
 
 std::string Lector_txt::leer_linea()
 {
-	if(archivo.eof())
-	{
+	if(archivo.eof()) {
+
 		linea_actual="";
 	}
-	else
-	{
+	else {
+
 		++numero_linea;
 		std::getline(archivo, linea_actual);
 		if(!linea_actual.size() || (linea_actual.size() && linea_actual[0]==comentario))
