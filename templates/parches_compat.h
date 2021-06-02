@@ -24,4 +24,22 @@ template <typename T> std::string to_string(const T& n)
 
 }
 
+namespace parche_mingw
+{
+
+#ifdef WINCOMPIL
+template <typename T> std::string to_string(const T& n)
+{	
+	return compat::to_string(n);
+}
+#endif
+#ifndef WINCOMPIL
+template <typename T> std::string to_string(const T& n)
+{
+	return compat::to_string(n);	
+}
+#endif
+
+}
+
 #endif
