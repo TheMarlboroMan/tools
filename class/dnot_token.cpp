@@ -2,7 +2,7 @@
 
 #ifdef WINCOMPIL
 /* Localización del parche mingw32... Esto debería estar en otro lado, supongo. */
-#include <herramientas/herramientas/herramientas.h>
+#include "../templates/parches_compat.h"
 #endif
 
 using namespace Herramientas_proyecto;
@@ -267,7 +267,7 @@ std::string Dnot_token::serializar(const Dnot_token_opciones_serializador& opcio
 	std::string resultado;
 
 #ifdef WINCOMPIL
-	using namespace parche_mingw;
+	using namespace compat;
 #else
 	using namespace std;
 #endif
@@ -365,7 +365,7 @@ std::string Dnot_token::traducir_tipo(Dnot_token::tipos t)const
 std::string Dnot_token::valor_como_string()const
 {
 #ifdef WINCOMPIL
-	using namespace parche_mingw;
+	using namespace compat;
 #else
 	using namespace std;
 #endif

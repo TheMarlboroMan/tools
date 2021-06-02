@@ -2,6 +2,7 @@
 #define MULTIPLATAFORM_PATCHES_COMPAT_H
 
 #include <string>
+#include <sstream>
 
 namespace compat
 {
@@ -9,9 +10,9 @@ namespace compat
 #ifdef WINCOMPIL
 template <typename T> std::string to_string(const T& n)
 {
-	std::ostringstream stm;
-	stm<<n;
-	return stm.str();
+	std::stringstream ss;
+	ss<<n;
+	return ss.str();
 }
 #endif
 #ifndef WINCOMPIL

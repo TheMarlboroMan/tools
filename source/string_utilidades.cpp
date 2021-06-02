@@ -4,7 +4,7 @@
 
 #ifdef WINCOMPIL
 /* Localización del parche mingw32... Esto debería estar en otro lado, supongo. */
-#include <herramientas/herramientas/herramientas.h>
+#include "../templates/parches_compat.h"
 #endif
 
 using namespace Herramientas_proyecto;
@@ -65,7 +65,7 @@ std::map<std::string, std::string> Herramientas_proyecto::generar_mapa_pares(con
 	Lector_txt L(fichero.c_str(), comentario);
 
 #ifdef WINCOMPIL
-	using namespace parche_mingw;
+	using namespace compat;
 #else
 	using namespace std;
 #endif
