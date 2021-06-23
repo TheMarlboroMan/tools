@@ -385,7 +385,14 @@ std::map<std::string, tools::i8n::codex_entry> tools::i8n::parser::parse(const s
 	std::map<std::string, codex_entry>	entries;
 
 	for(const auto& pair : _lexer_tokens) {
-		interpret_tokens(pair.second, entries);
+	
+		try {
+			interpret_tokens(pair.second, entries);
+		}
+		catch(i8n_parser_error& e) {
+			
+			throw i8n_parser_error(e.what()+std::string{" in "}+pair.first);
+		}
 	}
 
 	check_integrity(entries);
@@ -507,11 +514,12 @@ void tools::i8n::parser::interpret_tokens(const std::vector<lexer::token>& _toke
 
 	while(true) {
 
-		curlabel=label_phase(_tokens, curtoken, size);
-		_entries[curlabel]=value_phase(_tokens, curtoken, size);
+			curlabel=label_phase(_tokens, curtoken, size);
+			_entries[curlabel]=value_phase(_tokens, curtoken, size);
 
-		if(curtoken >= size) {
-			break;
+			if(curtoken >= size) {
+				break;
+			}
 		}
 	}
 }
