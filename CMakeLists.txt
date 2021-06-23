@@ -36,7 +36,7 @@ if(${BUILD_DEBUG_CODE})
 
 	message("will build debug code")
 	add_compile_definitions(WITH_DEBUG_CODE=1)
-endif();
+endif()
 
 IF(WIN32)
 	target_compile_definitions(tools_static PUBLIC -DWINBUILD)
