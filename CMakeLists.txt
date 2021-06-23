@@ -34,7 +34,7 @@ install(DIRECTORY include/ DESTINATION include)
 
 if(${BUILD_DEBUG_CODE})
 
-	message("will build debug code");
+	message("will build debug code")
 	add_compile_definitions(WITH_DEBUG_CODE=1)
 endif();
 
