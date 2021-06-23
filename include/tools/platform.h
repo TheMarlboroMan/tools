@@ -13,4 +13,4 @@ const std::string			newline="\r\n";
 const std::string			newline="\n";
 
 #endif
-};
+}
