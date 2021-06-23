@@ -3,6 +3,7 @@ project(tools)
 
 option(BUILD_EXAMPLES "Build example code" ON)
 option(BUILD_DEBUG "Build a debug release" OFF)
+option(BUILD_DEBUG_CODE "Builds with extra debug code" OFF)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -30,6 +31,12 @@ set_target_properties(tools_shared PROPERTIES OUTPUT_NAME tools)
 install(TARGETS tools_static DESTINATION lib)
 install(TARGETS tools_shared DESTINATION lib)
 install(DIRECTORY include/ DESTINATION include)
+
+if(${BUILD_DEBUG_CODE})
+
+	message("will build debug code");
+	add_compile_definitions(WITH_DEBUG_CODE=1)
+endif();
 
 IF(WIN32)
 	target_compile_definitions(tools_static PUBLIC -DWINBUILD)
