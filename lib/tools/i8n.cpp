@@ -514,12 +514,11 @@ void tools::i8n::parser::interpret_tokens(const std::vector<lexer::token>& _toke
 
 	while(true) {
 
-			curlabel=label_phase(_tokens, curtoken, size);
-			_entries[curlabel]=value_phase(_tokens, curtoken, size);
+		curlabel=label_phase(_tokens, curtoken, size);
+		_entries[curlabel]=value_phase(_tokens, curtoken, size);
 
-			if(curtoken >= size) {
-				break;
-			}
+		if(curtoken >= size) {
+			break;
 		}
 	}
 }
