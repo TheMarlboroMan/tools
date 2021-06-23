@@ -67,7 +67,7 @@ unsigned char 				utf8_2b_to_uchar(char, char);
 //!Converts a wchar string to its char representation.
 char * 					wstring_to_8b(const wchar_t *);
 
-/!Returns a string with the binary representation (with 0 and 1) of the given char.
+//!Returns a string with the binary representation (with 0 and 1) of the given char.
 std::string 				as_binary(char);
 
 //!Returns a string with the binary representation (with 0 and 1) of the given string.

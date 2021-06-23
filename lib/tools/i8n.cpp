@@ -3,6 +3,7 @@
 #include <tools/string_utils.h>
 #include <tools/file_utils.h>
 #include <tools/algorithm.h>
+#include <tools/platform.h>
 
 #include <algorithm>
 #include <ctype.h>
