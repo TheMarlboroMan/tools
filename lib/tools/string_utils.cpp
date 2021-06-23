@@ -199,41 +199,6 @@ char * tools::wstring_to_8b(const wchar_t * pstring) {
 	return buffer;
 }
 
-std::string tools::split_to_lines(std::string const &pstring, unsigned int pmax) {
-
-	unsigned int read=0;
-	std::string result;
-	auto it=std::begin(pstring), fin=std::end(pstring);
-
-	while(it != fin) {
-
-		++read;
-		result+=(*it);
-
-		//TODO: REvisar: si hacemos líneas de exactamente el mismo
-		//ancho hace dos veces \n.
-
-		if((*it)=='\n') {
-			read=0;
-		}
-		else if(read % pmax==0) {
-			//TODO
-			//Aquí cabe un poco más de rollo...
-			//Por ejemplo, si lo que hemos leido es un
-			//espacio lo podemos quitar. Si vamos a partir
-			//una cadena en dos podemos directamente cortar
-			//hacia atrás (siempre que haya un espacio cerca)
-			//Y pasar a la siguiente.
-
-			result+='\n';
-		}
-
-		++it;
-	}
-
-	return result;
-}
-
 std::string tools::as_binary(char _c) {
 
 	std::string res;

@@ -1,4 +1,5 @@
 #include <tools/file_utils.h>
+#include <tools/platform.h>
 
 #include <stdexcept>
 #include <iostream>
@@ -22,7 +23,7 @@ std::string tools::dump_file(const std::string& _path) {
 
 	std::string res, lin;
 	while(std::getline(f, lin)) {
-		res+=lin+"\n";
+		res+=lin+tools::newline;
 	}
 
 	return res;

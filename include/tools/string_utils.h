@@ -6,16 +6,6 @@
 
 namespace tools{
 
-#ifdef WINBUILD
-
-const std::string			newline="\r\n";
-
-#else
-
-const std::string			newline="\n";
-
-#endif
-
 //!Creates a string from the vector, separated by the second parameter.
 std::string					implode(const std::vector<std::string>&, const char);
 
@@ -77,10 +67,7 @@ unsigned char 				utf8_2b_to_uchar(char, char);
 //!Converts a wchar string to its char representation.
 char * 					wstring_to_8b(const wchar_t *);
 
-//!Returns a string resulting of splitting the given one into many lines of pmax length.
-std::string 				split_to_lines(const std::string&, unsigned int);
-
-//!Returns a string with the binary representation (with 0 and 1) of the given char.
+/!Returns a string with the binary representation (with 0 and 1) of the given char.
 std::string 				as_binary(char);
 
 //!Returns a string with the binary representation (with 0 and 1) of the given string.
