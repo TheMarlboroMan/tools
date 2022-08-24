@@ -27,6 +27,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 if(${BUILD_DEBUG})
         set(CMAKE_BUILD_TYPE Debug)
+
 else()
         set(CMAKE_BUILD_TYPE Release)
 endif()
@@ -73,22 +74,22 @@ ENDIF()
 
 if(${BUILD_EXAMPLES})
 	add_executable(i8n examples/i8n/main.cpp)
-	target_link_libraries(i8n tools_shared)
+	target_link_libraries(i8n tools_shared stdc++fs)
 
 	add_executable(system examples/system/main.cpp)
-	target_link_libraries(system tools_shared)
+	target_link_libraries(system tools_shared stdc++fs)
 
 	add_executable(json_config_file examples/json_config_file/main.cpp)
-	target_link_libraries(json_config_file tools_shared)
+	target_link_libraries(json_config_file tools_shared stdc++fs)
 
 	add_executable(file_utils examples/file_utils/main.cpp)
-	target_link_libraries(file_utils tools_shared)
+	target_link_libraries(file_utils tools_shared stdc++fs)
 	add_custom_command(TARGET file_utils POST_BUILD COMMAND cp -r ../examples/file_utils/*.txt ./)
 
 	add_executable(menu examples/menu/main.cpp)
-	target_link_libraries(menu tools_shared)
+	target_link_libraries(menu tools_shared stdc++fs)
 	add_custom_command(TARGET menu POST_BUILD COMMAND cp -r ../examples/menu/menu.json ./)
 
 	add_executable(chrono examples/chrono/main.cpp)
-	target_link_libraries(chrono tools_shared)
+	target_link_libraries(chrono tools_shared stdc++fs)
 endif()
