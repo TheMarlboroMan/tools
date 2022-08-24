@@ -3,10 +3,22 @@
 #include <string>
 #include <fstream>
 
-namespace tools{
+#if __has_include(<filesystem>)
 
-//!Returns true if the given file exists.
-bool		file_exists(const std::string&);
+	#include <filesystem>
+namespace tools { namespace filesystem = std::filesystem;}
+
+#elif __has_include(<experimental/filesystem>)
+
+	#include <experimental/filesystem>
+
+namespace tools {namespace filesystem = std::experimental::filesystem;}
+#else
+
+  error "Missing the <filesystem> header."
+#endif
+
+namespace tools{
 
 //!Dumps the contents of the file to a string.
 std::string	dump_file(const std::string&);

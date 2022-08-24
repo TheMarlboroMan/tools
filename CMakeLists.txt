@@ -5,12 +5,28 @@ option(BUILD_EXAMPLES "Build example code" ON)
 option(BUILD_DEBUG "Build a debug release" OFF)
 option(BUILD_DEBUG_CODE "Builds with extra debug code" OFF)
 
+#library version
+set(MAJOR_VERSION 1)
+set(MINOR_VERSION 0)
+set(PATCH_VERSION 0)
+
+if(${CMAKE_VERSION} VERSION_LESS "3.22.0")
+
+	add_definitions(-DMAJOR_VERSION=${MAJOR_VERSION})
+	add_definitions(-DMINOR_VERSION=${MINOR_VERSION})
+	add_definitions(-DPATCH_VERSION=${PATCH_VERSION})
+else()
+
+	add_compile_definitions(MAJOR_VERSION=${MAJOR_VERSION})
+	add_compile_definitions(MINOR_VERSION=${MINOR_VERSION})
+	add_compile_definitions(PATCH_VERSION=${PATCH_VERSION})
+endif()
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 if(${BUILD_DEBUG})
         set(CMAKE_BUILD_TYPE Debug)
-
 else()
         set(CMAKE_BUILD_TYPE Release)
 endif()
@@ -35,7 +51,14 @@ install(DIRECTORY include/ DESTINATION include)
 if(${BUILD_DEBUG_CODE})
 
 	message("will build debug code")
-	add_compile_definitions(WITH_DEBUG_CODE=1)
+
+	if(${CMAKE_VERSION} VERSION_LESS "3.22.0")
+
+		add_definitions(-DWITH_DEBUG_CODE=1)
+	else()
+
+		add_compile_definitions(WITH_DEBUG_CODE=1)
+	endif()
 endif()
 
 IF(WIN32)

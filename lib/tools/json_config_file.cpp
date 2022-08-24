@@ -14,7 +14,7 @@ json_config_file::json_config_file(const std::string& _path)
 try
 	:document{
 		parse_json_string(
-			file_exists(_path)
+			tools::filesystem::exists(_path)
 				? dump_file(_path)
 				: throw_on_non_existing_file(_path)
 		)
@@ -34,7 +34,7 @@ void json_config_file::load(const std::string& _path) {
 	}
 	catch(std::runtime_error& e) {
 		throw std::runtime_error(std::string("json_config_file: error loading configuration ")+_path+" : "+e.what());
-	} 
+	}
 }
 
 std::string json_config_file::throw_on_non_existing_file(const std::string& _path) {
@@ -50,7 +50,7 @@ void json_config_file::reload() {
 	}
 	catch(std::runtime_error& e) {
 		throw std::runtime_error(std::string("json_config_file: error reloading configuration ")+path+" : "+e.what());
-	} 
+	}
 }
 
 void json_config_file::save() {
@@ -58,7 +58,7 @@ void json_config_file::save() {
 	rapidjson::StringBuffer stringbuffer;
 	rapidjson::Writer<rapidjson::StringBuffer> writer(stringbuffer);
 	document.Accept(writer);
-	
+
 	std::ofstream f(path);
 	f<<stringbuffer.GetString();
 }
