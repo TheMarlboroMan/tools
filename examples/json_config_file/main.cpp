@@ -11,7 +11,7 @@ int main(int /*argc*/, char ** /*argv*/) {
 	}
 	catch(std::runtime_error& e) {
 		//Noop, this is expected...
-	}	
+	}
 
 	try {
 		const std::string path="in.json";
@@ -44,7 +44,7 @@ int main(int /*argc*/, char ** /*argv*/) {
 			std::cout<<"testing for float:"<<cf.float_from_path("float")<<std::endl;
 			std::cout<<"testing for double:"<<cf.double_from_path("double")<<std::endl;
 			std::cout<<"testing for string:"<<cf.string_from_path("string")<<std::endl;
-		
+
 			std::cout<<"testing for object:";
 			const auto& object=cf.token_from_path("object");
 			std::cout<<object["key"].GetString()<<" and "<<object["other"].GetInt()<<std::endl;
@@ -52,7 +52,7 @@ int main(int /*argc*/, char ** /*argv*/) {
 			std::cout<<"testing for array:";
 			const auto& array=cf.token_from_path("array");
 			for(const auto& val : array.GetArray()) {
-				std::cout<<val.GetInt()<<" ";			
+				std::cout<<val.GetInt()<<" ";
 			}
 			std::cout<<std::endl;
 		};
@@ -60,7 +60,7 @@ int main(int /*argc*/, char ** /*argv*/) {
 		test();
 
 		//Setting values...
-		std::cout<<"Values will be changed now..."<<std::endl;		
+		std::cout<<"Values will be changed now..."<<std::endl;
 		cf.set("nested_int:integer", 12);
 		cf.set("nesting:this:is:nested", 13);
 		cf.set("int", 14);
@@ -75,7 +75,7 @@ int main(int /*argc*/, char ** /*argv*/) {
 		test();
 
 		//Setting values...
-		std::cout<<"Values will be changed again and saved..."<<std::endl;		
+		std::cout<<"Values will be changed again and saved..."<<std::endl;
 		cf.set("nested_int:integer", 12);
 		cf.set("nesting:this:is:nested", 13);
 		cf.set("int", 14);
@@ -85,6 +85,31 @@ int main(int /*argc*/, char ** /*argv*/) {
 		cf.set_vector("array", std::vector<int>{5,6,7,8});
 		cf.save();
 		test();
+
+		//checking for existence of values...
+		std::cout<<"testing for not existing path"<<std::endl;
+		if(cf.has_path("not_really_a_path")) {
+
+			throw std::runtime_error("not_really_a_path is not as path and should not exist");
+		}
+
+		std::cout<<"testing for not existing nested path"<<std::endl;
+		if(cf.has_path("not:really:a:path")) {
+
+			throw std::runtime_error("not:really:a:path is not as path and should not exist");
+		}
+
+		std::cout<<"testing for not existing nested path"<<std::endl;
+		if(!cf.has_path("nested_int:integer")) {
+
+			throw std::runtime_error("nested_int:integer should be found");
+		}
+
+		std::cout<<"testing for existing path"<<std::endl;
+		if(!cf.has_path("string")) {
+
+			throw std::runtime_error("string should be found");
+		}
 
 		return 0;
 	}

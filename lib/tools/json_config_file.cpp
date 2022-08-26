@@ -63,6 +63,29 @@ void json_config_file::save() {
 	f<<stringbuffer.GetString();
 }
 
+bool json_config_file::has_path(
+	const std::string& _path
+) const {
+
+	const rapidjson::Value * p=&document;
+	auto v=explode(_path, ':');
+	for(const auto& key : v) {
+
+		if(!p->HasMember(key.c_str())) {
+
+			return false;
+		}
+
+		if(!p->IsObject()) {
+			return false;
+		}
+
+		p=&(p->GetObject()[key.c_str()]);
+	}
+
+	return true;
+}
+
 const rapidjson::Value& json_config_file::token_from_path(const std::string& _path) const {
 
 	const rapidjson::Value * p=&document;

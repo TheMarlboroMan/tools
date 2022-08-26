@@ -7,7 +7,7 @@ option(BUILD_DEBUG_CODE "Builds with extra debug code" OFF)
 
 #library version
 set(MAJOR_VERSION 1)
-set(MINOR_VERSION 0)
+set(MINOR_VERSION 1)
 set(PATCH_VERSION 0)
 
 if(${CMAKE_VERSION} VERSION_LESS "3.22.0")
@@ -92,4 +92,7 @@ if(${BUILD_EXAMPLES})
 
 	add_executable(chrono examples/chrono/main.cpp)
 	target_link_libraries(chrono tools_shared stdc++fs)
+
+	add_executable(version examples/lib_version.cpp)
+	target_link_libraries(version tools_shared stdc++fs)
 endif()

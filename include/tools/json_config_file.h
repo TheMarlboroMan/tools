@@ -17,6 +17,9 @@ class json_config_file {
 
 	public:
 
+	//!Returns true if the given path exists.
+	bool                has_path(const std::string& ppath) const;
+
 	//!Returns an integer from the given path. Will throw if the path does not exist or the value is not of the asked type.
 	int 				int_from_path(const std::string& ppath) const {return token_from_path(ppath).GetInt();}
 
@@ -31,7 +34,7 @@ class json_config_file {
 
 	//!Returns a float from the given path. Will throw if the path does not exist or the value is not of the asked type.
 	float				float_from_path(const std::string& ppath) const {return token_from_path(ppath).GetFloat();}
-	
+
 	//!Returns full json token (as a vector, or another map) from the given path. Will throw if the path does not exist or the value is not of the asked type.
 	const rapidjson::Value&	token_from_path(const std::string& c) const;
 
@@ -50,7 +53,7 @@ class json_config_file {
 
 		rapidjson::Value arr{rapidjson::kArrayType};
 		for(const auto& t : _v) {
-			
+
 			arr.PushBack(t, document.GetAllocator());
 		}
 
@@ -70,7 +73,7 @@ class json_config_file {
 	void 			save();
 
 	//!Constructs the parser with the given configuration file. The filename
-	//!will be used for subsequent save and load operations. The data of 
+	//!will be used for subsequent save and load operations. The data of
 	//!the file will be readily available when the object is fully constructed.
 					json_config_file(const std::string&);
 
