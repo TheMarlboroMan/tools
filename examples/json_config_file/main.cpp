@@ -99,7 +99,7 @@ int main(int /*argc*/, char ** /*argv*/) {
 			throw std::runtime_error("not:really:a:path is not as path and should not exist");
 		}
 
-		std::cout<<"testing for not existing nested path"<<std::endl;
+		std::cout<<"testing for existing nested path"<<std::endl;
 		if(!cf.has_path("nested_int:integer")) {
 
 			throw std::runtime_error("nested_int:integer should be found");
@@ -110,6 +110,43 @@ int main(int /*argc*/, char ** /*argv*/) {
 
 			throw std::runtime_error("string should be found");
 		}
+
+		std::cout<<"New values will be added and saved under a new path..."<<std::endl;
+		cf.add("a_new_path", "new");
+		cf.add("nested_int:another", 123);
+		cf.add("a:new:path", 456);
+		cf.set_filepath("config.copy.json");
+		cf.save();
+
+		std::cout<<"Testing for the new paths..."<<std::endl;
+		if(!cf.has_path("a_new_path")) {
+
+			throw std::runtime_error("a_new_path should be found");
+		}
+
+		if(!cf.has_path("nested_int:another")) {
+
+			throw std::runtime_error("nested_int:another should be found");
+		}
+
+		if(!cf.has_path("a:new:path")) {
+
+			throw std::runtime_error("a:new:path should be found");
+		}
+
+		std::cout<<"will test if adding existing values fail..."<<std::endl;
+		try {
+
+			cf.add("a_new_path", "new");
+			std::cout<<"error: should not allow an existing key to be added!"<<std::endl;
+		}
+		catch(std::exception &e) {
+
+			std::cout<<"ok"<<std::endl;
+		}
+
+		//cleanup...
+		tools::filesystem::remove("config.copy.json");
 
 		return 0;
 	}

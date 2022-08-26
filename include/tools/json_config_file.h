@@ -1,6 +1,7 @@
 #pragma once
 
 #include <rapidjson/document.h>
+#include <tools/string_utils.h>
 
 #include <iostream>
 #include <vector>
@@ -19,6 +20,9 @@ class json_config_file {
 
 	//!Returns true if the given path exists.
 	bool                has_path(const std::string& ppath) const;
+
+	//!Sets the current filename path.
+	void                set_filepath(const std::string& _path) {path=_path;}
 
 	//!Returns an integer from the given path. Will throw if the path does not exist or the value is not of the asked type.
 	int 				int_from_path(const std::string& ppath) const {return token_from_path(ppath).GetInt();}
@@ -58,6 +62,50 @@ class json_config_file {
 		}
 
 		token_from_path(k)=arr;
+	}
+
+	//add a new path with the given value. Will if the path already exists...
+	template <typename T>
+	void 	add(
+		const std::string& _k,
+		const T& _v
+	) {
+
+		//decompose the path: first we need to reach for it and remove the last
+		//part, which is the keyname...
+		auto v=explode(_k, ':');
+		const auto keyname=v.back();
+		v.pop_back();
+		rapidjson::Value * p=&document;
+		for(const auto& key : v) {
+
+			if(!p->IsObject()) {
+
+				throw std::runtime_error("unable to locate key "+key+" in path "+_k+": "+key+" is not an object");
+			}
+
+			if(!p->HasMember(key.c_str())) {
+
+				rapidjson::Value inner_key(rapidjson::kStringType);
+				inner_key.SetString(key.c_str(), key.size(), document.GetAllocator());
+
+				rapidjson::Value inner_value(rapidjson::kObjectType);
+				p->AddMember(inner_key, inner_value, document.GetAllocator());
+			}
+
+			p=&(p->GetObject()[key.c_str()]);
+		}
+
+		if(has_path(_k)) {
+
+			throw std::runtime_error("path already exists!");
+		}
+
+		rapidjson::Value key(rapidjson::kStringType);
+		key.SetString(keyname.c_str(), keyname.size(), document.GetAllocator());
+
+		rapidjson::Value new_entry{_v};
+		p->AddMember(key, new_entry, document.GetAllocator());
 	}
 
 	//!Reopens the configuration file and assigns the internal token map.

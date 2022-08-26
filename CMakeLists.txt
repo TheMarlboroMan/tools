@@ -3,6 +3,8 @@ project(tools)
 
 option(BUILD_EXAMPLES "Build example code" ON)
 option(BUILD_DEBUG "Build a debug release" OFF)
+option(BUILD_SHARED "Build a shared lib" ON)
+option(BUILD_STATIC "Build a static lib" OFF)
 option(BUILD_DEBUG_CODE "Builds with extra debug code" OFF)
 
 #library version
@@ -37,16 +39,23 @@ add_compile_options(-Wall -Wextra -Wundef -Wcast-align -Wwrite-strings -Wlogical
 
 include_directories("${PROJECT_SOURCE_DIR}/include")
 set(SOURCE "")
-
 add_subdirectory("${PROJECT_SOURCE_DIR}/lib")
-add_library(tools_static STATIC ${SOURCE})
-set_target_properties(tools_static PROPERTIES OUTPUT_NAME tools)
 
-add_library(tools_shared SHARED ${SOURCE})
-set_target_properties(tools_shared PROPERTIES OUTPUT_NAME tools)
+if(${BUILD_STATIC})
 
-install(TARGETS tools_static DESTINATION lib)
-install(TARGETS tools_shared DESTINATION lib)
+	add_library(tools_static STATIC ${SOURCE})
+	set_target_properties(tools_static PROPERTIES OUTPUT_NAME tools)
+	install(TARGETS tools_static DESTINATION lib)
+endif()
+
+if(${BUILD_SHARED})
+
+	add_library(tools_shared SHARED ${SOURCE})
+	set_target_properties(tools_shared PROPERTIES OUTPUT_NAME tools)
+	install(TARGETS tools_shared DESTINATION lib)
+endif()
+
+
 install(DIRECTORY include/ DESTINATION include)
 
 if(${BUILD_DEBUG_CODE})
@@ -73,6 +82,12 @@ ENDIF()
 
 
 if(${BUILD_EXAMPLES})
+
+	if(!${BUILD_SHARED})
+
+		message(FATAL_ERROR "examples must be built against the shared library!")
+	endif()
+
 	add_executable(i8n examples/i8n/main.cpp)
 	target_link_libraries(i8n tools_shared stdc++fs)
 

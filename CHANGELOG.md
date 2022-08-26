@@ -14,6 +14,7 @@ Changes will be documented under Added, Changed, Deprecated, Removed, Fixed or S
 ## [v1.1.0]: 2022-08-26
 ### Added
 - json_config_file::has_path
+- json_config_file::add
 
 ## [v1.0.0]: 2022-08-24
 ### Added

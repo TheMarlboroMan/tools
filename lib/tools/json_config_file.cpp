@@ -109,20 +109,26 @@ const rapidjson::Value& json_config_file::token_from_path(const std::string& _pa
 rapidjson::Value& json_config_file::token_from_path(const std::string& _path) {
 
 	rapidjson::Value * p=&document;
+
 	auto v=explode(_path, ':');
 	for(const auto& key : v) {
+
 		try {
-		if(!p->HasMember(key.c_str())) {
-				std::runtime_error("unable to locate key "+key+" in path "+_path);
+
+			if(!p->HasMember(key.c_str())) {
+
+				throw std::runtime_error("unable to locate key "+key+" in path "+_path);
 			}
 
 			if(!p->IsObject()) {
-				std::runtime_error("unable to locate key "+key+" in path "+_path+": "+key+" is not an object");
+
+				throw std::runtime_error("unable to locate key "+key+" in path "+_path+": "+key+" is not an object");
 			}
 
 			p=&(p->GetObject()[key.c_str()]);
 		}
 		catch(std::exception& e) {
+
 			throw std::runtime_error("unable to locate key "+key+" in path "+_path);
 		}
 	}
