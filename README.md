@@ -17,7 +17,11 @@ Must be built with a compiler that accepts the c++14 standard.
 
 Requires gcc 7.5 or newer. With 7.5 versions requires the stdc++fs library to be added to the linker.
 
-Requires of the rapidjson library at https://github.com/Tencent/rapidjson
+Requires the rapidjson library at https://github.com/Tencent/rapidjson
+
+## License usage
+
+Uses rapidjson, from Tencent, licensed under the MIT license.
 
 ## TODO
 
