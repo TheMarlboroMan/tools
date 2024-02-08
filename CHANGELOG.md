@@ -11,6 +11,10 @@ Changes will be documented under Added, Changed, Deprecated, Removed, Fixed or S
 ## Unreleased
 ### Pending
 
+## [v1.1.1]: 2024-02-08
+### Added
+- changes build and versioning.
+
 ## [v1.1.0]: 2022-08-26
 ### Added
 - json_config_file::has_path

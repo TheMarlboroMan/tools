@@ -5,71 +5,87 @@ option(BUILD_EXAMPLES "Build example code" ON)
 option(BUILD_DEBUG "Build a debug release" OFF)
 option(BUILD_SHARED "Build a shared lib" ON)
 option(BUILD_STATIC "Build a static lib" OFF)
-option(BUILD_DEBUG_CODE "Builds with extra debug code" OFF)
 
 #library version
 set(MAJOR_VERSION 1)
 set(MINOR_VERSION 1)
-set(PATCH_VERSION 0)
+set(PATCH_VERSION 1)
+
+if(${BUILD_DEBUG})
+
+	set(RELEASE_VERSION "debug")
+
+else()
+
+	set(RELEASE_VERSION "prod")
+endif()
 
 if(${CMAKE_VERSION} VERSION_LESS "3.22.0")
 
 	add_definitions(-DMAJOR_VERSION=${MAJOR_VERSION})
 	add_definitions(-DMINOR_VERSION=${MINOR_VERSION})
 	add_definitions(-DPATCH_VERSION=${PATCH_VERSION})
+	add_definitions(-DRELEASE_VERSION=\"${RELEASE_VERSION}\")
 else()
 
 	add_compile_definitions(MAJOR_VERSION=${MAJOR_VERSION})
 	add_compile_definitions(MINOR_VERSION=${MINOR_VERSION})
 	add_compile_definitions(PATCH_VERSION=${PATCH_VERSION})
+	add_compile_definitions(RELEASE_VERSION=\"${RELEASE_VERSION}\")
 endif()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-if(${BUILD_DEBUG})
-        set(CMAKE_BUILD_TYPE Debug)
-
-else()
-        set(CMAKE_BUILD_TYPE Release)
-endif()
-
-
 add_compile_options(-Wall -Wextra -Wundef -Wcast-align -Wwrite-strings -Wlogical-op -Wmissing-declarations -Wredundant-decls -Wshadow -Woverloaded-virtual -Wno-deprecated -ansi -pedantic -fno-rtti)
 
+#include and source...
 include_directories("${PROJECT_SOURCE_DIR}/include")
 set(SOURCE "")
 add_subdirectory("${PROJECT_SOURCE_DIR}/lib")
 
+#library type and filenames.
+if(${BUILD_DEBUG})
+
+	set(CMAKE_BUILD_TYPE Debug)
+	set(LIB_FILENAME "tools_debug")
+else()
+
+	set(CMAKE_BUILD_TYPE Release)
+	set(LIB_FILENAME "tools")
+endif()
+
 if(${BUILD_STATIC})
 
 	add_library(tools_static STATIC ${SOURCE})
-	set_target_properties(tools_static PROPERTIES OUTPUT_NAME tools)
+	set_target_properties(tools_static PROPERTIES OUTPUT_NAME ${LIB_FILENAME})
+	target_compile_definitions(tools_static PUBLIC "-DLIB_VERSION=\"static\"")
 	install(TARGETS tools_static DESTINATION lib)
+
+	if(${BUILD_DEBUG})
+
+		target_compile_definitions(tools_static PUBLIC "-DWITH_DEBUG_CODE=1")
+	endif()
+
+	message("will build ${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}-${RELEASE_VERSION}-static")
 endif()
 
 if(${BUILD_SHARED})
 
 	add_library(tools_shared SHARED ${SOURCE})
-	set_target_properties(tools_shared PROPERTIES OUTPUT_NAME tools)
+	set_target_properties(tools_shared PROPERTIES OUTPUT_NAME ${LIB_FILENAME})
+	target_compile_definitions(tools_shared PUBLIC "-DLIB_VERSION=\"shared\"")
 	install(TARGETS tools_shared DESTINATION lib)
-endif()
 
+	if(${BUILD_DEBUG})
+
+		target_compile_definitions(tools_shared PUBLIC "-DWITH_DEBUG_CODE=1")
+	endif()
+
+	message("will build ${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}-${RELEASE_VERSION}-shared")
+endif()
 
 install(DIRECTORY include/ DESTINATION include)
-
-if(${BUILD_DEBUG_CODE})
-
-	message("will build debug code")
-
-	if(${CMAKE_VERSION} VERSION_LESS "3.22.0")
-
-		add_definitions(-DWITH_DEBUG_CODE=1)
-	else()
-
-		add_compile_definitions(WITH_DEBUG_CODE=1)
-	endif()
-endif()
 
 IF(WIN32)
 	target_compile_definitions(tools_static PUBLIC -DWINBUILD)
