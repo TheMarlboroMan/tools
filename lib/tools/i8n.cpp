@@ -504,6 +504,26 @@ void tools::i8n::parser::debug(const entry_segment& _segment, std::ostream& _str
 		case entry_segment::types::embed: 		_stream<<"[EMB] "<<_segment.value<<std::endl; break;
 	}
 }
+#else
+void tools::i8n::parser::debug(const std::vector<lexer::token>& _tokens, std::ostream& _stream) const {
+
+	throw std::runtime_error("cannot call tools::i8n::parser::debug without a debug build");
+}
+
+void tools::i8n::parser::debug(const lexer::token& _token, std::ostream& _stream) const {
+
+	throw std::runtime_error("cannot call tools::i8n::parser::debug without a debug build");
+}
+
+void tools::i8n::parser::debug(const codex_entry& _entry, std::ostream& _stream) const {
+
+	throw std::runtime_error("cannot call tools::i8n::parser::debug without a debug build");
+}
+
+void tools::i8n::parser::debug(const entry_segment& _segment, std::ostream& _stream) const {
+
+	throw std::runtime_error("cannot call tools::i8n::parser::debug without a debug build");
+}
 #endif
 
 void tools::i8n::parser::interpret_tokens(const std::vector<lexer::token>& _tokens, std::map<std::string, codex_entry>& _entries) const {

@@ -249,13 +249,11 @@ class i8n {
 		//!Parses the tokens to a codex entry.
 		codex_entry									parse(const std::vector<lexer::token>&) const;
 
-#ifdef WITH_DEBUG_CODE
 		//!Prints out the tokens to the given stream, for debug purposes.
 		void			debug(const std::vector<lexer::token>&, std::ostream&) const;
 		void			debug(const lexer::token&, std::ostream&) const;
 		void			debug(const codex_entry&, std::ostream&) const;
 		void			debug(const entry_segment&, std::ostream&) const;
-#endif
 
 		private:
 
