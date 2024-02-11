@@ -465,16 +465,18 @@ std::map<std::string, tools::i8n::codex_entry> tools::i8n::parser::compile_entri
 }
 
 
-#ifdef WITH_DEBUG_CODE
 void tools::i8n::parser::debug(const std::vector<lexer::token>& _tokens, std::ostream& _stream) const {
 
+#ifdef WITH_DEBUG_CODE
 	for(const auto& token : _tokens) {
 		debug(token, _stream);
 	}
+#endif
 }
 
 void tools::i8n::parser::debug(const lexer::token& _token, std::ostream& _stream) const {
 
+#ifdef WITH_DEBUG_CODE
 	switch(_token.type) {
 		case lexer::tokentypes::openlabel: 	_stream<<"[OPENLAB] "<<_token.line<<":"<<_token.charnum<<std::endl; break;
 		case lexer::tokentypes::closelabel: _stream<<"[CLSELAB] "<<_token.line<<":"<<_token.charnum<<std::endl; break;
@@ -487,44 +489,28 @@ void tools::i8n::parser::debug(const lexer::token& _token, std::ostream& _stream
 		case lexer::tokentypes::nothing:	_stream<<"[NOTHING] "<<_token.line<<":"<<_token.charnum<<std::endl; break;
 		case lexer::tokentypes::literal:	_stream<<"[LITERAL] "<<_token.line<<":"<<_token.charnum<<" '"<<_token.val<<"'"<<std::endl; break;
 	}
+#endif
 }
 
 void tools::i8n::parser::debug(const codex_entry& _entry, std::ostream& _stream) const {
 
+#ifdef WITH_DEBUG_CODE
 	for(const auto& s : _entry.segments) {
 		debug(s, _stream);
 	}
+#endif
 }
 
 void tools::i8n::parser::debug(const entry_segment& _segment, std::ostream& _stream) const {
 
+#ifdef WITH_DEBUG_CODE
 	switch(_segment.type) {
 		case entry_segment::types::literal: 	_stream<<"[LIT] "<<_segment.value<<std::endl; break;
 		case entry_segment::types::variable:	_stream<<"[VAR] "<<_segment.value<<std::endl; break;
 		case entry_segment::types::embed: 		_stream<<"[EMB] "<<_segment.value<<std::endl; break;
 	}
-}
-#else
-void tools::i8n::parser::debug(const std::vector<lexer::token>& _tokens, std::ostream& _stream) const {
-
-	throw std::runtime_error("cannot call tools::i8n::parser::debug without a debug build");
-}
-
-void tools::i8n::parser::debug(const lexer::token& _token, std::ostream& _stream) const {
-
-	throw std::runtime_error("cannot call tools::i8n::parser::debug without a debug build");
-}
-
-void tools::i8n::parser::debug(const codex_entry& _entry, std::ostream& _stream) const {
-
-	throw std::runtime_error("cannot call tools::i8n::parser::debug without a debug build");
-}
-
-void tools::i8n::parser::debug(const entry_segment& _segment, std::ostream& _stream) const {
-
-	throw std::runtime_error("cannot call tools::i8n::parser::debug without a debug build");
-}
 #endif
+}
 
 void tools::i8n::parser::interpret_tokens(const std::vector<lexer::token>& _tokens, std::map<std::string, codex_entry>& _entries) const {
 
