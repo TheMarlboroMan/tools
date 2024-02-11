@@ -465,7 +465,11 @@ std::map<std::string, tools::i8n::codex_entry> tools::i8n::parser::compile_entri
 }
 
 
+#ifdef WITH_DEBUG_CODE
 void tools::i8n::parser::debug(const std::vector<lexer::token>& _tokens, std::ostream& _stream) const {
+#else
+void tools::i8n::parser::debug(const std::vector<lexer::token>&, std::ostream&) const {
+#endif
 
 #ifdef WITH_DEBUG_CODE
 	for(const auto& token : _tokens) {
@@ -474,7 +478,11 @@ void tools::i8n::parser::debug(const std::vector<lexer::token>& _tokens, std::os
 #endif
 }
 
+#ifdef WITH_DEBUG_CODE
 void tools::i8n::parser::debug(const lexer::token& _token, std::ostream& _stream) const {
+#else
+void tools::i8n::parser::debug(const lexer::token&, std::ostream&) const {
+#endif
 
 #ifdef WITH_DEBUG_CODE
 	switch(_token.type) {
@@ -492,7 +500,11 @@ void tools::i8n::parser::debug(const lexer::token& _token, std::ostream& _stream
 #endif
 }
 
+#ifdef WITH_DEBUG_CODE
 void tools::i8n::parser::debug(const codex_entry& _entry, std::ostream& _stream) const {
+#else
+void tools::i8n::parser::debug(const codex_entry&, std::ostream&) const {
+#endif
 
 #ifdef WITH_DEBUG_CODE
 	for(const auto& s : _entry.segments) {
@@ -501,7 +513,11 @@ void tools::i8n::parser::debug(const codex_entry& _entry, std::ostream& _stream)
 #endif
 }
 
+#ifdef WITH_DEBUG_CODE
 void tools::i8n::parser::debug(const entry_segment& _segment, std::ostream& _stream) const {
+#else
+void tools::i8n::parser::debug(const entry_segment&, std::ostream&) const {
+#endif
 
 #ifdef WITH_DEBUG_CODE
 	switch(_segment.type) {
