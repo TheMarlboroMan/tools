@@ -2,8 +2,10 @@
 
 #include <rapidjson/document.h>
 #include <tools/string_utils.h>
+#include <tools/json.h>
 
 #include <iostream>
+#include <sstream>
 #include <vector>
 #include <string>
 
@@ -52,8 +54,14 @@ class json_config_file {
 		token_from_path(k)=v;
 	}
 
+/**
+ * sets a vector of trivially copied values.
+ */
 	template <typename T>
-	void 	set_vector(const std::string& k, const std::vector<T>& _v) {
+	void 	set_vector(
+		const std::string& k, 
+		const std::vector<T>& _v
+	) {
 
 		rapidjson::Value arr{rapidjson::kArrayType};
 		for(const auto& t : _v) {
@@ -63,6 +71,49 @@ class json_config_file {
 
 		token_from_path(k)=arr;
 	}
+
+/**
+ * sets a vector of json values.
+ */
+	void 	set_vector(
+		const std::string& k, 
+		const rapidjson::Value& _vector
+	) {
+
+		rapidjson::Value v(_vector, document.GetAllocator());
+		token_from_path(k)=v;
+	}
+
+	template <typename T>
+	void add_to_vector(
+		rapidjson::Value& _vector, 
+		const T& _value
+	) {
+
+		tools::add_to_vector(_vector, _value, document);
+	}
+
+	template <typename T>
+	void add_to_object(rapidjson::Value& _object, const std::string& _key, const T& _value) {
+
+		tools::json_add_to_object(_object, _key, _value, document);
+	}
+
+	void 	set_object(
+		const std::string& _k,
+		rapidjson::Value& _v
+	) {
+
+		if(!_v.IsObject()) {
+
+			std::stringstream ss;
+			ss<<"cannot set_object from non-object argument in json_config_file, key was "<<_k;
+			throw std::runtime_error(ss.str());
+		}
+
+		token_from_path(_k)=_v;
+	}
+
 
 	//add a new path with the given value. Will if the path already exists...
 	template <typename T>
