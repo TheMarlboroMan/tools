@@ -69,7 +69,7 @@ class pager {
 	void						set_item_count(size_t);
 
 	//!Resets the current index and page to zero. Does not handle page turning.
-	//!Sets flags if values change.
+	//!Sets flags if values change. Does not reset item count to zero.
 	void						reset();
 
 	//!Resets the current index to zero. Does not handle page turning.

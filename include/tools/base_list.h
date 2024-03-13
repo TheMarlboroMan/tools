@@ -24,9 +24,10 @@ class base_list
 
 	//!Removes all elements from the internal list.
 	void                    clear() {
+
 		data.clear();
+		pager_instance.reset();
 		pager_instance.set_item_count(0);
-		pager_instance.set_index(0);
 	}
 
 	//!Inserts an element at the end of the list.
