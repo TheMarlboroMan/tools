@@ -11,6 +11,10 @@ Changes will be documented under Added, Changed, Deprecated, Removed, Fixed or S
 ## Unreleased
 ### Pending
 
+## [v1.1.4]: 2024-07-24
+### Added
+- Added small time library.
+
 ## [v1.1.3]: 2024-03-08
 ### Added
 - Added many json methods to the json tools and json config file to be able to manipulate them better.
