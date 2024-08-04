@@ -60,7 +60,7 @@ unsigned long int chrono::get_seconds() const {
 	if(running) {
 
 		if(paused) {
-			return std::chrono::duration_cast<std::chrono::milliseconds>(pause_point - begin).count();
+			return std::chrono::duration_cast<std::chrono::seconds>(pause_point - begin).count();
 		}
 		else {
 			return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - begin).count();
