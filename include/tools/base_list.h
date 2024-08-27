@@ -85,10 +85,10 @@ class base_list
 	}
 
 	//!Passthrough for pager.reset_index().
-	void                    reset_index() 	{pager_instance.reset_index();}
+	void                    reset_index() 	{pager_instance.reset_index(true);}
 
 	//!Passthrough for pager.set_index().
-	void                    set_index(std::size_t v) {pager_instance.set_index(v);}
+	void                    set_index(std::size_t v) {pager_instance.set_index(v, true);}
 
 	//!Passthrough for pager.get_current_page().
 	std::size_t             get_current_page() const {return pager_instance.get_current_page();}

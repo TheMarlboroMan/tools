@@ -11,6 +11,11 @@ Changes will be documented under Added, Changed, Deprecated, Removed, Fixed or S
 ## Unreleased
 ### Pending
 
+## [v1.1.5]: 2024-07-28
+### Changed
+- Pager can now handle page changes when setting index.
+- Previous change applied by default to lists.
+
 ## [v1.1.4]: 2024-07-24
 ### Added
 - Added small time library.

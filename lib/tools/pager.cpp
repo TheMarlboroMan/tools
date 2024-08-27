@@ -10,6 +10,7 @@ pager::pager(size_t rpp, size_t pitem_count)
 
 	//Prevenir una división por 0...
 	if(items_per_page && item_count) {
+
 		calculate_page_info();
 	}
 }
@@ -133,5 +134,32 @@ void pager::reset() {
 	if(0!=current_index) {
 		status_flags|=status::item_cycled;
 		current_index=0;
+	}
+}
+
+void pager::set_index(
+	std::size_t _index,
+	bool _handle_side_effects
+) {
+
+	if(_handle_side_effects && current_index != _index) {
+
+		status_flags|=status::item_cycled;
+	}
+
+	if(!_handle_side_effects) {
+
+		current_index=_index;
+		return;
+	}
+
+	//This handles the side effects.
+	auto old_page=floor(current_index / items_per_page);
+
+	current_index=_index;
+	current_page=floor(current_index / items_per_page);
+	if(old_page != current_page) {
+
+		status_flags|=status::page_turned;
 	}
 }

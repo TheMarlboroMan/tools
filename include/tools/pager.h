@@ -55,12 +55,9 @@ class pager {
 	//!can change.
 	void						cycle_item(dir);
 
-	//!Sets the currently selected index  Does not handle page turning not
-	//!sets flags.
-	void						set_index(size_t v) {
-
-		current_index=v;
-	}
+	//!Sets the currently selected index. Handles page turning and flags
+	//!if second argument is true.
+	void						set_index(size_t v, bool=false);
 
 	//!Sets the current items per page value.
 	void						set_items_per_page(size_t);
@@ -72,8 +69,9 @@ class pager {
 	//!Sets flags if values change. Does not reset item count to zero.
 	void						reset();
 
-	//!Resets the current index to zero. Does not handle page turning.
-	void						reset_index() {current_index=0;}
+	//!Resets the current index to zero. Does handle page turning.
+	//!if specified.
+	void						reset_index(bool _handle_side_effects=false) {set_index(0, _handle_side_effects);}
 
 	private:
 
