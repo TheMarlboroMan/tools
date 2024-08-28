@@ -11,6 +11,10 @@ Changes will be documented under Added, Changed, Deprecated, Removed, Fixed or S
 ## Unreleased
 ### Pending
 
+## [v1.1.6]: 2024-07-29
+### Added
+- Added percent function.
+
 ## [v1.1.5]: 2024-07-28
 ### Changed
 - Pager can now handle page changes when setting index.
