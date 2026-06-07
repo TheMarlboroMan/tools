@@ -16,7 +16,7 @@ void chrono::stop() {
 
 void chrono::pause() {
 
-	if(paused) {
+	if(paused || !is_running()) {
 
 		return;
 	}

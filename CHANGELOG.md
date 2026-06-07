@@ -11,6 +11,10 @@ Changes will be documented under Added, Changed, Deprecated, Removed, Fixed or S
 ## Unreleased
 ### Pending
 
+## [v1.1.7]: 2026-06-07
+### Fixed
+- Fixes bug in chrono, should not be able to pause if the chrono was not running.
+
 ## [v1.1.6]: 2024-07-29
 ### Added
 - Added percent function.
