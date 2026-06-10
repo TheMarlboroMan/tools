@@ -16,11 +16,23 @@ exec_exception::exec_exception(const std::string& _msg)
 
 }
 
-exec_result tools::exec(const char * _command, size_t _bufsize) {
 #ifdef WINBUILD
 
+exec_result tools::exec(
+	const char *, 
+	size_t
+) {
+
 	return {0, "this does not work under windows"};
+}
+
 #else
+
+exec_result tools::exec(
+	const char * _command, 
+	size_t _bufsize
+) {
+
 	auto pipe=popen(_command, "r");
 	if(!pipe) {
 		throw exec_exception(
@@ -48,5 +60,6 @@ exec_result tools::exec(const char * _command, size_t _bufsize) {
 	}
 
 	return {status, result};
-#endif
 }
+
+#endif
