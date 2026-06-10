@@ -11,7 +11,7 @@ class int_generator {
 
 #ifdef WINBUILD
 	//!Constructs the generator with the min and max values (inclusive).
-			int_generator(int vmin, int vmax):vmin(vmin), vmax(vmax){
+			int_generator(int _vmin, int _vmax):vmin(_vmin), vmax(_vmax){
 	}
 	
 	//!Gets the next number in the sequence.
@@ -24,7 +24,7 @@ class int_generator {
 	}
 #else
 	//!Constructs the generator with the min and max values (inclusive).
-			int_generator(int vmin, int vmax):dist{vmin, vmax}, re(std::random_device{}()) {
+			int_generator(int _vmin, int _vmax):dist{_vmin, _vmax}, re(std::random_device{}()) {
 	}
 
 	//!Gets the next number in the sequence.
