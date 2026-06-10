@@ -9,7 +9,7 @@ option(BUILD_STATIC "Build a static lib" OFF)
 #library version
 set(MAJOR_VERSION 1)
 set(MINOR_VERSION 1)
-set(PATCH_VERSION 7)
+set(PATCH_VERSION 8)
 
 if(${BUILD_DEBUG})
 
@@ -43,8 +43,8 @@ add_compile_options(-Wall -Wextra -Wundef -Wcast-align -Wwrite-strings -Wlogical
 include_directories("${PROJECT_SOURCE_DIR}/include")
 set(SOURCE "")
 add_subdirectory("${PROJECT_SOURCE_DIR}/lib")
-
 #library type and filenames.
+
 if(${BUILD_DEBUG})
 
 	set(CMAKE_BUILD_TYPE Debug)
@@ -89,11 +89,9 @@ install(DIRECTORY include/ DESTINATION include)
 
 IF(WIN32)
 
-	include_directories("${CMAKE_CURRENT_LIST_DIR}/../rapidjson/include/")
-
 	if(${BUILD_SHARED})
 		target_compile_definitions(tools_shared PUBLIC -DWINBUILD)
-	endif
+	endif()
 
 	if(${BUILD_STATIC})
 		target_compile_definitions(tools_static PUBLIC -DWINBUILD)
