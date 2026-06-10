@@ -88,14 +88,17 @@ endif()
 install(DIRECTORY include/ DESTINATION include)
 
 IF(WIN32)
-	target_compile_definitions(tools_static PUBLIC -DWINBUILD)
-	target_compile_definitions(tools_shared PUBLIC -DWINBUILD)
 
 	include_directories("${CMAKE_CURRENT_LIST_DIR}/../rapidjson/include/")
-	target_compile_definitions(tools_static PUBLIC -DWINBUILD)
-	target_compile_definitions(tools_shared PUBLIC -DWINBUILD)
-ENDIF()
 
+	if(${BUILD_SHARED})
+		target_compile_definitions(tools_shared PUBLIC -DWINBUILD)
+	endif
+
+	if(${BUILD_STATIC})
+		target_compile_definitions(tools_static PUBLIC -DWINBUILD)
+	endif()
+ENDIF()
 
 if(${BUILD_EXAMPLES})
 
