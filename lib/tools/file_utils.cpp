@@ -9,7 +9,8 @@ using namespace tools;
 
 std::string tools::dump_file(const std::string& _path) {
 
-	std::ifstream f(_path);
+	//Read the file as it is, do not allow any newline conversions to take place.
+	std::ifstream f(_path, std::ifstream::binary);
 	if(!f) {
 		throw std::runtime_error(std::string{"dump_file failed, could not open "}+_path);
 	}

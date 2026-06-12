@@ -12,6 +12,8 @@ Changes will be documented under Added, Changed, Deprecated, Removed, Fixed or S
 ### Pending
 
 ## [v1.1.9]: 2026-06-12
+### Changed
+- Makes dump file ignore any kind of newline conversion.
 ### Fixed
 - Fixes failed assertion on windows build
 
