@@ -14,7 +14,10 @@ int main(int, char **) {
 
 	localization.set({"var", "supervar"});
 	std::cout<<localization.get("label-1")<<std::endl;
+	std::cout<<localization.get("label-2")<<std::endl;
+	std::cout<<localization.get("label-3")<<std::endl;
 	std::cout<<localization.get("label-4")<<std::endl;
+	std::cout<<localization.get("label-5")<<std::endl;
 	std::cout<<localization.get("complex", {{"varhere","varhere1"}, {"varthere","varthere1"}})<<std::endl;
 	std::cout<<localization.get("label-doesnotexist")<<std::endl;
 

@@ -1,3 +1,9 @@
 [[label-3]]{{((varhere)) that was a var, this ((varthere)) is another}}
 [[label-4]]{{<<embedhere>>- that was an embed, this <<embedthere>> is another}}
+[[label-5]]{{A new line
+and another
+but here we have two blank lines
+
+
+and we are done}}
 [[complex]]{{This has ((var)) vars and embeds <<label-3>>}}

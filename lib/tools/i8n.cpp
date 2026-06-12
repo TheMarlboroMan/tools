@@ -293,8 +293,11 @@ std::vector<tools::i8n::lexer::token> tools::i8n::lexer::from_string(const std::
 		++linenum;
 		charnum=0;
 
+		std::cout<<"LINE SIZE OF '"<<line<<"' IS "<<line.size()<<std::endl;
+
 		//Skip comments... Blank lines will not be skipped, as they might carry meaning!
-		if(delim.comment==line.front()) {
+		//check line size because this fails an assertion in windows!
+		if(0!=line.size() && delim.comment==line.front()) {
 			continue;
 		}
 

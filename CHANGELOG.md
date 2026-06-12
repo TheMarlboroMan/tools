@@ -11,7 +11,11 @@ Changes will be documented under Added, Changed, Deprecated, Removed, Fixed or S
 ## Unreleased
 ### Pending
 
-## [v1.1.7]: 2026-06-10
+## [v1.1.9]: 2026-06-12
+### Fixed
+- Fixes failed assertion on windows build
+
+## [v1.1.8]: 2026-06-10
 ### Fixed
 - Fixes warning on windows build.
 
