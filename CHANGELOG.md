@@ -14,6 +14,7 @@ Changes will be documented under Added, Changed, Deprecated, Removed, Fixed or S
 ## [v1.1.11]: 2026-09-19
 ### Added
 - added lerp functions to number utils.
+- added tweeners.
 
 ## [v1.1.10]: 2026-08-11
 ### Added

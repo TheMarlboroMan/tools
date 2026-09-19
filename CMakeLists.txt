@@ -128,6 +128,9 @@ if(${BUILD_EXAMPLES})
 	add_executable(number_utils examples/number_utils/main.cpp)
 	target_link_libraries(tools_shared stdc++fs)
 
+	add_executable(tween examples/tween/main.cpp)
+	target_link_libraries(tools_shared stdc++fs)
+
 	add_executable(version examples/lib_version.cpp)
 	target_link_libraries(version tools_shared stdc++fs)
 endif()
