@@ -13,7 +13,7 @@ class tweener {
 	//!Creates a tweener that will take _from to _to along _time seconds using
 	//!the given interpolation function
 	            tweener(U _from, U _to, double _time, interpolators::interpolating_function_interface& _interpolator)
-	            :from{_from}, to{_to}, current_time{0}, duration{_time}, interpolator{_interpolator}
+	            :from{_from}, to{_to}, current_time{0}, duration{_time}, interpolator{&_interpolator}
 	{ }
 
 	//!Tics the tweener, returns the new interpolated value for this moment in time.
@@ -27,7 +27,7 @@ class tweener {
 			current_time=duration;
 		}
 
-		double double_delta=interpolator.update(current_time / duration);
+		double double_delta=interpolator->update(current_time / duration);
 		U delta=static_cast<U>(double_delta);
 		return from + (delta * (to - from));
 	}
@@ -40,6 +40,13 @@ class tweener {
 		to=_to;
 		duration=_time;
 		current_time=0.;
+		return *this;
+	}
+
+	//!Changes the interpolator.
+	tweener&    set_interpolator(interpolators::interpolating_function_interface& _interpolator) {
+
+		interpolator=&_interpolator;
 		return *this;
 	}
 
@@ -79,7 +86,7 @@ class tweener {
                             to;
 	double                  current_time,
 	                        duration;
-	interpolators::interpolating_function_interface& interpolator;
+	interpolators::interpolating_function_interface* interpolator;
 };
 
 }} //end of namespaces

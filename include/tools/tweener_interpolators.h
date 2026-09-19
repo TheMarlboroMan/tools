@@ -36,7 +36,7 @@ struct ease_out_quad:
 	double  update(double _time) {
 
 		double v = _time - 1.0;
-		return v * v + 1.0;
+		return 1. - (v * v);
 	}
 };
 
@@ -45,13 +45,13 @@ struct ease_in_out_quad:
 
 	double  update(double _time) {
 
-		if(_time < 0.5) {
+		if (_time < 0.5) {
 
-			return 4.0 * _time * _time;
+			return 2.0 * _time * _time;
 		}
 
-		double v = (2.0 * _time) - 2.0;
-		return 0.5 * v * v + 1.0;
+		double v = _time - 1.0;
+		return 1.0 - 2.0 * v * v;
 	}
 };
 
