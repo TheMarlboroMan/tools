@@ -11,6 +11,10 @@ Changes will be documented under Added, Changed, Deprecated, Removed, Fixed or S
 ## Unreleased
 ### Pending
 
+## [v1.1.11]: 2026-09-19
+### Added
+- added lerp functions to number utils.
+
 ## [v1.1.10]: 2026-08-11
 ### Added
 - i8n has now the ability to use files in user-provided directories.

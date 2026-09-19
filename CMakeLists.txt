@@ -9,7 +9,7 @@ option(BUILD_STATIC "Build a static lib" OFF)
 #library version
 set(MAJOR_VERSION 1)
 set(MINOR_VERSION 1)
-set(PATCH_VERSION 10)
+set(PATCH_VERSION 11)
 
 if(${BUILD_DEBUG})
 
@@ -124,6 +124,9 @@ if(${BUILD_EXAMPLES})
 
 	add_executable(chrono examples/chrono/main.cpp)
 	target_link_libraries(chrono tools_shared stdc++fs)
+
+	add_executable(number_utils examples/number_utils/main.cpp)
+	target_link_libraries(tools_shared stdc++fs)
 
 	add_executable(version examples/lib_version.cpp)
 	target_link_libraries(version tools_shared stdc++fs)
